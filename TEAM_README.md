@@ -15,10 +15,13 @@ npm run dev
 
 ## Hostinger (الإنتاج)
 
-- Entry file: `server.js` — يستمع على `process.env.PORT`.
-- `npm run build` خفيف؛ الإنتاج يخدم `public/` + `POST /api/analyze` بدون vinext.
-- في hPanel تأكد أن تطبيق Node.js يعمل، وليس إعداد Next standalone.
-- إذا ظهر 503 على `/` و`/dashboard.html` يعمل: عملية Node متوقفة — أعد التشغيل بعد سحب آخر كوميت.
+- Framework في hPanel: **Express** (ليس Next.js)
+- Entry file: `server.js`
+- Output directory: `public`
+- Build script: `build` → يتحقق من وجود `public/` و`server.js` فقط
+- يستمع على `process.env.PORT`
+
+إذا ظهر 503: أعد تشغيل تطبيق Node من hPanel بعد نجاح آخر بناء.
 
 ## التحليل
 
