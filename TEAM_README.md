@@ -4,7 +4,7 @@
 
 ## التشغيل
 
-المتطلبات: Node.js 22+ و npm.
+المتطلبات: Node.js 20+ و npm.
 
 ```bash
 npm install
@@ -12,6 +12,13 @@ npm run dev
 ```
 
 ثم افتح الرابط المحلي الذي يظهر في الطرفية. الواجهة الرئيسية موجودة في `/dashboard.html`.
+
+## Hostinger (الإنتاج)
+
+- Entry file: `server.js` — يستمع على `process.env.PORT`.
+- `npm run build` خفيف؛ الإنتاج يخدم `public/` + `POST /api/analyze` بدون vinext.
+- في hPanel تأكد أن تطبيق Node.js يعمل، وليس إعداد Next standalone.
+- إذا ظهر 503 على `/` و`/dashboard.html` يعمل: عملية Node متوقفة — أعد التشغيل بعد سحب آخر كوميت.
 
 ## التحليل
 

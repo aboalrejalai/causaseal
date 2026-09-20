@@ -3,17 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=20"
   },
   "scripts": {
     "install:ci": "npm ci",
     "dev": "node scripts/run-framework.mjs dev",
-    "build": "node scripts/run-framework.mjs build && mkdir -p .next && rm -rf .next/standalone && cp -r dist/standalone .next/standalone && mkdir -p .next/static && cp -r dist/client/* .next/static/ 2>/dev/null || true",
-    "postbuild": "mkdir -p .next && rm -rf .next/standalone && cp -r dist/standalone .next/standalone && mkdir -p .next/static && cp -r dist/client/* .next/static/ 2>/dev/null || true",
+    "build": "node -e \"console.log('[CAUSASEAL] Hostinger build OK — static public/ + server.js')\"",
     "start": "node server.js",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },
+  "main": "server.js",
+
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@hookform/resolvers": "^5.7.1",

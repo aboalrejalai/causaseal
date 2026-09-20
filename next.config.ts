@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Local vinext/dev only. Hostinger production uses server.js + public/.
 };
 
 export default nextConfig;
