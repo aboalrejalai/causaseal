@@ -15,13 +15,12 @@ npm run dev
 
 ## Hostinger (الإنتاج)
 
-- Framework في hPanel: **Express** (ليس Next.js)
+- Framework في hPanel: **Express**
 - Entry file: `server.js`
-- Output directory: `public`
-- Build script: `build` → يتحقق من وجود `public/` و`server.js` فقط
+- Output directory: فارغ (لا تستخدم `public` كمخرج بناء — هذا يفرّغ جذر الموقع ويكسر البروكسي)
+- لا تضع `.htaccess` داخل `public/`
+- Build script: `build`
 - يستمع على `process.env.PORT`
-
-إذا ظهر 503: أعد تشغيل تطبيق Node من hPanel بعد نجاح آخر بناء.
 
 ## التحليل
 

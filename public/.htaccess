@@ -1,6 +1,0 @@
-DirectoryIndex index.html dashboard.html
-
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteRule ^$ /dashboard.html [R=302,L]
-</IfModule>

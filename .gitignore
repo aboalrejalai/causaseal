@@ -6,6 +6,7 @@ out/
 .vinext/
 .wrangler/
 .sites-runtime/
+.hostinger-static/
 *.tsbuildinfo
 
 .env

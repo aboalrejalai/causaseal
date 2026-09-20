@@ -4,7 +4,17 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const publicDir = path.resolve(__dirname, "public");
+
+// Hostinger may run from repo root (with public/) or flatten static files next to server.js.
+const candidateRoots = [
+  path.resolve(__dirname, "public"),
+  __dirname,
+].filter((dir, index, all) => all.indexOf(dir) === index);
+
+const staticRoot =
+  candidateRoots.find((dir) => fs.existsSync(path.join(dir, "dashboard.html"))) ||
+  candidateRoots[0];
+
 const port = parseInt(process.env.PORT || "3000", 10);
 const host = process.env.HOST || "0.0.0.0";
 
@@ -159,8 +169,8 @@ async function analyze(body) {
 function safePublicPath(urlPath) {
   const decoded = decodeURIComponent(urlPath.split("?")[0] || "/");
   const relative = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
-  const resolved = path.resolve(publicDir, relative);
-  if (!resolved.startsWith(publicDir + path.sep) && resolved !== publicDir) {
+  const resolved = path.resolve(staticRoot, relative);
+  if (!resolved.startsWith(staticRoot + path.sep) && resolved !== staticRoot) {
     return null;
   }
   return resolved;
@@ -184,7 +194,15 @@ function serveStatic(req, res, urlPath) {
 
   const ext = path.extname(target).toLowerCase();
   const type = MIME[ext] || "application/octet-stream";
-  res.writeHead(200, { "Content-Type": type });
+  const headers = { "Content-Type": type };
+  if (req.method === "HEAD") {
+    const stat = fs.statSync(target);
+    headers["Content-Length"] = stat.size;
+    res.writeHead(200, headers);
+    res.end();
+    return;
+  }
+  res.writeHead(200, headers);
   fs.createReadStream(target).pipe(res);
 }
 
@@ -226,6 +244,15 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (pathname === "/healthz") {
+      sendJson(res, 200, {
+        ok: true,
+        staticRoot,
+        hasDashboard: fs.existsSync(path.join(staticRoot, "dashboard.html")),
+      });
+      return;
+    }
+
     if (req.method === "GET" || req.method === "HEAD") {
       serveStatic(req, res, pathname);
       return;
@@ -240,7 +267,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(port, host, () => {
   console.log(`[CAUSASEAL] Listening on http://${host}:${port}`);
-  console.log(`[CAUSASEAL] Serving static from ${publicDir}`);
+  console.log(`[CAUSASEAL] Serving static from ${staticRoot}`);
 });
 
 server.on("error", (error) => {
