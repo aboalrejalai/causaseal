@@ -4,11 +4,11 @@
 
 ## التشغيل
 
-المتطلبات: Node.js 22+ و pnpm.
+المتطلبات: Node.js 22+ و npm.
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ثم افتح الرابط المحلي الذي يظهر في الطرفية. الواجهة الرئيسية موجودة في `/dashboard.html`.
