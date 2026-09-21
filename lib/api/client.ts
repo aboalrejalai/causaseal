@@ -1,4 +1,5 @@
 import type { AnalysisResult, CausalNode, Fingerprint, IncidentInput } from "@/lib/contracts"
+import { apiUrl } from "@/lib/api/base"
 
 async function readJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -11,7 +12,7 @@ export async function analyzeIncident(
   input: IncidentInput,
   options?: { preferRules?: boolean }
 ): Promise<AnalysisResult> {
-  const response = await fetch("/api/analyze", {
+  const response = await fetch(apiUrl("/api/analyze"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...input, preferRules: Boolean(options?.preferRules) }),
@@ -24,7 +25,7 @@ export async function fetchEvents(params?: { status?: string; q?: string }) {
   if (params?.status) search.set("status", params.status)
   if (params?.q) search.set("q", params.q)
   const qs = search.toString()
-  const response = await fetch(`/api/events${qs ? `?${qs}` : ""}`)
+  const response = await fetch(apiUrl(`/api/events${qs ? `?${qs}` : ""}`))
   return readJson<{ events: import("@/lib/contracts").AgentEvent[]; illustrative: boolean }>(
     response
   )
@@ -32,7 +33,7 @@ export async function fetchEvents(params?: { status?: string; q?: string }) {
 
 export async function fetchFingerprints() {
   try {
-    const response = await fetch("/api/fingerprints")
+    const response = await fetch(apiUrl("/api/fingerprints"))
     return readJson<{ fingerprints: Fingerprint[]; illustrative: boolean }>(response)
   } catch {
     const raw = localStorage.getItem("causaseal_fingerprints")
@@ -47,7 +48,7 @@ export async function createFingerprint(
   input: Partial<Fingerprint>
 ): Promise<{ fingerprint: Fingerprint }> {
   try {
-    const response = await fetch("/api/fingerprints", {
+    const response = await fetch(apiUrl("/api/fingerprints"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
@@ -82,7 +83,7 @@ export async function runSermg(body: {
   changePrivilege?: boolean
   environment?: "cloud" | "enterprise" | "dev"
 }) {
-  const response = await fetch("/api/sermg/run", {
+  const response = await fetch(apiUrl("/api/sermg/run"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -91,7 +92,7 @@ export async function runSermg(body: {
 }
 
 export async function fetchReportMetrics() {
-  const response = await fetch("/api/reports/metrics")
+  const response = await fetch(apiUrl("/api/reports/metrics"))
   return readJson<{
     illustrative: boolean
     fromSession?: boolean
@@ -128,7 +129,7 @@ export type SessionSummary = {
 }
 
 export async function interceptAgent(body: IncidentInput) {
-  const response = await fetch("/api/gateway/intercept", {
+  const response = await fetch(apiUrl("/api/gateway/intercept"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -137,7 +138,7 @@ export async function interceptAgent(body: IncidentInput) {
 }
 
 export async function fetchCompliance() {
-  const response = await fetch("/api/compliance")
+  const response = await fetch(apiUrl("/api/compliance"))
   return readJson<{
     controls: import("@/lib/contracts").ComplianceControl[]
     illustrative: boolean
@@ -145,6 +146,6 @@ export async function fetchCompliance() {
 }
 
 export async function fetchSession() {
-  const response = await fetch("/api/session")
+  const response = await fetch(apiUrl("/api/session"))
   return readJson<SessionSummary>(response)
 }
