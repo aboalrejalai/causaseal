@@ -1,4 +1,6 @@
-/** Session telemetry. Seeded history stays; live analyses are prepended. */
+/** Session telemetry. Seeded history stays; live analyses are prepended and saved to disk. */
+
+import { readState, writeState } from "./persist.mjs"
 
 export const SEED_EVENTS = [
   {
@@ -74,7 +76,7 @@ export const SEED_EVENTS = [
 ]
 
 /** @type {Array<Record<string, unknown>>} */
-let sessionEvents = []
+let sessionEvents = Array.isArray(readState().sessionEvents) ? readState().sessionEvents : []
 
 /** @type {Record<string, unknown> | null} */
 let lastAnalysis = null
@@ -84,6 +86,7 @@ let lastAnalysis = null
  */
 export function recordEvent(event) {
   sessionEvents = [{ ...event, session: true }, ...sessionEvents].slice(0, 80)
+  writeState({ sessionEvents })
   return sessionEvents[0]
 }
 
@@ -135,6 +138,15 @@ export function sessionSummary() {
   const sermg = events.filter((event) => event.source === "sermg" && event.risky)
   const sermgDetected = sermg.filter((event) => event.status !== "allowed").length
   const last = events[0]
+  const reductions = events
+    .map((event) => Number(event.reductionRatio))
+    .filter((value) => Number.isFinite(value))
+  const latencies = events
+    .map((event) => Number(event.latencyMs))
+    .filter((value) => Number.isFinite(value))
+  const environments = new Set(
+    events.map((event) => event.environment).filter((value) => typeof value === "string")
+  )
 
   return {
     hasSession,
@@ -146,6 +158,13 @@ export function sessionSummary() {
     sermgDetected,
     sermgTotal: sermg.length,
     lastLatencyMs: typeof last?.latencyMs === "number" ? last.latencyMs : null,
+    avgLatencyMs: latencies.length
+      ? Math.round(latencies.reduce((sum, value) => sum + value, 0) / latencies.length)
+      : null,
+    avgReduction: reductions.length
+      ? Number((reductions.reduce((sum, value) => sum + value, 0) / reductions.length).toFixed(3))
+      : null,
+    environmentCount: environments.size,
     riskScore: hasSession
       ? Math.min(100, Math.round((blocked / Math.max(events.length, 1)) * 100))
       : null,
