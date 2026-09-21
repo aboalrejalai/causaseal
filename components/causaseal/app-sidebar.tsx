@@ -7,6 +7,7 @@ import {
   GitBranchIcon,
   LayoutDashboardIcon,
   RadioIcon,
+  TargetIcon,
   UsersIcon,
 } from "lucide-react"
 import Link from "next/link"
@@ -45,6 +46,7 @@ const ICONS = {
   Fingerprint: FingerprintIcon,
   FlaskConical: FlaskConicalIcon,
   FileBarChart: FileBarChartIcon,
+  Target: TargetIcon,
   Users: UsersIcon,
 } as const
 

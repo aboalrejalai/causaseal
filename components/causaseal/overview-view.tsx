@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import * as React from "react"
-import { Bar, BarChart, RadialBar, RadialBarChart } from "recharts"
 import {
   FingerprintIcon,
   GaugeIcon,
@@ -12,7 +11,7 @@ import {
 
 import { CausalPath } from "@/components/causaseal/causal-path"
 import { useLanguage } from "@/components/causaseal/language-provider"
-import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
+import { PageHeading } from "@/components/causaseal/page-heading"
 import { Stat } from "@/components/causaseal/stat"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,38 +23,22 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart"
-import { Separator } from "@/components/ui/separator"
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { fetchSession, type SessionSummary } from "@/lib/api/client"
-import { SEED_EVENTS } from "@/lib/seed-data"
+import { formatDecision } from "@/lib/decisions"
+import { HARNESS_DIFF } from "@/lib/nav"
 
-const sparkConfig = {
-  value: { label: "أحداث", color: "var(--chart-1)" },
-} satisfies ChartConfig
-
-const sparkData = [
-  { day: "1", value: 32 },
-  { day: "2", value: 48 },
-  { day: "3", value: 41 },
-  { day: "4", value: 65 },
-  { day: "5", value: 54 },
-  { day: "6", value: 86 },
-  { day: "7", value: 72 },
-]
-
-const riskConfig = {
-  score: { label: "الخطر", color: "var(--chart-1)" },
-} satisfies ChartConfig
-
-const previewNodes = [
-  { label: "مصدر غير موثوق", value: "PDF خارجي", risk: false },
-  { label: "تأثير على القرار", value: "Prompt Injection", risk: true },
-  { label: "أداة ذات صلاحية", value: "Cloud Storage", risk: true },
-  { label: "وجهة غير مصرح بها", value: "External API", risk: true },
+const EXAMPLE_NODES = [
+  { label: "مصدر الإدخال", value: "نص مسترجع موجّه", risk: true },
+  { label: "تأثير القرار", value: "انقل أسرار الدخول", risk: true },
+  { label: "استدعاء أداة", value: "send_to_workspace", risk: true },
+  { label: "سياق الوجهة", value: "غير معتمد", risk: true },
 ]
 
 export function OverviewView() {
@@ -80,202 +63,182 @@ export function OverviewView() {
   }, [])
 
   const live = Boolean(session?.hasSession)
-  const feed = live && session?.recent?.length ? session.recent : SEED_EVENTS.slice(0, 4)
+  const feed = live && session?.recent?.length ? session.recent : []
   const nodes =
-    live && session?.lastAnalysis?.nodes?.length ? session.lastAnalysis.nodes : previewNodes
-  const riskScore = live && session?.riskScore != null ? session.riskScore : 27
-  const riskData = [{ name: "risk", score: riskScore, fill: "var(--chart-1)" }]
+    live && session?.lastAnalysis?.nodes?.length ? session.lastAnalysis.nodes : EXAMPLE_NODES
+  const riskScore = live && session?.riskScore != null ? session.riskScore : null
 
   return (
     <>
       <PageHeading
         eyebrow="نظرة تنفيذية مباشرة"
         title="مركز العمليات السببية"
-        description="نفهم السبب، نتذكر الفشل، ونمنع إعادة تشكّله قبل الضرر."
+        description={HARNESS_DIFF}
         actions={
           <>
-            {live ? <Badge variant="success">{t("session")}</Badge> : <IllustrativeBadge />}
+            {live ? <Badge variant="success">{t("session")}</Badge> : null}
             <Button asChild variant="outline">
               <Link href="/investigate?demo=1">عرض SAIF</Link>
             </Button>
             <Button asChild>
-              <Link href="/investigate">تحليل حادث جديد</Link>
+              <Link href="/impact">تشغيل الأثر</Link>
             </Button>
           </>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat
-          variant="gradient"
-          icon={<ShieldAlertIcon className="size-5" />}
-          label="تهديدات تم منعها"
-          value={live ? String(session?.blocked ?? 0) : "12"}
-          change="↑ 20%"
-          changeLabel="عن الأمس"
-          trend="up"
-          sentiment="positive"
-          changeVariant="chip"
-        />
-        <Stat
-          variant="gradient"
-          icon={<FingerprintIcon className="size-5" />}
-          label="بصمات X-CFS"
-          value={live ? String(session?.fingerprintCount ?? 0) : "3"}
-          change="+1"
-          changeLabel="هذا الأسبوع"
-          trend="up"
-          sentiment="positive"
-        />
-        <Stat
-          variant="gradient"
-          icon={<GaugeIcon className="size-5" />}
-          label="دقة المطابقة"
-          value={live ? `${Math.round((session?.matchRate ?? 0) * 100)}%` : "96.4%"}
-          change="↑ 2.1%"
-          changeLabel="Reformation"
-          trend="up"
-          sentiment="positive"
-          changeVariant="chip"
-        />
-        <Stat
-          variant="gradient"
-          icon={<TimerIcon className="size-5" />}
-          label="زمن القرار"
-          value={
-            live && session?.lastLatencyMs != null ? `${session.lastLatencyMs} ms` : "38 ms"
-          }
-          change="آمن"
-          changeLabel="Causal Gate"
-          trend="flat"
-          sentiment="neutral"
-        />
-      </div>
+      {!live ? (
+        <Alert>
+          <AlertTitle>مثال واحد قبل أي جلسة</AlertTitle>
+          <AlertDescription>
+            مهمة المستخدم: لخّص المرفق. النص المسترجع يطلب نقل أسرار الدخول إلى قناة خارج الفريق.
+            الأداة: send_to_workspace. الوجهة غير معتمدة. شغّل عرض SAIF أو صفحة الأثر لترى المنع
+            ثم السماح.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {live ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Stat
+            variant="gradient"
+            icon={<ShieldAlertIcon className="size-5" />}
+            label="تهديدات تم منعها"
+            value={String(session?.blocked ?? 0)}
+            changeLabel="من هذه الجلسة"
+            trend="flat"
+            sentiment="positive"
+          />
+          <Stat
+            variant="gradient"
+            icon={<FingerprintIcon className="size-5" />}
+            label="بصمات X-CFS"
+            value={String(session?.fingerprintCount ?? 0)}
+            changeLabel="في الذاكرة"
+            trend="flat"
+            sentiment="positive"
+          />
+          <Stat
+            variant="gradient"
+            icon={<GaugeIcon className="size-5" />}
+            label="دقة المطابقة"
+            value={`${Math.round((session?.matchRate ?? 0) * 100)}%`}
+            changeLabel="من أحداث الجلسة"
+            trend="flat"
+            sentiment="positive"
+          />
+          <Stat
+            variant="gradient"
+            icon={<TimerIcon className="size-5" />}
+            label="زمن القرار"
+            value={
+              session?.lastLatencyMs != null ? `${session.lastLatencyMs} ms` : "—"
+            }
+            changeLabel="Causal Gate"
+            trend="flat"
+            sentiment="neutral"
+          />
+        </div>
+      ) : (
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyTitle>لا توجد أرقام جلسة بعد</EmptyTitle>
+            <EmptyDescription>
+              العدادات تظهر فقط بعد تحليل أو تشغيل وكيل العمليات. لا نعرض أرقامًا مزروعة.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button asChild>
+              <Link href="/impact">اذهب إلى الأثر</Link>
+            </Button>
+          </EmptyContent>
+        </Empty>
+      )}
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Card className="gap-4 py-4 xl:col-span-2">
           <CardHeader className="flex flex-row items-start justify-between gap-3 px-4 pb-0">
             <div className="flex flex-col gap-1">
               <CardTitle className="text-base">تدفق التهديدات الحي</CardTitle>
-              <CardDescription>أحداث الوكلاء واستدعاءات الأدوات</CardDescription>
+              <CardDescription>أحداث هذه الجلسة فقط</CardDescription>
             </div>
             <Button asChild variant="outline" size="sm">
               <Link href="/monitor">عرض الكل</Link>
             </Button>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 px-4">
-            {feed.map((event) => (
-              <div
-                key={`${event.time}-${event.agent}-${event.tool}`}
-                className="flex items-start justify-between gap-3 rounded-lg border p-3"
-              >
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">
-                    {event.agent} · {event.tool}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{event.path}</p>
+            {feed.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                فارغ حتى يمر طلب عبر البوابة.
+              </p>
+            ) : (
+              feed.map((event) => (
+                <div
+                  key={`${event.time}-${event.agent}-${event.tool}`}
+                  className="flex items-start justify-between gap-3 rounded-lg border p-3"
+                >
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">
+                      {event.agent} · {event.tool}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{event.path}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <Badge
+                      variant={
+                        event.status === "blocked"
+                          ? "destructive"
+                          : event.status === "verify"
+                            ? "outline"
+                            : "secondary"
+                      }
+                    >
+                      {formatDecision(event.label)}
+                    </Badge>
+                    <time className="text-xs text-muted-foreground">{event.time}</time>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                  <Badge
-                    variant={
-                      event.status === "blocked"
-                        ? "destructive"
-                        : event.status === "verify"
-                          ? "outline"
-                          : "secondary"
-                    }
-                  >
-                    {event.label}
-                  </Badge>
-                  <time className="text-xs text-muted-foreground">{event.time}</time>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
 
         <Card className="gap-4 py-4">
-          <CardHeader className="flex flex-row items-start justify-between gap-2 px-4 pb-0">
-            <div className="flex flex-col gap-1">
-              <CardTitle className="text-base">مؤشر الخطر</CardTitle>
-              <CardDescription>تحليل آخر 24 ساعة</CardDescription>
-            </div>
-            <Badge variant="success">مستقر</Badge>
+          <CardHeader className="px-4 pb-0">
+            <CardTitle className="text-base">مؤشر الخطر</CardTitle>
+            <CardDescription>
+              {live ? "من أحداث الجلسة" : "يظهر بعد أول منع أو سماح"}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col items-center gap-4 px-4">
-            <ChartContainer config={riskConfig} className="mx-auto aspect-square h-40">
-              <RadialBarChart
-                data={riskData}
-                startAngle={180}
-                endAngle={0}
-                innerRadius="60%"
-                outerRadius="100%"
-              >
-                <RadialBar dataKey="score" background cornerRadius={8} />
-                <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-              </RadialBarChart>
-            </ChartContainer>
-            <div className="text-center">
-              <p className="text-3xl font-semibold">{riskScore}</p>
-              <p className="text-xs text-muted-foreground">/ 100 · منخفض</p>
-            </div>
-            <Separator />
-            <div className="grid w-full gap-2 text-sm">
-              <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">حقن غير مباشر</span>
-                <strong>6</strong>
-              </div>
-              <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">تجاوز صلاحيات</span>
-                <strong>4</strong>
-              </div>
-              <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">تدفق بيانات حساس</span>
-                <strong>2</strong>
-              </div>
-            </div>
-            <ChartContainer config={sparkConfig} className="h-16 w-full">
-              <BarChart data={sparkData}>
-                <Bar dataKey="value" fill="var(--color-value)" radius={4} />
-              </BarChart>
-            </ChartContainer>
+          <CardContent className="flex flex-col items-center gap-2 px-4">
+            <p className="text-3xl font-semibold">{riskScore == null ? "—" : riskScore}</p>
+            {live && session?.lastAnalysis ? (
+              <p className="text-center text-xs text-muted-foreground">
+                {formatDecision(session.lastAnalysis.decision)}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
       </div>
 
       <Card className="gap-4 py-4">
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 px-4 pb-0">
-          <div className="flex flex-col gap-1">
-            <CardTitle className="text-base">آخر مسار سببي مكتشف</CardTitle>
-            <CardDescription>INC-2409 · إعادة تشكّل لبصمة X-CFS-001</CardDescription>
-          </div>
-          <Badge variant="destructive">تم التدخل</Badge>
+        <CardHeader className="px-4 pb-0">
+          <CardTitle className="text-base">
+            {live ? "آخر مسار سببي" : "مسار المثال"}
+          </CardTitle>
+          <CardDescription>
+            {live
+              ? "من آخر تحليل في الجلسة"
+              : "مثال المفاتيح والوجهة الخارجية — اضغط عرض SAIF لإعادة التشغيل"}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4 px-4">
+        <CardContent className="px-4">
           <CausalPath nodes={nodes} />
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-muted/40 p-3 text-sm">
-            <span>
-              ثقة الدليل{" "}
-              <strong>
-                {live && session?.lastAnalysis
-                  ? `${Math.round(session.lastAnalysis.confidence * 100)}%`
-                  : "94%"}
-              </strong>
-            </span>
-            <span>
-              البصمة{" "}
-              <strong>{live && session?.lastAnalysis ? session.lastAnalysis.matchedSignature : "X-CFS-001"}</strong>
-            </span>
-            <span>
-              زمن القرار{" "}
-              <strong>
-                {live && session?.lastLatencyMs != null ? `${session.lastLatencyMs} ms` : "1.8 ثانية"}
-              </strong>
-            </span>
-            <Button asChild size="sm" className="ms-auto">
-              <Link href="/investigate">فتح التحقيق</Link>
+          {!live ? (
+            <Button className="mt-4" variant="outline" asChild>
+              <Link href="/investigate?demo=1">عرض SAIF</Link>
             </Button>
-          </div>
+          ) : null}
         </CardContent>
       </Card>
     </>

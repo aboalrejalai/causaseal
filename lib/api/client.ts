@@ -96,6 +96,9 @@ export async function fetchReportMetrics() {
   return readJson<{
     illustrative: boolean
     fromSession?: boolean
+    matchRate?: number
+    prevention?: number
+    correctAllow?: number
     metrics: Array<{ label: string; value: number }>
     decisions?: Array<{ decision: string; note: string; time: string }>
     experiments?: { learn: boolean; recognize: boolean; allow: boolean }
@@ -135,6 +138,27 @@ export async function interceptAgent(body: IncidentInput) {
     body: JSON.stringify(body),
   })
   return readJson<{ executed: false; result: AnalysisResult }>(response)
+}
+
+export async function runOpsAgentClient(body: {
+  kind?: "leak" | "safe" | "cross"
+  orgId?: string
+  environment?: string
+}) {
+  const response = await fetch(apiUrl("/api/agent/run"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...body, preferRules: true }),
+  })
+  return readJson<{
+    executed: false
+    delivered: boolean
+    result: AnalysisResult
+    beneficiary: string
+    change: string
+    kind: string
+    orgId: string
+  }>(response)
 }
 
 export async function fetchCompliance() {

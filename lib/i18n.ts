@@ -11,6 +11,7 @@ export const translations = {
     "nav.memory": "ذاكرة X-CFS",
     "nav.lab": "مختبر SERMG",
     "nav.reports": "التقارير",
+    "nav.impact": "الأثر",
     "nav.team": "الفريق",
     "topbar.search": "بحث في الصفحات…",
     "topbar.searchShortcut": "⌘K",
@@ -44,6 +45,7 @@ export const translations = {
     "nav.memory": "X-CFS Memory",
     "nav.lab": "SERMG Lab",
     "nav.reports": "Reports",
+    "nav.impact": "Impact",
     "nav.team": "Team",
     "topbar.search": "Search pages…",
     "topbar.searchShortcut": "⌘K",
@@ -81,5 +83,6 @@ export const NAV_I18N: Record<
   "/memory": { titleKey: "nav.memory", group: "analysis" },
   "/lab": { titleKey: "nav.lab", group: "analysis" },
   "/reports": { titleKey: "nav.reports", group: "operations" },
+  "/impact": { titleKey: "nav.impact", group: "operations" },
   "/team": { titleKey: "nav.team", group: "operations" },
 }

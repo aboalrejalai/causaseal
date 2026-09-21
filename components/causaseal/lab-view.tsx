@@ -71,7 +71,9 @@ export function LabView() {
       setSubtitle(`اكتملت ${data.results.length} محاكاة عبر البوابة السببية`)
       toast.success("اكتملت محاكاة SERMG")
     } catch {
-      toast.error("تعذر تشغيل المختبر. تأكد أن خادم التحليل يعمل.")
+      toast.error(
+        "تعذر تشغيل المختبر. خادم التحليل (server.js) غير شغال. شغّل: npm start"
+      )
     } finally {
       setRunning(false)
     }

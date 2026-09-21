@@ -33,45 +33,40 @@ const EXPERIMENTS = [
     code: "A",
     phase: "LEARN",
     title: "تعلم من فشل معروف",
-    desc: "إعادة بناء السبب وإنشاء X-CFS-001.",
-    status: "مكتمل",
+    desc: "إعادة بناء السبب وإنشاء بصمة.",
+    status: "بانتظار العرض",
   },
   {
     code: "B",
     phase: "RECOGNIZE",
     title: "اكتشاف إعادة التشكّل",
-    desc: "تغيّرت التفاصيل وبقيت الثوابت السببية.",
-    status: "ناجح",
+    desc: "تغيّرت الصياغة وبقيت الثوابت السببية.",
+    status: "بانتظار العرض",
   },
   {
     code: "C",
     phase: "ALLOW",
     title: "السماح بالسياق المشروع",
-    desc: "تشابه بنيوي مع صلاحية ووجهة معتمدة.",
-    status: "ناجح",
+    desc: "أداة إرسال مع وجهة معتمدة.",
+    status: "بانتظار العرض",
   },
 ]
 
-const DECISION_LOG = [
-  { decision: "ALLOW", note: "سياق مشروع ووجهة معتمدة", time: "09:41" },
-  { decision: "INTERVENE", note: "تسرّب محتمل عبر External API", time: "09:38" },
-  { decision: "VERIFY", note: "صلاحية مرتفعة غير معتادة", time: "09:31" },
-  { decision: "ALLOW", note: "استعلام قاعدة بيانات ضمن المهمة", time: "09:22" },
-]
-
-const DEFAULT_METRICS = [
-  { label: "دقة إعادة البناء", value: 0.92 },
-  { label: "دقة مطابقة Reformation", value: 0.96 },
-  { label: "Recall للمسارات الخطرة", value: 0.89 },
-  { label: "السماح الصحيح بالنشاط المشروع", value: 0.94 },
-]
-
 export function ReportsView() {
-  const [metrics, setMetrics] = React.useState(DEFAULT_METRICS)
+  const [metrics, setMetrics] = React.useState<Array<{ label: string; value: number }>>([])
   const [fromSession, setFromSession] = React.useState(false)
-  const [decisions, setDecisions] = React.useState(DECISION_LOG)
+  const [decisions, setDecisions] = React.useState<
+    Array<{ decision: string; note: string; time: string }>
+  >([])
   const [experiments, setExperiments] = React.useState(EXPERIMENTS)
   const [controls, setControls] = React.useState<ComplianceControl[]>(() => evaluateCompliance())
+  const [snapshot, setSnapshot] = React.useState<{
+    matchRate?: number
+    prevention?: number
+    correctAllow?: number
+    metrics: Array<{ label: string; value: number }>
+    decisions?: Array<{ decision: string; note: string; time: string }>
+  } | null>(null)
 
   React.useEffect(() => {
     let cancelled = false
@@ -79,10 +74,13 @@ export function ReportsView() {
       void fetchReportMetrics()
         .then((data) => {
           if (cancelled) return
-          setMetrics(data.metrics)
+          setMetrics(data.metrics || [])
           setFromSession(Boolean(data.fromSession))
+          setSnapshot(data)
           if (data.decisions && data.decisions.length > 0) {
             setDecisions(data.decisions)
+          } else if (!data.fromSession) {
+            setDecisions([])
           }
           if (data.experiments) {
             setExperiments(
@@ -100,8 +98,9 @@ export function ReportsView() {
         })
         .catch(() => {
           if (!cancelled) {
-            setMetrics(DEFAULT_METRICS)
+            setMetrics([])
             setFromSession(false)
+            setDecisions([])
           }
         })
       void fetchCompliance()
@@ -121,20 +120,31 @@ export function ReportsView() {
   }, [])
 
   function downloadReport() {
-    const content = [
-      "CAUSASEAL — SAIF 2026 MVP REPORT",
-      "A / LEARN: Completed",
-      "B / RECOGNIZE: Passed",
-      "C / ALLOW: Passed",
-      "",
-      "Prototype metrics are illustrative and must be replaced with measured experiment results before scientific presentation.",
-    ].join("\n")
+    const content = JSON.stringify(
+      {
+        title: "CAUSASEAL session report",
+        fromSession,
+        matchRate: snapshot?.matchRate,
+        prevention: snapshot?.prevention,
+        correctAllow: snapshot?.correctAllow,
+        metrics: snapshot?.metrics ?? metrics,
+        decisions: snapshot?.decisions ?? decisions,
+        feasibility: {
+          runtime: "node server.js + JSON state file",
+          integration: "one POST /api/gateway/intercept or /api/agent/run before the tool",
+          multiTenant: "orgId isolates fingerprints under orgs in causaseal-state.json",
+        },
+        generatedAt: new Date().toISOString(),
+      },
+      null,
+      2
+    )
     const a = document.createElement("a")
-    a.href = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }))
-    a.download = "CAUSASEAL_MVP_Report.txt"
+    a.href = URL.createObjectURL(new Blob([content], { type: "application/json;charset=utf-8" }))
+    a.download = "CAUSASEAL_Session_Report.json"
     a.click()
     URL.revokeObjectURL(a.href)
-    toast.success("تم تجهيز التقرير التنفيذي")
+    toast.success("تم تنزيل تقرير الجلسة")
   }
 
   return (
@@ -197,11 +207,14 @@ export function ReportsView() {
           <CardHeader className="px-4 pb-0">
             <CardTitle className="text-base">مقاييس النموذج الأولي</CardTitle>
             <CardDescription>
-              {fromSession ? "محسوبة من قرارات هذه الجلسة" : "قيم توضيحية حتى يبدأ العرض"}
+              {fromSession ? "محسوبة من قرارات هذه الجلسة" : "فارغة حتى تبدأ الجلسة"}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4 px-4">
-            {metrics.map((m) => (
+            {metrics.length === 0 ? (
+              <p className="text-sm text-muted-foreground">لا مقاييس حتى يمر تحليل عبر البوابة.</p>
+            ) : (
+              metrics.map((m) => (
               <div key={m.label} className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2 text-sm">
                   <span>{m.label}</span>
@@ -209,16 +222,20 @@ export function ReportsView() {
                 </div>
                 <Progress value={m.value * 100} />
               </div>
-            ))}
+              ))
+            )}
           </CardContent>
         </Card>
 
         <Card className="gap-4 py-4">
           <CardHeader className="px-4 pb-0">
             <CardTitle className="text-base">سجل القرارات</CardTitle>
-            <CardDescription>عيّنة من قرارات البوابة</CardDescription>
+            <CardDescription>من أحداث هذه الجلسة</CardDescription>
           </CardHeader>
           <CardContent className="px-4">
+            {decisions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">لا قرارات بعد.</p>
+            ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -249,9 +266,22 @@ export function ReportsView() {
                 ))}
               </TableBody>
             </Table>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      <Card className="gap-4 py-4">
+        <CardHeader className="px-4 pb-0">
+          <CardTitle className="text-base">جدوى التشغيل من المعمارية</CardTitle>
+          <CardDescription>محسوبة مما بُني في المستودع</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2 px-4 text-sm text-muted-foreground">
+          <p>التكلفة: عملية server.js + ملف حالة JSON.</p>
+          <p>الربط: نداء واحد قبل الأداة عبر /api/gateway/intercept أو /api/agent/run.</p>
+          <p>جهة ثانية: عزل البصمات بمفتاح orgId تحت orgs في ملف الحالة.</p>
+        </CardContent>
+      </Card>
 
       <Card className="gap-4 py-4">
         <CardHeader className="px-4 pb-0">
