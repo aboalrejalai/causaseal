@@ -6,6 +6,19 @@
 
 **تدقيق التصميم:** [`docs/DESIGN_SYSTEM_AUDIT.md`](./docs/DESIGN_SYSTEM_AUDIT.md) · **مطابقة الفكرة مع الكود:** [`docs/مطابقة-الفكرة-مع-الكود.md`](./docs/مطابقة-الفكرة-مع-الكود.md)
 
+## Capacitor (بدون إصدار)
+
+الواجهة الثابتة في `out/` تُزامَن إلى مشاريع Android / iOS / Electron عبر Capacitor. التطبيق المغلف يستدعي الـ API على Hostinger عبر `NEXT_PUBLIC_API_BASE` (انظر `.env.example`).
+
+```bash
+npm run cap:sync              # بناء out/ + مزامنة المنصات
+npm run cap:open:android      # فتح Android Studio محليًا
+npm run cap:open:ios          # فتح Xcode محليًا
+npm run cap:open:electron     # فتح مشروع Electron محليًا
+```
+
+**ممنوع حتى موافقة صريحة بعد انتهاء التعديلات:** بناء APK/AAB أو IPA أو مثبتات ويندوز/ماك/لينكس، أو رفع أي متجر. لا توجد سكربتات `release` في جذر المشروع لهذه المرحلة.
+
 ## التشغيل
 
 المتطلبات: Node.js `>=20.9` و npm.

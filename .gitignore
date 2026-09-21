@@ -23,3 +23,21 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 data/causaseal-state.json
+
+# Capacitor native shells (regenerate with npx cap add … after clone)
+android/
+ios/
+electron/node_modules/
+electron/dist/
+electron/build/
+electron/*.log
+# Never commit packaged installers from this phase
+*.apk
+*.aab
+*.ipa
+*.dmg
+*.exe
+*.msi
+*.AppImage
+*.deb
+*.rpm
