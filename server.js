@@ -4,8 +4,8 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { analyze } from "./engine/gateway.mjs"
-import { listFingerprints, storeFingerprint } from "./engine/memory.mjs"
-import { listEvents, sessionSummary } from "./engine/telemetry.mjs"
+import { immunizedEnvironments, listFingerprints, storeFingerprint } from "./engine/memory.mjs"
+import { listEvents, listSessionEvents, sessionSummary } from "./engine/telemetry.mjs"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -182,7 +182,7 @@ const server = http.createServer(async (req, res) => {
           status: url.searchParams.get("status") || "all",
           q: url.searchParams.get("q") || "",
         }),
-        illustrative: true,
+        illustrative: listSessionEvents().length === 0,
       })
       return
     }
@@ -200,10 +200,18 @@ const server = http.createServer(async (req, res) => {
       return
     }
 
+    if (pathname === "/api/gateway/intercept" && req.method === "POST") {
+      const body = await parseJsonBody(req, res)
+      if (body === null) return
+      const result = await analyze(body, { source: "intercept", rulesOnly: true })
+      sendJson(res, 200, { executed: false, result })
+      return
+    }
+
     if (pathname === "/api/sermg/run" && req.method === "POST") {
       const body = await parseJsonBody(req, res)
       if (body === null) return
-      // Stub — real engine lands later; keep route reserved.
+      // Stub comment removed — mutate replays the gateway and writes immunity.
       const { mutate } = await import("./engine/sermg.mjs")
       sendJson(res, 200, mutate(body))
       return
@@ -236,6 +244,11 @@ const server = http.createServer(async (req, res) => {
           { label: "نسبة المنع للمسارات الخطرة", value: summary.prevention },
           { label: "السماح الصحيح بالنشاط المشروع", value: summary.correctAllow },
           { label: "اكتشاف طفرات SERMG", value: sermgScore },
+          { label: "متوسط الاختزال السببي", value: summary.avgReduction ?? 0 },
+          {
+            label: "بيئات اكتسبت المناعة",
+            value: Math.min(immunizedEnvironments().length, 3) / 3,
+          },
         ],
         decisions: summary.decisions,
         experiments: {
@@ -257,7 +270,7 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === "/api/compliance" && req.method === "GET") {
       const { evaluate } = await import("./engine/compliance.mjs")
-      sendJson(res, 200, { controls: evaluate(), illustrative: true })
+      sendJson(res, 200, { controls: evaluate(), illustrative: false })
       return
     }
 
