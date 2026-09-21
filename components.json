@@ -3,6 +3,8 @@
   "style": "new-york",
   "rsc": true,
   "tsx": true,
+  "rtl": true,
+  "iconLibrary": "lucide",
   "tailwind": {
     "config": "",
     "css": "app/globals.css",
