@@ -228,6 +228,11 @@ const server = http.createServer(async (req, res) => {
       return
     }
 
+    if (pathname === "/dashboard.html") {
+      res.writeHead(301, { Location: "/" }).end()
+      return
+    }
+
     if (req.method === "GET" || req.method === "HEAD") {
       serveStatic(req, res, pathname)
       return

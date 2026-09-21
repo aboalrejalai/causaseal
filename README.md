@@ -29,11 +29,21 @@ npm start       # node server.js — يخدم out/ + /api/*
 
 ### Hostinger (الإنتاج)
 
-- Framework في hPanel: **Express** (صحيح — التشغيل عبر `server.js`، ليس Next standalone)
-- Entry file: `server.js`
-- Output directory: فارغ (لا تستخدم `public` أو `out` كمخرج بناء في اللوحة)
-- Build script: `build` → يشغّل `next build --webpack` (Webpack إلزامي: بيئة Hostinger قديمة GLIBC ولا تدعم Turbopack/native SWC)
-- يستمع على `process.env.PORT`
+اترك إعدادات اللوحة كما هي — لا تغيّرها إلى Next.js:
+
+| الحقل | القيمة الصحيحة |
+| --- | --- |
+| Framework preset | **Express** (التشغيل عبر `server.js` + تصدير ثابت `out/`) |
+| Branch | `main` |
+| Node version | **22.x** |
+| Root directory | `./` |
+| Package manager | **npm** |
+| Entry file | **server.js** |
+| Output directory | فارغ |
+
+لا تستخدم preset **Next.js**: التطبيق ليس Next standalone؛ البناء يصدّر HTML إلى `out/` و`server.js` يخدمه + `/api/*`.
+
+**تحذير:** لا تضع في `public_html/.htaccess` قاعدة `RewriteRule ^$ /dashboard.html` — كانت تسبّب 302 من `/` إلى صفحة قديمة محذوفة ثم Not Found. `DirectoryIndex` يجب أن يكون `index.html` فقط مع إعدادات Passenger.
 
 مسار المنتج على Hostinger لا يحتاج vinext؛ استخدم `npm run build` ثم `npm start`.
 
