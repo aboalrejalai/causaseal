@@ -22,6 +22,12 @@ const TEAM = [
     initials: "ب",
     focus: "بوابة التحليل، واجهة العمليات، والنشر الإنتاجي للنموذج الأولي.",
   },
+  {
+    name: "محمد أبو الرجال",
+    role: "الأنظمة والأمن السيبراني",
+    initials: "م",
+    focus: "هندسة المنصات المتكاملة، دمج وكلاء الذكاء الاصطناعي، وحلول الأمن السيبراني عالية الضمان.",
+  },
 ]
 
 export default function TeamPage() {
@@ -30,9 +36,9 @@ export default function TeamPage() {
       <PageHeading
         eyebrow="TEAM"
         title="فريق العمل"
-        description="أدوار الابتكار والهندسة في نموذج CAUSASEAL لـ SAIF 2026."
+        description="أدوار الابتكار والهندسة والأنظمة في نموذج CAUSASEAL لـ SAIF 2026."
       />
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {TEAM.map((member) => (
           <Card key={member.name}>
             <CardHeader className="flex flex-row items-center gap-4">
