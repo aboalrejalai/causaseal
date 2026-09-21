@@ -1,14 +1,23 @@
 import { z } from "zod"
 
+export const PathStepSchema = z.object({
+  tool: z.string(),
+  summary: z.string(),
+})
+
 export const IncidentInputSchema = z.object({
   prompt: z.string(),
-  untrustedContent: z.string(),
+  untrustedContent: z.string().optional().default(""),
+  retrievedText: z.string().optional(),
   agent: z.string(),
   tool: z.string(),
   trustedDestination: z.boolean(),
   elevatedPrivilege: z.boolean(),
   sensitiveData: z.boolean(),
   environment: z.enum(["cloud", "enterprise", "dev"]).optional(),
+  orgId: z.string().optional(),
+  steps: z.array(PathStepSchema).optional(),
+  preferRules: z.boolean().optional(),
 })
 
 export const CausalNodeSchema = z.object({
@@ -28,10 +37,10 @@ export const XcfsReduceResultSchema = z.object({
 
 export const AnalysisResultSchema = z.object({
   decision: z.enum(["ALLOW", "VERIFY", "INTERVENE"]),
-  confidence: z.number().min(0).max(1),
+  confidence: z.number().min(0).max(1).optional(),
   reason: z.string(),
   matchedSignature: z.string(),
-  evidenceStrength: z.number().min(0).max(1),
+  evidenceStrength: z.number().min(0).max(1).optional(),
   nodes: z.array(CausalNodeSchema).min(1).max(8),
   mode: z.enum(["rules", "ai"]),
   warning: z.string().optional(),
@@ -57,6 +66,8 @@ export const FingerprintSchema = z.object({
   environment: z.enum(["cloud", "enterprise", "dev"]).optional(),
   nodes: z.array(CausalNodeSchema).optional(),
   coveredEnvironments: z.array(z.string()).optional(),
+  origin: z.enum(["seed", "stored"]).optional(),
+  orgId: z.string().optional(),
 })
 
 export const AgentEventSchema = z.object({
@@ -104,4 +115,3 @@ export const ComplianceControlSchema = z.object({
   status: z.enum(["mapped", "partial", "planned"]),
   notes: z.string(),
 })
-

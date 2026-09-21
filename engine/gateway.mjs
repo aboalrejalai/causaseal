@@ -1,9 +1,9 @@
 /**
- * Causal gateway — X-CFS reduction, memory match, then rules or OpenAI.
+ * Causal gateway — X-CFS reduction, memory match, then structural rules or OpenAI.
  */
 
 import { matchByInvariants, storeFingerprint } from "./memory.mjs"
-import { reduce } from "./xcfs.mjs"
+import { deriveInvariants, reduce } from "./xcfs.mjs"
 import { recordEvent, rememberAnalysis } from "./telemetry.mjs"
 
 const ENV_LABEL = {
@@ -17,35 +17,43 @@ function envLabel(value) {
 }
 
 /**
+ * Structural rules — no HOSTILE word list.
  * @param {Record<string, unknown>} body
+ * @param {string[]} [invariants]
  */
-export function fallback(body = {}) {
-  const text = `${body.prompt ?? ""} ${body.untrustedContent ?? ""}`.toLowerCase()
-  const hostile = /override|ignore|disregard|تجاهل|external|upload|secret|مفتاح|مفاتيح|سرية/.test(text)
-  const authorized = Boolean(body.trustedDestination && !body.sensitiveData && !body.elevatedPrivilege)
-  const decision = authorized
-    ? "ALLOW"
-    : hostile && body.sensitiveData
-      ? "INTERVENE"
-      : body.elevatedPrivilege && !body.trustedDestination
-        ? "INTERVENE"
-        : hostile || body.sensitiveData
-          ? "VERIFY"
-          : "ALLOW"
-  const confidence = decision === "ALLOW" ? 0.97 : decision === "INTERVENE" ? 0.94 : 0.82
-  return {
+export function fallback(body = {}, invariants) {
+  const list = Array.isArray(invariants) ? invariants : deriveInvariants(body)
+  const has = (name) => list.includes(name)
+  const sendLeak =
+    has("أداة إرسال") && has("بيانات حساسة") && has("وجهة غير معتمدة")
+  const directedSend =
+    has("أداة إرسال") && has("تعليمة في النص المسترجع") && has("وجهة غير معتمدة")
+  const privilege = has("صلاحية مرتفعة")
+  const residualRisk = list.filter((name) => name !== "أداة إرسال")
+
+  /** @type {"ALLOW" | "VERIFY" | "INTERVENE"} */
+  let decision = "ALLOW"
+  if (sendLeak || directedSend || privilege) decision = "INTERVENE"
+  else if (residualRisk.length > 0) decision = "VERIFY"
+
+  /** @type {Record<string, unknown>} */
+  const result = {
     decision,
-    confidence,
     reason:
       decision === "ALLOW"
-        ? "الوجهة معتمدة والفعل متوافق مع المهمة والسياسة."
+        ? "شكل المسار متوافق مع الوجهة المعتمدة والمهمة."
         : decision === "INTERVENE"
-          ? "الثوابت السببية تشير إلى مسار خطر قبل تنفيذ الأداة."
-          : "العلاقات السببية غير مكتملة وتحتاج تحققاً بشرياً قبل التنفيذ.",
+          ? "الثوابت السببية لشكل المسار تشير إلى خطر قبل تنفيذ الأداة."
+          : "الثوابت ناقصة وتحتاج تحققًا بشريًا قبل التنفيذ.",
     matchedSignature: "NO-MATCH",
-    evidenceStrength: confidence,
     mode: "rules",
   }
+  if (decision === "INTERVENE") {
+    result.evidenceStrength = 0.9
+  } else if (decision === "VERIFY") {
+    result.evidenceStrength = 0.7
+  }
+  return result
 }
 
 /**
@@ -130,19 +138,21 @@ function statusFor(decision) {
 
 /**
  * @param {Record<string, unknown>} body
- * @param {{ rulesOnly?: boolean, source?: string }} [options]
+ * @param {{ rulesOnly?: boolean, source?: string, orgId?: string }} [options]
  */
 export async function analyze(body = {}, options = {}) {
   const rulesOnly = Boolean(options.rulesOnly || body.preferRules)
+  const orgId = String(options.orgId || body.orgId || "demo")
   const started = Date.now()
   const reduction = reduce(body)
-  const risky = reduction.invariants.length > 0
+  const risky = reduction.invariants.some((name) => name !== "أداة إرسال")
   const environment = ["cloud", "enterprise", "dev"].includes(body.environment)
     ? body.environment
     : "enterprise"
   const match = matchByInvariants(reduction.invariants, {
     environment,
     nodes: reduction.keptNodes,
+    orgId,
   })
 
   /** @type {Record<string, unknown>} */
@@ -154,7 +164,7 @@ export async function analyze(body = {}, options = {}) {
       confidence: Math.max(0.9, match.score),
       reason: match.crossContext
         ? `اكتُشف في ${envLabel(match.learnedIn)}، ومُنع في ${envLabel(match.appliedIn)}. البصمة ${match.id}.`
-        : `الثوابت السببية تطابق ${match.id} رغم تغيّر الشكل. مُنع المسار قبل تنفيذ الأداة.`,
+        : `الثوابت السببية تطابق ${match.id} رغم تغيّر الصياغة. مُنع المسار قبل تنفيذ الأداة.`,
       matchedSignature: match.id,
       evidenceStrength: match.score,
       nodes: reduction.keptNodes,
@@ -176,7 +186,7 @@ export async function analyze(body = {}, options = {}) {
       }
     } catch (error) {
       console.error("[CAUSASEAL] AI fallback", error)
-      const rules = fallback(body)
+      const rules = fallback(body, reduction.invariants)
       result = {
         ...rules,
         nodes: reduction.keptNodes,
@@ -186,7 +196,7 @@ export async function analyze(body = {}, options = {}) {
       }
     }
   } else {
-    const rules = fallback(body)
+    const rules = fallback(body, reduction.invariants)
     result = {
       ...rules,
       nodes: reduction.keptNodes,
@@ -196,22 +206,39 @@ export async function analyze(body = {}, options = {}) {
   }
 
   if (result.decision === "INTERVENE" && !match) {
-    const stored = storeFingerprint({
-      title: "بصمة مستخرجة تلقائيًا من قرار المنع",
-      desc: String(result.reason || ""),
-      invariants: reduction.invariants,
-      tags: reduction.invariants,
-      nodes: reduction.keptNodes,
-      environment,
-      confidence: `${Math.round(Number(result.confidence) * 100)}%`,
-    })
+    const stored = storeFingerprint(
+      {
+        title: "بصمة مستخرجة تلقائيًا من قرار المنع",
+        desc: String(result.reason || ""),
+        invariants: reduction.invariants,
+        tags: reduction.invariants,
+        nodes: reduction.keptNodes,
+        environment,
+        confidence:
+          typeof result.matchScore === "number"
+            ? `${Math.round(Number(result.matchScore) * 100)}%`
+            : "—",
+      },
+      { orgId }
+    )
     result.matchedSignature = stored.id
     result.storedFingerprint = stored.id
+  }
+
+  if (typeof result.matchScore === "number" && result.confidence == null) {
+    result.confidence = result.matchScore
   }
 
   const latencyMs = Date.now() - started
   result.reduction = reduction
   result.latencyMs = latencyMs
+
+  const confidenceLabel =
+    typeof result.matchScore === "number"
+      ? `${Math.round(Number(result.matchScore) * 100)}%`
+      : typeof result.confidence === "number"
+        ? `${Math.round(Number(result.confidence) * 100)}%`
+        : "—"
 
   const event = {
     time: new Date().toLocaleTimeString("en-GB", { hour12: false }),
@@ -220,15 +247,16 @@ export async function analyze(body = {}, options = {}) {
     path: reduction.invariants.join(" → ") || "مسار ضمن المهمة",
     status: statusFor(String(result.decision)),
     label: result.decision,
-    confidence: `${Math.round(Number(result.confidence) * 100)}%`,
+    confidence: confidenceLabel,
     matchedSignature: result.matchedSignature,
     latencyMs,
     reductionRatio: reduction.reductionRatio,
     environment,
     source: options.source || "analyze",
     risky,
+    orgId,
   }
-  recordEvent(event)
+  recordEvent(event, { orgId })
   rememberAnalysis({
     decision: result.decision,
     confidence: result.confidence,

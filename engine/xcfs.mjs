@@ -1,33 +1,59 @@
 /**
- * X-CFS — expand an incident into a noisy causal graph, then keep only
- * the nodes required to explain the breach.
+ * X-CFS — derive structural causal invariants from the tool-path shape,
+ * then keep only the nodes required to explain the breach.
  */
 
-const HOSTILE =
-  /override|ignore|disregard|bypass|تجاهل|تجاوز السياسة|external|upload|secret|مفتاح|مفاتيح|سرية|keys/
+export const SEND_TOOLS = new Set([
+  "send_to_workspace",
+  "export_document",
+  "share_document",
+  "invoke_vendor_api",
+])
+
+const DIRECTIVE =
+  /أرسل|انقل|تجاهل|send|export|ignore|override|disregard|bypass/i
+
+/**
+ * @param {Record<string, unknown>} body
+ */
+export function retrievedTextOf(body = {}) {
+  if (typeof body.retrievedText === "string" && body.retrievedText.length) {
+    return body.retrievedText
+  }
+  return String(body.untrustedContent ?? "")
+}
+
+/**
+ * Directive verb in retrieved text that is absent from the user prompt.
+ * @param {string} prompt
+ * @param {string} retrieved
+ */
+export function hasDirectiveInRetrieved(prompt, retrieved) {
+  if (!retrieved.trim()) return false
+  const retrievedHit = DIRECTIVE.test(retrieved)
+  if (!retrievedHit) return false
+  return !DIRECTIVE.test(prompt || "")
+}
 
 /**
  * @param {Record<string, unknown>} body
  */
 export function deriveInvariants(body = {}) {
-  const text = `${body.prompt ?? ""} ${body.untrustedContent ?? ""}`
-  const hostile = HOSTILE.test(text.toLowerCase())
-  const poison = /ذاكرة|انتقال سياق|تعليمات خفية/.test(text)
+  const tool = String(body.tool || "")
+  const isSend = SEND_TOOLS.has(tool)
+  const prompt = String(body.prompt ?? "")
+  const retrieved = retrievedTextOf(body)
   /** @type {string[]} */
   const invariants = []
 
-  if (hostile) {
-    invariants.push("مصدر غير موثوق", "تأثير قرار")
-  }
+  if (isSend) invariants.push("أداة إرسال")
   if (body.sensitiveData) invariants.push("بيانات حساسة")
-  if (!body.trustedDestination && (hostile || body.sensitiveData)) {
-    invariants.push("وجهة خارجية")
+  if (isSend && !body.trustedDestination) invariants.push("وجهة غير معتمدة")
+  if (hasDirectiveInRetrieved(prompt, retrieved)) {
+    invariants.push("تعليمة في النص المسترجع")
   }
   if (body.elevatedPrivilege && !body.trustedDestination) {
-    invariants.push("صلاحية مرتفعة", "استدعاء أداة خارج النطاق")
-  }
-  if (poison) {
-    invariants.push("تسميم ذاكرة", "انتقال سياق", "تعليمات خفية")
+    invariants.push("صلاحية مرتفعة")
   }
 
   return [...new Set(invariants)]
@@ -39,28 +65,37 @@ export function deriveInvariants(body = {}) {
 export function expand(body = {}) {
   const invariants = deriveInvariants(body)
   const has = (name) => invariants.includes(name)
+  const steps = Array.isArray(body.steps) ? body.steps : []
+
+  const stepNodes = steps.map((step, index) => ({
+    id: `step-${index + 1}`,
+    label: "نداء سابق",
+    value: `${step?.tool || "tool"}: ${step?.summary || ""}`,
+    risk: false,
+    critical: false,
+  }))
 
   const causal = [
     {
       id: "source",
       label: "مصدر الإدخال",
-      value: has("مصدر غير موثوق") ? "غير موثوق" : "ضمن المهمة",
-      risk: has("مصدر غير موثوق") || has("تسميم ذاكرة"),
-      critical: has("مصدر غير موثوق") || has("تسميم ذاكرة"),
+      value: has("تعليمة في النص المسترجع") ? "نص مسترجع موجّه" : "ضمن المهمة",
+      risk: has("تعليمة في النص المسترجع"),
+      critical: has("تعليمة في النص المسترجع"),
     },
     {
       id: "influence",
       label: "تأثير القرار",
-      value: has("تأثير قرار") || has("تعليمات خفية") ? "تعليمة خفية" : "لا تأثير حاسم",
-      risk: has("تأثير قرار") || has("تعليمات خفية"),
-      critical: has("تأثير قرار") || has("تعليمات خفية"),
+      value: has("تعليمة في النص المسترجع") ? "تعليمة في المسترجع" : "لا تأثير حاسم",
+      risk: has("تعليمة في النص المسترجع"),
+      critical: has("تعليمة في النص المسترجع"),
     },
     {
       id: "tool",
       label: "استدعاء أداة",
       value: String(body.tool || "غير محدد"),
-      risk: has("استدعاء أداة خارج النطاق"),
-      critical: has("استدعاء أداة خارج النطاق") || invariants.length > 0,
+      risk: has("أداة إرسال") && has("وجهة غير معتمدة"),
+      critical: has("أداة إرسال"),
     },
     {
       id: "data",
@@ -73,8 +108,8 @@ export function expand(body = {}) {
       id: "destination",
       label: "سياق الوجهة",
       value: body.trustedDestination ? "معتمد" : "غير معتمد",
-      risk: has("وجهة خارجية"),
-      critical: has("وجهة خارجية") || invariants.length > 0,
+      risk: has("وجهة غير معتمدة"),
+      critical: has("وجهة غير معتمدة"),
     },
     {
       id: "privilege",
@@ -85,15 +120,7 @@ export function expand(body = {}) {
     },
   ]
 
-  const bloat = Array.from({ length: 44 }, (_, index) => ({
-    id: `log-${index + 1}`,
-    label: "سطر سجل غير حرج",
-    value: `span-${index + 1}`,
-    risk: false,
-    critical: false,
-  }))
-
-  return { nodes: [...causal, ...bloat], invariants }
+  return { nodes: [...stepNodes, ...causal], invariants }
 }
 
 /**
@@ -101,6 +128,7 @@ export function expand(body = {}) {
  */
 export function reduce(body = {}) {
   const { nodes, invariants } = expand(body)
+  const steps = Array.isArray(body.steps) ? body.steps : []
   let kept = nodes.filter((node) => node.critical)
   if (kept.length === 0) {
     kept = nodes.filter((node) => ["source", "tool", "destination"].includes(node.id))
@@ -112,15 +140,16 @@ export function reduce(body = {}) {
     risk: Boolean(node.risk),
   })
 
-  const total = nodes.length
-  const reductionRatio = Number((1 - kept.length / total).toFixed(3))
+  const beforeCount = steps.length + 6
+  const keptCount = kept.length
+  const reductionRatio = Number((1 - keptCount / Math.max(beforeCount, 1)).toFixed(3))
 
   return {
     reductionRatio,
     invariants,
     keptNodes: kept.map(toView),
-    beforeCount: total,
-    prunedCount: total - kept.length,
+    beforeCount,
+    prunedCount: Math.max(beforeCount - keptCount, 0),
     illustrative: false,
   }
 }
