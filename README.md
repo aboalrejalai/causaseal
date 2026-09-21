@@ -1,10 +1,74 @@
-# vinext-starter
+# CAUSASEAL (SAIF 2026)
 
-A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support.
+نموذج أولي لمنصة تحليل سببي تحمي وكلاء الذكاء الاصطناعي من المسارات الخطرة قبل تنفيذ الأدوات — واجهة عربية RTL مبنية بـ **Next.js App Router** + **shadcn/ui** + هوية **Saudi Soft** (SA-600، IBM Plex Sans Arabic، Lucide).
+
+الواجهة تُصدَّر كملفات ثابتة إلى `out/` بينما يبقى `server.js` مسؤولاً عن الـ API والنشر على Hostinger (ملفات ثابتة + `/api/*`).
+
+**تدقيق التصميم:** [`docs/DESIGN_SYSTEM_AUDIT.md`](./docs/DESIGN_SYSTEM_AUDIT.md) · **مطابقة الفكرة مع الكود:** [`docs/مطابقة-الفكرة-مع-الكود.md`](./docs/مطابقة-الفكرة-مع-الكود.md)
+
+## التشغيل
+
+المتطلبات: Node.js `>=20.9` و npm.
+
+```bash
+npm install
+npm run dev      # الواجهة :3000 + الـ API :4000
+npm run build    # next export → out/ + تحقق Hostinger
+npm start        # يخدم out/ عبر server.js
+```
+
+- الواجهة: http://localhost:3000
+- الـ API: http://localhost:4000 (`/api/*` يُعاد توجيهه من Next في وضع التطوير)
+
+## البناء والنشر
+
+```bash
+npm run build   # next build (output: export) ثم التحقق من out/
+npm start       # node server.js — يخدم out/ + /api/*
+```
+
+### Hostinger (الإنتاج)
+
+- Framework في hPanel: **Express**
+- Entry file: `server.js`
+- Output directory: فارغ (لا تستخدم `public` أو `out` كمخرج بناء في اللوحة)
+- Build script: `build`
+- يستمع على `process.env.PORT`
+
+مسار المنتج على Hostinger لا يحتاج vinext؛ استخدم `npm run build` ثم `npm start`.
+
+## التحليل والواجهات البرمجية
+
+| المسار | الوصف |
+| --- | --- |
+| `POST /api/analyze` | بوابة القرار السببي (قواعد + OpenAI اختياري) |
+| `GET /api/events` | أحداث المراقبة (بيانات بذرية) |
+| `GET\|POST /api/fingerprints` | ذاكرة X-CFS |
+| `POST /api/sermg/run` | محاكاة SERMG (stub) |
+| `GET /api/reports/metrics` | مقاييس توضيحية |
+| `GET /api/compliance` | خريطة NCA / OWASP |
+| `GET /healthz` | فحص الصحة |
+
+- بدون `OPENAI_API_KEY` يعمل محرك القواعد السببية الآمن.
+- لتفعيل تحليل النموذج، أضف `OPENAI_API_KEY` (واختياريًا `OPENAI_MODEL`) في متغيرات البيئة على الخادم فقط.
+
+## الصفحات
+
+`/` · `/monitor` · `/investigate` · `/memory` · `/lab` · `/reports` · `/team`
+
+## تنبيه
+
+هذا MVP للهاكاثون. المقاييس المعروضة في الواجهة توضيحية (معلّمة بـ «بيانات توضيحية»)، ويجب استبدالها بنتائج التجارب المقاسة قبل أي عرض علمي نهائي.
+
+---
+
+# vinext-starter (upstream scaffold notes)
+
+A clean full-stack starter running on [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and Drizzle support. The CAUSASEAL product path above does **not** require vinext for Hostinger deploys.
 
 ## Prerequisites
 
-- Node.js `>=22.13.0`
+- Node.js `>=22.13.0` (for the vinext/Sites path; CAUSASEAL Hostinger path uses `>=20.9`)
 - Portable: Windows, macOS, or Linux; no Bash required
 - Managed Linux: managed Linux runtime with Bash, `flock`, `curl`, `sha256sum`, and GNU `timeout`
 - Git is required only for publishing
@@ -24,13 +88,13 @@ This starter does not use `wrangler.jsonc`.
 
 `scripts/sites-env.mjs` preserves the caller's HOME, npm cache, proxy, XDG, and temporary-directory configuration while defaulting Wrangler and Miniflare state to the checkout. If npm reports an unwritable cache, select a writable path with `npm_config_cache` for that install. The `dev` and `start` scripts also keep Wrangler logs inside the checkout. Generated `.sites-runtime/` and `.wrangler/` directories are disposable and ignored by Git.
 
-On portable, `npm run dev` uses `vinext dev` with HMR, starting at port 5173. Vinext records the running server in ignored `.vinext/` state, rejects an ordinary duplicate launch, and recovers stale state after a stopped process; exactly simultaneous starts can race. Pass `--port <port>` or `--hostname <host>` after `npm run dev --` when needed; keep portable previews on loopback.
+On portable, `npm run dev:vinext` uses `vinext dev` with HMR. Vinext records the running server in ignored `.vinext/` state, rejects an ordinary duplicate launch, and recovers stale state after a stopped process; exactly simultaneous starts can race. Pass `--port <port>` or `--hostname <host>` after `npm run dev:vinext --` when needed; keep portable previews on loopback.
 
-For browser QA on managed Linux, use `sites-preview start`. The project's dev script runs Vite and accepts the supervisor's `--host 0.0.0.0 --port 4173 --strictPort` arguments. The internal browser uses `http://terminal.local:4173/`; it is not a user-facing URL. The supervisor owns the preview lifecycle. The ignored local profile survives the supervisor's cleared process environment.
+For browser QA on managed Linux, use `sites-preview start`. The project's vinext dev script runs Vite and accepts the supervisor's `--host 0.0.0.0 --port 4173 --strictPort` arguments. The internal browser uses `http://terminal.local:4173/`; it is not a user-facing URL. The supervisor owns the preview lifecycle. The ignored local profile survives the supervisor's cleared process environment.
 
 The portable profile simulates ChatGPT sign-in only for loopback development requests. Visit `/signin-with-chatgpt?return_to=/` to sign in as `local_seedy` (`seedy@sites.test`, display name `Seedy`) and `/signout-with-chatgpt?return_to=/` to sign out. The development cookie preserves that identity across server restarts. Mock auth is disabled in the managed-linux profile and is not included in production builds; hosted authentication remains dispatch-owned.
 
-The Worker uses `vinext/server/fetch-handler`, including Vinext's config-aware image handling. After building, `npm start` runs that Worker locally through Wrangler on `127.0.0.1`, sharing `.wrangler/state` with dev preview and local D1 migrations; it does not deploy the site or simulate sign-in. Use the URL printed by the server. Pass `npm start -- --port <port>` to select a different built-preview port.
+The Worker uses `vinext/server/fetch-handler`, including Vinext's config-aware image handling. After building for vinext, local Worker preview runs through Wrangler on `127.0.0.1`, sharing `.wrangler/state` with dev preview and local D1 migrations; it does not deploy the site or simulate sign-in. Use the URL printed by the server.
 
 Local previews use Miniflare's placeholder `Request.cf` metadata without a network lookup. Set `CLOUDFLARE_CF_FETCH_ENABLED=true` to opt into fetching preview metadata; this setting does not change hosted request metadata.
 
@@ -111,9 +175,10 @@ Replace the filename with the pending migration and `DB` with your D1 binding na
 ## Diagnostic Commands
 
 - `npm run install:ci`: perform the one locked dependency install
-- `npm run dev`: start the Vite/Vinext development server
-- `npm run build`: build the deployable Sites artifact
-- `npm run start`: preview the built Worker locally with D1/R2 support
+- `npm run dev`: CAUSASEAL Next + API (see above)
+- `npm run dev:vinext`: start the Vite/Vinext development server
+- `npm run build`: build the deployable artifact (`out/` for Hostinger; Sites artifact for vinext path)
+- `npm run start`: serve `out/` + `/api/*` via `server.js` (Hostinger path)
 - `npm run db:generate`: generate Drizzle migrations after schema changes
 
 When using the Sites plugin, follow its skill instructions for installation, builds, and publishing. These npm commands remain available for standalone use.
