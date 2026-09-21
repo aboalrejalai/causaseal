@@ -1,0 +1,47 @@
+---
+description: After every change set, make granular English commits and push directly to main — no branches or PRs
+alwaysApply: true
+---
+
+# Git: granular commits → push main
+
+## Required after meaningful work
+
+1. Split the work into the **largest practical number of small commits** (one logical concern each).
+2. Write detailed **English** commit messages (why + what).
+3. Commit on **`main` only**.
+4. **`git push origin main`** after the commit batch.
+5. **Never** create a feature branch, never open a PR, never push elsewhere — unless the user explicitly overrides in that message.
+
+## How to split
+
+Prefer separate commits for:
+
+- Cursor rules / agent config
+- Design tokens / theme / Badge / Soft CSS
+- Deleting or replacing legacy UI
+- Engine / server / API wiring
+- Shared `lib/` contracts, i18n, nav, seed data
+- App shell (layout, providers, sidebar, header)
+- One page or view at a time when changes are large
+- Docs / README
+
+Avoid one mega-commit that mixes unrelated areas.
+
+## Examples
+
+```text
+✅ good
+fix(ui): Soft Badge secondary uses muted chips, not Button SA-700
+feat(shell): collapse sidebar with offcanvas instead of icon rail
+docs: record Soft Badge vs Button secondary rule
+
+❌ bad
+feat: Soft foundation, UEP port, badge fix, sidebar, docs, and engines
+```
+
+## Safety
+
+- Do not force-push `main` unless the user explicitly asks.
+- Do not commit secrets (`.env`, credentials, tokens).
+- Follow the usual git safety protocol for hooks; fix hook failures with a **new** commit, not amend, unless amend rules are fully met.
