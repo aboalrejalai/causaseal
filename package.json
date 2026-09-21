@@ -11,13 +11,20 @@
     "dev:vinext": "node scripts/run-framework.mjs dev",
     "build": "next build --webpack && node scripts/hostinger-build.mjs",
     "start": "node server.js",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern out",
-    "db:generate": "drizzle-kit generate"
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern out --ignore-pattern android --ignore-pattern ios --ignore-pattern electron",
+    "db:generate": "drizzle-kit generate",
+    "cap:sync": "npm run build && npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:electron": "npx cap open @capacitor-community/electron"
   },
   "main": "server.js",
-
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@capacitor-community/electron": "^5.0.1",
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
     "@hookform/resolvers": "^5.7.1",
     "@shadcn/react": "^0.3.0",
     "class-variance-authority": "0.7.1",
@@ -43,6 +50,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
     "@cloudflare/vite-plugin": "1.37.1",
     "@cloudflare/workers-types": "4.20260515.1",
     "@tailwindcss/postcss": "4.2.1",
