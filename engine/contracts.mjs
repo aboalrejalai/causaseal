@@ -8,6 +8,7 @@ export const IncidentInputSchema = z.object({
   trustedDestination: z.boolean(),
   elevatedPrivilege: z.boolean(),
   sensitiveData: z.boolean(),
+  environment: z.enum(["cloud", "enterprise", "dev"]).optional(),
 })
 
 export const CausalNodeSchema = z.object({
@@ -37,6 +38,10 @@ export const AnalysisResultSchema = z.object({
   matchScore: z.number().min(0).max(1).optional(),
   latencyMs: z.number().optional(),
   storedFingerprint: z.string().optional(),
+  learnedIn: z.string().optional(),
+  appliedIn: z.string().optional(),
+  crossContext: z.boolean().optional(),
+  graphScore: z.number().optional(),
   reduction: XcfsReduceResultSchema.optional(),
 })
 
@@ -49,6 +54,9 @@ export const FingerprintSchema = z.object({
   confidence: z.string(),
   date: z.string(),
   invariants: z.array(z.string()).optional(),
+  environment: z.enum(["cloud", "enterprise", "dev"]).optional(),
+  nodes: z.array(CausalNodeSchema).optional(),
+  coveredEnvironments: z.array(z.string()).optional(),
 })
 
 export const AgentEventSchema = z.object({
@@ -68,6 +76,7 @@ export const MutationOptionSchema = z.object({
   changeTool: z.boolean().default(true),
   changeData: z.boolean().default(true),
   changePrivilege: z.boolean().default(false),
+  environment: z.enum(["cloud", "enterprise", "dev"]).optional(),
 })
 
 export const MutationResultSchema = z.object({
@@ -75,6 +84,10 @@ export const MutationResultSchema = z.object({
   title: z.string(),
   similarity: z.number(),
   outcome: z.enum(["ALLOW", "DETECTED"]),
+  immunized: z.boolean().optional(),
+  crossContext: z.boolean().optional(),
+  learnedIn: z.string().nullable().optional(),
+  appliedIn: z.string().optional(),
 })
 
 export const MutationRunSchema = z.object({

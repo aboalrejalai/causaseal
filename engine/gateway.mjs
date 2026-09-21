@@ -6,6 +6,16 @@ import { matchByInvariants, storeFingerprint } from "./memory.mjs"
 import { reduce } from "./xcfs.mjs"
 import { recordEvent, rememberAnalysis } from "./telemetry.mjs"
 
+const ENV_LABEL = {
+  dev: "التطوير",
+  enterprise: "المؤسسة",
+  cloud: "السحابة",
+}
+
+function envLabel(value) {
+  return ENV_LABEL[value] || "البيئة الحالية"
+}
+
 /**
  * @param {Record<string, unknown>} body
  */
@@ -127,7 +137,13 @@ export async function analyze(body = {}, options = {}) {
   const started = Date.now()
   const reduction = reduce(body)
   const risky = reduction.invariants.length > 0
-  const match = matchByInvariants(reduction.invariants)
+  const environment = ["cloud", "enterprise", "dev"].includes(body.environment)
+    ? body.environment
+    : "enterprise"
+  const match = matchByInvariants(reduction.invariants, {
+    environment,
+    nodes: reduction.keptNodes,
+  })
 
   /** @type {Record<string, unknown>} */
   let result
@@ -136,12 +152,18 @@ export async function analyze(body = {}, options = {}) {
     result = {
       decision: "INTERVENE",
       confidence: Math.max(0.9, match.score),
-      reason: `الثوابت السببية تطابق ${match.id} رغم تغيّر الشكل. مُنع المسار قبل تنفيذ الأداة.`,
+      reason: match.crossContext
+        ? `اكتُشف في ${envLabel(match.learnedIn)}، ومُنع في ${envLabel(match.appliedIn)}. البصمة ${match.id}.`
+        : `الثوابت السببية تطابق ${match.id} رغم تغيّر الشكل. مُنع المسار قبل تنفيذ الأداة.`,
       matchedSignature: match.id,
       evidenceStrength: match.score,
       nodes: reduction.keptNodes,
       mode: "rules",
       matchScore: match.score,
+      learnedIn: match.learnedIn,
+      appliedIn: match.appliedIn,
+      crossContext: match.crossContext,
+      graphScore: match.graphScore,
     }
   } else if (!rulesOnly && process.env.OPENAI_API_KEY) {
     try {
@@ -179,6 +201,8 @@ export async function analyze(body = {}, options = {}) {
       desc: String(result.reason || ""),
       invariants: reduction.invariants,
       tags: reduction.invariants,
+      nodes: reduction.keptNodes,
+      environment,
       confidence: `${Math.round(Number(result.confidence) * 100)}%`,
     })
     result.matchedSignature = stored.id
@@ -199,6 +223,8 @@ export async function analyze(body = {}, options = {}) {
     confidence: `${Math.round(Number(result.confidence) * 100)}%`,
     matchedSignature: result.matchedSignature,
     latencyMs,
+    reductionRatio: reduction.reductionRatio,
+    environment,
     source: options.source || "analyze",
     risky,
   }
@@ -207,6 +233,9 @@ export async function analyze(body = {}, options = {}) {
     decision: result.decision,
     confidence: result.confidence,
     matchedSignature: result.matchedSignature,
+    learnedIn: result.learnedIn,
+    appliedIn: result.appliedIn,
+    crossContext: result.crossContext,
     nodes: result.nodes,
     reason: result.reason,
   })
