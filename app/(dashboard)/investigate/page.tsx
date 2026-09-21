@@ -1,6 +1,7 @@
 import { InvestigateView } from "@/components/causaseal/investigate-view"
 import { PageHeading } from "@/components/causaseal/page-heading"
 import { Badge } from "@/components/ui/badge"
+import { Suspense } from "react"
 
 export default function InvestigatePage() {
   return (
@@ -11,7 +12,9 @@ export default function InvestigatePage() {
         description="أدخل سيناريو الوكيل لبناء المسار السببي واختباره."
         actions={<Badge variant="info">MVP قابل للاختبار</Badge>}
       />
-      <InvestigateView />
+      <Suspense fallback={null}>
+        <InvestigateView />
+      </Suspense>
     </>
   )
 }

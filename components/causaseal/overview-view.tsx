@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import * as React from "react"
 import { Bar, BarChart, RadialBar, RadialBarChart } from "recharts"
 import {
   FingerprintIcon,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react"
 
 import { CausalPath } from "@/components/causaseal/causal-path"
+import { useLanguage } from "@/components/causaseal/language-provider"
 import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
 import { Stat } from "@/components/causaseal/stat"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +30,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import { Separator } from "@/components/ui/separator"
+import { fetchSession, type SessionSummary } from "@/lib/api/client"
 import { SEED_EVENTS } from "@/lib/seed-data"
 
 const sparkConfig = {
@@ -48,8 +51,6 @@ const riskConfig = {
   score: { label: "الخطر", color: "var(--chart-1)" },
 } satisfies ChartConfig
 
-const riskData = [{ name: "risk", score: 27, fill: "var(--chart-1)" }]
-
 const previewNodes = [
   { label: "مصدر غير موثوق", value: "PDF خارجي", risk: false },
   { label: "تأثير على القرار", value: "Prompt Injection", risk: true },
@@ -58,6 +59,33 @@ const previewNodes = [
 ]
 
 export function OverviewView() {
+  const { t } = useLanguage()
+  const [session, setSession] = React.useState<SessionSummary | null>(null)
+
+  React.useEffect(() => {
+    let cancelled = false
+    const load = () => {
+      void fetchSession()
+        .then((data) => {
+          if (!cancelled) setSession(data)
+        })
+        .catch(() => {})
+    }
+    load()
+    const timer = window.setInterval(load, 4000)
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [])
+
+  const live = Boolean(session?.hasSession)
+  const feed = live && session?.recent?.length ? session.recent : SEED_EVENTS.slice(0, 4)
+  const nodes =
+    live && session?.lastAnalysis?.nodes?.length ? session.lastAnalysis.nodes : previewNodes
+  const riskScore = live && session?.riskScore != null ? session.riskScore : 27
+  const riskData = [{ name: "risk", score: riskScore, fill: "var(--chart-1)" }]
+
   return (
     <>
       <PageHeading
@@ -66,7 +94,10 @@ export function OverviewView() {
         description="نفهم السبب، نتذكر الفشل، ونمنع إعادة تشكّله قبل الضرر."
         actions={
           <>
-            <IllustrativeBadge />
+            {live ? <Badge variant="success">{t("session")}</Badge> : <IllustrativeBadge />}
+            <Button asChild variant="outline">
+              <Link href="/investigate?demo=1">عرض SAIF</Link>
+            </Button>
             <Button asChild>
               <Link href="/investigate">تحليل حادث جديد</Link>
             </Button>
@@ -79,7 +110,7 @@ export function OverviewView() {
           variant="gradient"
           icon={<ShieldAlertIcon className="size-5" />}
           label="تهديدات تم منعها"
-          value="12"
+          value={live ? String(session?.blocked ?? 0) : "12"}
           change="↑ 20%"
           changeLabel="عن الأمس"
           trend="up"
@@ -90,7 +121,7 @@ export function OverviewView() {
           variant="gradient"
           icon={<FingerprintIcon className="size-5" />}
           label="بصمات X-CFS"
-          value="3"
+          value={live ? String(session?.fingerprintCount ?? 0) : "3"}
           change="+1"
           changeLabel="هذا الأسبوع"
           trend="up"
@@ -100,7 +131,7 @@ export function OverviewView() {
           variant="gradient"
           icon={<GaugeIcon className="size-5" />}
           label="دقة المطابقة"
-          value="96.4%"
+          value={live ? `${Math.round((session?.matchRate ?? 0) * 100)}%` : "96.4%"}
           change="↑ 2.1%"
           changeLabel="Reformation"
           trend="up"
@@ -111,7 +142,9 @@ export function OverviewView() {
           variant="gradient"
           icon={<TimerIcon className="size-5" />}
           label="زمن القرار"
-          value="38 ms"
+          value={
+            live && session?.lastLatencyMs != null ? `${session.lastLatencyMs} ms` : "38 ms"
+          }
           change="آمن"
           changeLabel="Causal Gate"
           trend="flat"
@@ -131,9 +164,9 @@ export function OverviewView() {
             </Button>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 px-4">
-            {SEED_EVENTS.slice(0, 4).map((event) => (
+            {feed.map((event) => (
               <div
-                key={`${event.time}-${event.tool}`}
+                key={`${event.time}-${event.agent}-${event.tool}`}
                 className="flex items-start justify-between gap-3 rounded-lg border p-3"
               >
                 <div className="flex flex-col gap-1">
@@ -183,7 +216,7 @@ export function OverviewView() {
               </RadialBarChart>
             </ChartContainer>
             <div className="text-center">
-              <p className="text-3xl font-semibold">27</p>
+              <p className="text-3xl font-semibold">{riskScore}</p>
               <p className="text-xs text-muted-foreground">/ 100 · منخفض</p>
             </div>
             <Separator />
@@ -219,16 +252,25 @@ export function OverviewView() {
           <Badge variant="destructive">تم التدخل</Badge>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 px-4">
-          <CausalPath nodes={previewNodes} />
+          <CausalPath nodes={nodes} />
           <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-muted/40 p-3 text-sm">
             <span>
-              ثقة الدليل <strong>94%</strong>
+              ثقة الدليل{" "}
+              <strong>
+                {live && session?.lastAnalysis
+                  ? `${Math.round(session.lastAnalysis.confidence * 100)}%`
+                  : "94%"}
+              </strong>
             </span>
             <span>
-              تشابه سببي <strong>91%</strong>
+              البصمة{" "}
+              <strong>{live && session?.lastAnalysis ? session.lastAnalysis.matchedSignature : "X-CFS-001"}</strong>
             </span>
             <span>
-              زمن الاستباق <strong>1.8 ثانية</strong>
+              زمن القرار{" "}
+              <strong>
+                {live && session?.lastLatencyMs != null ? `${session.lastLatencyMs} ms` : "1.8 ثانية"}
+              </strong>
             </span>
             <Button asChild size="sm" className="ms-auto">
               <Link href="/investigate">فتح التحقيق</Link>

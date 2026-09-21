@@ -68,19 +68,48 @@ const DEFAULT_METRICS = [
 
 export function ReportsView() {
   const [metrics, setMetrics] = React.useState(DEFAULT_METRICS)
+  const [fromSession, setFromSession] = React.useState(false)
+  const [decisions, setDecisions] = React.useState(DECISION_LOG)
+  const [experiments, setExperiments] = React.useState(EXPERIMENTS)
   const [controls] = React.useState<ComplianceControl[]>(() => evaluateCompliance())
 
   React.useEffect(() => {
     let cancelled = false
-    void fetchReportMetrics()
-      .then((data) => {
-        if (!cancelled) setMetrics(data.metrics)
-      })
-      .catch(() => {
-        if (!cancelled) setMetrics(DEFAULT_METRICS)
-      })
+    const load = () => {
+      void fetchReportMetrics()
+        .then((data) => {
+          if (cancelled) return
+          setMetrics(data.metrics)
+          setFromSession(Boolean(data.fromSession))
+          if (data.decisions && data.decisions.length > 0) {
+            setDecisions(data.decisions)
+          }
+          if (data.experiments) {
+            setExperiments(
+              EXPERIMENTS.map((exp) => {
+                const done =
+                  exp.code === "A"
+                    ? data.experiments?.learn
+                    : exp.code === "B"
+                      ? data.experiments?.recognize
+                      : data.experiments?.allow
+                return { ...exp, status: done ? "من الجلسة" : "بانتظار العرض" }
+              })
+            )
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setMetrics(DEFAULT_METRICS)
+            setFromSession(false)
+          }
+        })
+    }
+    load()
+    const timer = window.setInterval(load, 4000)
     return () => {
       cancelled = true
+      window.clearInterval(timer)
     }
   }, [])
 
@@ -109,28 +138,42 @@ export function ReportsView() {
         description="نتائج التجارب A / B / C دون ادعاءات نجاح مسبقة."
         actions={
           <>
-            <IllustrativeBadge />
+            {fromSession ? <Badge variant="success">أرقام هذه الجلسة</Badge> : <IllustrativeBadge />}
             <Button onClick={downloadReport}>تنزيل التقرير التنفيذي</Button>
           </>
         }
       />
 
-      <Alert>
-        <InfoIcon />
-        <AlertTitle>بيانات توضيحية</AlertTitle>
-        <AlertDescription>
-          المقاييس المعروضة للنموذج الأولي ويجب استبدالها بنتائج الاختبارات الفعلية قبل
-          العرض العلمي.
-        </AlertDescription>
-      </Alert>
+      {fromSession ? (
+        <Alert>
+          <InfoIcon />
+          <AlertTitle>أرقام هذه الجلسة</AlertTitle>
+          <AlertDescription>
+            المقاييس محسوبة من تحليلات ومختبر هذه الجلسة فقط، وليست ادعاءً علميًا عامًا.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Alert>
+          <InfoIcon />
+          <AlertTitle>بيانات توضيحية</AlertTitle>
+          <AlertDescription>
+            لم تُسجَّل تحليلات في هذه الجلسة بعد. شغّل التحليل أو عرض SAIF لتظهر أرقام
+            الجلسة.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
-        {EXPERIMENTS.map((exp) => (
+        {experiments.map((exp) => (
           <Card key={exp.code} className="h-full gap-4 py-4">
             <CardHeader className="px-4 pb-0">
               <div className="flex items-center justify-between gap-2">
                 <Badge variant="outline">{exp.code}</Badge>
-                <Badge variant="success">{exp.status}</Badge>
+                <Badge
+                  variant={exp.status === "بانتظار العرض" ? "outline" : "success"}
+                >
+                  {exp.status}
+                </Badge>
               </div>
               <CardDescription>{exp.phase}</CardDescription>
               <CardTitle className="line-clamp-2 text-base">{exp.title}</CardTitle>
@@ -146,7 +189,9 @@ export function ReportsView() {
         <Card className="gap-4 py-4">
           <CardHeader className="px-4 pb-0">
             <CardTitle className="text-base">مقاييس النموذج الأولي</CardTitle>
-            <CardDescription>قيم توضيحية حتى تُستبدل بالقياس</CardDescription>
+            <CardDescription>
+              {fromSession ? "محسوبة من قرارات هذه الجلسة" : "قيم توضيحية حتى يبدأ العرض"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4 px-4">
             {metrics.map((m) => (
@@ -176,7 +221,7 @@ export function ReportsView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {DECISION_LOG.map((row) => (
+                {decisions.map((row) => (
                   <TableRow key={`${row.time}-${row.decision}`}>
                     <TableCell>
                       <Badge

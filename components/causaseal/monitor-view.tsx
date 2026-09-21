@@ -73,6 +73,15 @@ export function MonitorView() {
     }
   }, [filter, query])
 
+  React.useEffect(() => {
+    const timer = window.setInterval(() => {
+      void fetchEvents({ status: filter, q: query })
+        .then((data) => setEvents(data.events))
+        .catch(() => {})
+    }, 4000)
+    return () => window.clearInterval(timer)
+  }, [filter, query])
+
   return (
     <>
       <PageHeading
@@ -152,8 +161,8 @@ export function MonitorView() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((event) => (
-                <TableRow key={`${event.time}-${event.tool}`}>
+              {events.map((event, index) => (
+                <TableRow key={`${event.time}-${event.tool}-${event.agent}-${index}`}>
                   <TableCell className="font-mono text-xs">{event.time}</TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-0.5">

@@ -31,6 +31,7 @@ export const translations = {
     "search.empty": "لا توجد نتائج",
     "search.pages": "الصفحات",
     "illustrative": "بيانات توضيحية",
+    "session": "هذه الجلسة",
     "live": "بث مباشر",
   },
   en: {
@@ -63,6 +64,7 @@ export const translations = {
     "search.empty": "No results",
     "search.pages": "Pages",
     "illustrative": "Illustrative data",
+    "session": "This session",
     "live": "Live",
   },
 } as const

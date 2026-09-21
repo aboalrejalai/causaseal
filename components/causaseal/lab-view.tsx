@@ -3,7 +3,7 @@
 import * as React from "react"
 import { toast } from "sonner"
 
-import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
+import { PageHeading } from "@/components/causaseal/page-heading"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -60,39 +60,17 @@ export function LabView() {
     setScore(null)
     setSubtitle("جاري توليد الطفرات السببية…")
     try {
-      const data = await runSermg({ signatureId, count })
+      const data = await runSermg({ signatureId, count, ...options })
       // Stream rows for demo feel
       for (let i = 0; i < data.results.length; i++) {
         await new Promise((r) => setTimeout(r, 120))
         setResults((prev) => [...prev, data.results[i]])
       }
       setScore(data.score)
-      setSubtitle(`اكتملت ${data.results.length} محاكاة عبر سياقات مختلفة`)
+      setSubtitle(`اكتملت ${data.results.length} محاكاة عبر البوابة السببية`)
       toast.success("اكتملت محاكاة SERMG")
     } catch {
-      // Local fallback animation
-      const titles = [
-        "Agent + API مختلف",
-        "Prompt معاد الصياغة",
-        "بيانات بصيغة أخرى",
-        "صلاحية مؤقتة",
-      ]
-      for (let i = 0; i < count; i++) {
-        await new Promise((r) => setTimeout(r, 120))
-        const allowed = i === count - 1
-        setResults((prev) => [
-          ...prev,
-          {
-            index: i + 1,
-            title: titles[i % titles.length],
-            similarity: allowed ? 0.62 : Number(`0.8${i % 9}`),
-            outcome: allowed ? "ALLOW" : "DETECTED",
-          },
-        ])
-      }
-      setScore(0.91)
-      setSubtitle(`اكتملت ${count} محاكاة عبر سياقات مختلفة`)
-      toast.success("اكتملت محاكاة SERMG (محلي)")
+      toast.error("تعذر تشغيل المختبر. تأكد أن خادم التحليل يعمل.")
     } finally {
       setRunning(false)
     }
@@ -106,8 +84,7 @@ export function LabView() {
         description="محاكاة تغيّر السياق مع الحفاظ على ثوابت الفشل السببية."
         actions={
           <>
-            <IllustrativeBadge />
-            <Badge variant="success">محاكاة آمنة</Badge>
+            <Badge variant="success">إعادة تشغيل التحليل</Badge>
           </>
         }
       />

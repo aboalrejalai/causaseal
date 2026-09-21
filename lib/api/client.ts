@@ -1,4 +1,4 @@
-import type { AnalysisResult, Fingerprint, IncidentInput } from "@/lib/contracts"
+import type { AnalysisResult, CausalNode, Fingerprint, IncidentInput } from "@/lib/contracts"
 
 async function readJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -7,11 +7,14 @@ async function readJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T
 }
 
-export async function analyzeIncident(input: IncidentInput): Promise<AnalysisResult> {
+export async function analyzeIncident(
+  input: IncidentInput,
+  options?: { preferRules?: boolean }
+): Promise<AnalysisResult> {
   const response = await fetch("/api/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
+    body: JSON.stringify({ ...input, preferRules: Boolean(options?.preferRules) }),
   })
   return readJson<AnalysisResult>(response)
 }
@@ -59,6 +62,7 @@ export async function createFingerprint(
       title: input.title || "بصمة مستخرجة من التحقيق الحالي",
       desc: input.desc || "مسار سببي موثق أُنشئ من سيناريو التحليل التفاعلي.",
       tags: input.tags || ["مصدر غير موثوق", "تأثير قرار", "سياق متغير"],
+      invariants: input.invariants || input.tags || [],
       matches: 0,
       confidence: input.confidence || "—",
       date: input.date || new Date().toLocaleDateString("ar-SA"),
@@ -72,6 +76,10 @@ export async function createFingerprint(
 export async function runSermg(body: {
   signatureId: string
   count: number
+  changePrompt?: boolean
+  changeTool?: boolean
+  changeData?: boolean
+  changePrivilege?: boolean
 }) {
   const response = await fetch("/api/sermg/run", {
     method: "POST",
@@ -85,6 +93,37 @@ export async function fetchReportMetrics() {
   const response = await fetch("/api/reports/metrics")
   return readJson<{
     illustrative: boolean
+    fromSession?: boolean
     metrics: Array<{ label: string; value: number }>
+    decisions?: Array<{ decision: string; note: string; time: string }>
+    experiments?: { learn: boolean; recognize: boolean; allow: boolean }
   }>(response)
+}
+
+export type SessionSummary = {
+  hasSession: boolean
+  blocked: number
+  eventCount: number
+  fingerprintCount: number
+  matchRate: number
+  prevention: number
+  correctAllow: number
+  sermgDetected: number
+  sermgTotal: number
+  lastLatencyMs: number | null
+  riskScore: number | null
+  recent: import("@/lib/contracts").AgentEvent[] | null
+  decisions: Array<{ decision: string; note: string; time: string }>
+  lastAnalysis: {
+    decision: string
+    confidence: number
+    matchedSignature: string
+    nodes: CausalNode[]
+    reason: string
+  } | null
+}
+
+export async function fetchSession() {
+  const response = await fetch("/api/session")
+  return readJson<SessionSummary>(response)
 }

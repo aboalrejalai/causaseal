@@ -85,7 +85,7 @@ export function MemoryView() {
                 <CardDescription className="line-clamp-3">{fp.desc}</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-1.5 px-4">
-                {fp.tags.map((tag) => (
+                {(fp.invariants?.length ? fp.invariants : fp.tags).map((tag) => (
                   <Badge key={tag} variant="secondary">
                     {tag}
                   </Badge>
@@ -118,12 +118,15 @@ export function MemoryView() {
           {selected ? (
             <div className="flex flex-col gap-4 px-1">
               <p className="text-sm text-muted-foreground">{selected.desc}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {selected.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary">
-                    {tag}
-                  </Badge>
-                ))}
+              <div className="flex flex-col gap-2">
+                <p className="text-xs text-muted-foreground">الثوابت السببية</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(selected.invariants?.length ? selected.invariants : selected.tags).map((tag) => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-lg border p-3">
