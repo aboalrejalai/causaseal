@@ -1,4 +1,4 @@
-/** Seeded live-telemetry events (illustrative until a real feed exists). */
+/** Session telemetry. Seeded history stays; live analyses are prepended. */
 
 export const SEED_EVENTS = [
   {
@@ -9,6 +9,7 @@ export const SEED_EVENTS = [
     status: "blocked",
     label: "INTERVENE",
     confidence: "94%",
+    session: false,
   },
   {
     time: "09:41:05",
@@ -18,6 +19,7 @@ export const SEED_EVENTS = [
     status: "allowed",
     label: "ALLOW",
     confidence: "99%",
+    session: false,
   },
   {
     time: "09:38:44",
@@ -27,6 +29,7 @@ export const SEED_EVENTS = [
     status: "verify",
     label: "VERIFY",
     confidence: "81%",
+    session: false,
   },
   {
     time: "09:35:12",
@@ -36,6 +39,7 @@ export const SEED_EVENTS = [
     status: "allowed",
     label: "ALLOW",
     confidence: "98%",
+    session: false,
   },
   {
     time: "09:31:27",
@@ -45,6 +49,7 @@ export const SEED_EVENTS = [
     status: "blocked",
     label: "RESTRICT",
     confidence: "89%",
+    session: false,
   },
   {
     time: "09:28:09",
@@ -54,6 +59,7 @@ export const SEED_EVENTS = [
     status: "allowed",
     label: "ALLOW",
     confidence: "97%",
+    session: false,
   },
   {
     time: "09:22:33",
@@ -63,20 +69,92 @@ export const SEED_EVENTS = [
     status: "verify",
     label: "VERIFY",
     confidence: "76%",
+    session: false,
   },
 ]
+
+/** @type {Array<Record<string, unknown>>} */
+let sessionEvents = []
+
+/** @type {Record<string, unknown> | null} */
+let lastAnalysis = null
+
+/**
+ * @param {Record<string, unknown>} event
+ */
+export function recordEvent(event) {
+  sessionEvents = [{ ...event, session: true }, ...sessionEvents].slice(0, 80)
+  return sessionEvents[0]
+}
+
+/**
+ * @param {Record<string, unknown>} snapshot
+ */
+export function rememberAnalysis(snapshot) {
+  lastAnalysis = snapshot
+}
+
+export function getLastAnalysis() {
+  return lastAnalysis
+}
+
+export function listSessionEvents() {
+  return [...sessionEvents]
+}
 
 /**
  * @param {{ status?: string, q?: string }} [filter]
  */
 export function listEvents(filter = {}) {
-  let events = [...SEED_EVENTS]
+  let events = [...sessionEvents, ...SEED_EVENTS]
   if (filter.status && filter.status !== "all") {
-    events = events.filter((e) => e.status === filter.status)
+    events = events.filter((event) => event.status === filter.status)
   }
   if (filter.q) {
     const q = filter.q.toLowerCase()
-    events = events.filter((e) => Object.values(e).join(" ").toLowerCase().includes(q))
+    events = events.filter((event) => Object.values(event).join(" ").toLowerCase().includes(q))
   }
   return events
+}
+
+export function sessionSummary() {
+  const events = sessionEvents
+  const hasSession = events.length > 0
+  const blocked = events.filter((event) => event.status === "blocked").length
+  const risky = events.filter((event) => event.risky)
+  const matched = risky.filter((event) => String(event.matchedSignature || "").startsWith("X-CFS"))
+  const matchRate = risky.length ? matched.length / risky.length : 0
+  const benign = events.filter((event) => event.risky === false)
+  const correctAllow = benign.length
+    ? benign.filter((event) => event.status === "allowed").length / benign.length
+    : 0
+  const prevention = risky.length
+    ? risky.filter((event) => event.status === "blocked" || event.status === "verify").length /
+      risky.length
+    : 0
+  const sermg = events.filter((event) => event.source === "sermg" && event.risky)
+  const sermgDetected = sermg.filter((event) => event.status !== "allowed").length
+  const last = events[0]
+
+  return {
+    hasSession,
+    blocked,
+    eventCount: events.length,
+    matchRate: Number(matchRate.toFixed(3)),
+    prevention: Number(prevention.toFixed(3)),
+    correctAllow: Number(correctAllow.toFixed(3)),
+    sermgDetected,
+    sermgTotal: sermg.length,
+    lastLatencyMs: typeof last?.latencyMs === "number" ? last.latencyMs : null,
+    riskScore: hasSession
+      ? Math.min(100, Math.round((blocked / Math.max(events.length, 1)) * 100))
+      : null,
+    recent: hasSession ? events.slice(0, 4) : null,
+    decisions: events.slice(0, 8).map((event) => ({
+      decision: event.label,
+      note: event.path,
+      time: event.time,
+    })),
+    lastAnalysis,
+  }
 }

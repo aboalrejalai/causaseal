@@ -16,15 +16,28 @@ export const CausalNodeSchema = z.object({
   risk: z.boolean(),
 })
 
+export const XcfsReduceResultSchema = z.object({
+  reductionRatio: z.number(),
+  invariants: z.array(z.string()),
+  keptNodes: z.array(CausalNodeSchema),
+  beforeCount: z.number(),
+  prunedCount: z.number(),
+  illustrative: z.boolean(),
+})
+
 export const AnalysisResultSchema = z.object({
   decision: z.enum(["ALLOW", "VERIFY", "INTERVENE"]),
   confidence: z.number().min(0).max(1),
   reason: z.string(),
   matchedSignature: z.string(),
   evidenceStrength: z.number().min(0).max(1),
-  nodes: z.array(CausalNodeSchema).min(4).max(4),
+  nodes: z.array(CausalNodeSchema).min(1).max(8),
   mode: z.enum(["rules", "ai"]),
   warning: z.string().optional(),
+  matchScore: z.number().min(0).max(1).optional(),
+  latencyMs: z.number().optional(),
+  storedFingerprint: z.string().optional(),
+  reduction: XcfsReduceResultSchema.optional(),
 })
 
 export const FingerprintSchema = z.object({
@@ -35,6 +48,7 @@ export const FingerprintSchema = z.object({
   matches: z.number(),
   confidence: z.string(),
   date: z.string(),
+  invariants: z.array(z.string()).optional(),
 })
 
 export const AgentEventSchema = z.object({
@@ -67,7 +81,7 @@ export const MutationRunSchema = z.object({
   signatureId: z.string(),
   score: z.number(),
   results: z.array(MutationResultSchema),
-  illustrative: z.literal(true).default(true),
+  illustrative: z.boolean(),
 })
 
 export const ComplianceControlSchema = z.object({
@@ -78,9 +92,3 @@ export const ComplianceControlSchema = z.object({
   notes: z.string(),
 })
 
-export const XcfsReduceResultSchema = z.object({
-  signature: z.string(),
-  reductionRatio: z.number(),
-  invariants: z.array(z.string()),
-  illustrative: z.literal(true).default(true),
-})
