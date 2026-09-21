@@ -1,26 +1,19 @@
-import { accessSync, constants, cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { accessSync, constants, existsSync } from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const publicDir = path.join(root, "public");
-const entry = path.join(root, "server.js");
-const stageDir = path.join(root, ".hostinger-static");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const outDir = path.join(root, "out")
+const entry = path.join(root, "server.js")
 
-accessSync(publicDir, constants.R_OK);
-accessSync(entry, constants.R_OK);
-accessSync(path.join(publicDir, "dashboard.html"), constants.R_OK);
+accessSync(entry, constants.R_OK)
 
-// Keep a verified static snapshot Hostinger can detect even if it looks for an output folder.
-rmSync(stageDir, { recursive: true, force: true });
-mkdirSync(stageDir, { recursive: true });
-cpSync(publicDir, stageDir, { recursive: true });
-
-if (!existsSync(path.join(stageDir, "dashboard.html"))) {
-  throw new Error("Static snapshot missing dashboard.html");
+if (!existsSync(path.join(outDir, "index.html"))) {
+  throw new Error(
+    "Static export missing out/index.html. Run `next build` (output: export) before hostinger-build."
+  )
 }
 
-console.log("[CAUSASEAL] Hostinger build OK");
-console.log("[CAUSASEAL] entry=server.js");
-console.log(`[CAUSASEAL] static=${publicDir}`);
-console.log(`[CAUSASEAL] snapshot=${stageDir}`);
+console.log("[CAUSASEAL] Hostinger build OK")
+console.log("[CAUSASEAL] entry=server.js")
+console.log(`[CAUSASEAL] static=${outDir}`)
