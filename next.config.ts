@@ -3,7 +3,7 @@ import type { NextConfig } from "next"
 const nextConfig: NextConfig = {
   output: "export",
   images: { unoptimized: true },
-  // Honoured by `next dev` only — ignored at export time.
+  // Used by `next dev` only. Static export ignores rewrites (warning is harmless).
   async rewrites() {
     return [
       {
