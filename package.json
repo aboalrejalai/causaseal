@@ -11,12 +11,21 @@
     "dev:vinext": "node scripts/run-framework.mjs dev",
     "build": "next build --webpack && node scripts/hostinger-build.mjs",
     "start": "node server.js",
+    "test": "node --test test/**/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern out --ignore-pattern android --ignore-pattern ios --ignore-pattern electron",
     "db:generate": "drizzle-kit generate",
     "cap:sync": "npm run build && npx cap sync",
     "cap:open:android": "npx cap open android",
     "cap:open:ios": "npx cap open ios",
-    "cap:open:electron": "npx cap open @capacitor-community/electron"
+    "cap:open:electron": "npx cap open @capacitor-community/electron",
+    "build:android": "npx cap build android",
+    "build:ios": "npx cap build ios",
+    "build:mac": "npm --prefix electron run build:mac",
+    "build:linux": "npm --prefix electron run build:linux",
+    "build:win": "npm --prefix electron run build:win",
+    "pack:mac": "npm --prefix electron run pack:mac",
+    "pack:linux": "npm --prefix electron run pack:linux",
+    "pack:win": "npm --prefix electron run pack:win"
   },
   "main": "server.js",
   "dependencies": {
