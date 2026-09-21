@@ -1,93 +1,78 @@
-/** Session telemetry. Seeded history stays; live analyses are prepended and saved to disk. */
+/** Session telemetry per org. Live UI shows session events only. */
 
 import { readState, writeState } from "./persist.mjs"
 
+const DEFAULT_ORG = "demo"
+
+/** Keep seeds for reference / offline demos only — not mixed into live listEvents. */
 export const SEED_EVENTS = [
   {
     time: "09:42:18",
     agent: "Finance Copilot",
     tool: "send_to_workspace",
-    path: "PDF → Decision → External API",
+    path: "أداة إرسال → بيانات حساسة → وجهة غير معتمدة",
     status: "blocked",
     label: "INTERVENE",
-    confidence: "94%",
-    session: false,
-  },
-  {
-    time: "09:41:05",
-    agent: "HR Assistant",
-    tool: "read_employee_file",
-    path: "User → HR DB → Summary",
-    status: "allowed",
-    label: "ALLOW",
-    confidence: "99%",
-    session: false,
-  },
-  {
-    time: "09:38:44",
-    agent: "Operations Agent",
-    tool: "export_document",
-    path: "Email → Agent → Unknown Drive",
-    status: "verify",
-    label: "VERIFY",
-    confidence: "81%",
-    session: false,
-  },
-  {
-    time: "09:35:12",
-    agent: "Support Agent",
-    tool: "search_knowledge",
-    path: "Ticket → KB → Response",
-    status: "allowed",
-    label: "ALLOW",
-    confidence: "98%",
-    session: false,
-  },
-  {
-    time: "09:31:27",
-    agent: "Procurement AI",
-    tool: "invoke_vendor_api",
-    path: "Web → Tool → Vendor API",
-    status: "blocked",
-    label: "RESTRICT",
-    confidence: "89%",
-    session: false,
-  },
-  {
-    time: "09:28:09",
-    agent: "Finance Copilot",
-    tool: "query_database",
-    path: "User → Finance DB → Chart",
-    status: "allowed",
-    label: "ALLOW",
-    confidence: "97%",
-    session: false,
-  },
-  {
-    time: "09:22:33",
-    agent: "Legal Reviewer",
-    tool: "share_document",
-    path: "Contract → Agent → Team Space",
-    status: "verify",
-    label: "VERIFY",
-    confidence: "76%",
+    confidence: "—",
     session: false,
   },
 ]
 
-/** @type {Array<Record<string, unknown>>} */
-let sessionEvents = Array.isArray(readState().sessionEvents) ? readState().sessionEvents : []
+/** @type {Record<string, Array<Record<string, unknown>>>} */
+const sessionByOrg = {}
 
 /** @type {Record<string, unknown> | null} */
 let lastAnalysis = null
 
+function ensureOrgs() {
+  const state = readState()
+  if (state.orgs && typeof state.orgs === "object") return state.orgs
+  /** @type {Record<string, { fingerprints?: unknown, sessionEvents?: unknown }>} */
+  const orgs = {
+    [DEFAULT_ORG]: {
+      fingerprints: Array.isArray(state.fingerprints) ? state.fingerprints : undefined,
+      sessionEvents: Array.isArray(state.sessionEvents) ? state.sessionEvents : undefined,
+    },
+  }
+  writeState({ orgs })
+  return orgs
+}
+
+/**
+ * @param {string} [orgId]
+ */
+function loadSession(orgId = DEFAULT_ORG) {
+  const id = orgId || DEFAULT_ORG
+  if (sessionByOrg[id]) return sessionByOrg[id]
+  const orgs = ensureOrgs()
+  const bucket = orgs[id] || {}
+  sessionByOrg[id] = Array.isArray(bucket.sessionEvents) ? [...bucket.sessionEvents] : []
+  return sessionByOrg[id]
+}
+
+/**
+ * @param {string} orgId
+ * @param {Array<Record<string, unknown>>} events
+ */
+function saveSession(orgId, events) {
+  const orgs = ensureOrgs()
+  const id = orgId || DEFAULT_ORG
+  if (!orgs[id]) orgs[id] = {}
+  orgs[id].sessionEvents = events
+  sessionByOrg[id] = events
+  writeState({ orgs })
+}
+
 /**
  * @param {Record<string, unknown>} event
+ * @param {{ orgId?: string }} [options]
  */
-export function recordEvent(event) {
-  sessionEvents = [{ ...event, session: true }, ...sessionEvents].slice(0, 80)
-  writeState({ sessionEvents })
-  return sessionEvents[0]
+export function recordEvent(event, options = {}) {
+  const orgId = options.orgId || event.orgId || DEFAULT_ORG
+  const current = loadSession(orgId)
+  const next = [{ ...event, session: true, orgId }, ...current].slice(0, 80)
+  saveSession(orgId, next)
+  return next[0]
 }
 
 /**
@@ -101,15 +86,20 @@ export function getLastAnalysis() {
   return lastAnalysis
 }
 
-export function listSessionEvents() {
-  return [...sessionEvents]
+/**
+ * @param {string} [orgId]
+ */
+export function listSessionEvents(orgId = DEFAULT_ORG) {
+  return [...loadSession(orgId)]
 }
 
 /**
- * @param {{ status?: string, q?: string }} [filter]
+ * Live feed — session only (no seed mix).
+ * @param {{ status?: string, q?: string, orgId?: string }} [filter]
  */
 export function listEvents(filter = {}) {
-  let events = [...sessionEvents, ...SEED_EVENTS]
+  const orgId = filter.orgId || DEFAULT_ORG
+  let events = [...loadSession(orgId)]
   if (filter.status && filter.status !== "all") {
     events = events.filter((event) => event.status === filter.status)
   }
@@ -120,8 +110,11 @@ export function listEvents(filter = {}) {
   return events
 }
 
-export function sessionSummary() {
-  const events = sessionEvents
+/**
+ * @param {string} [orgId]
+ */
+export function sessionSummary(orgId = DEFAULT_ORG) {
+  const events = loadSession(orgId)
   const hasSession = events.length > 0
   const blocked = events.filter((event) => event.status === "blocked").length
   const risky = events.filter((event) => event.risky)
@@ -175,5 +168,12 @@ export function sessionSummary() {
       time: event.time,
     })),
     lastAnalysis,
+    orgId,
   }
+}
+
+/** Clear in-memory org caches (tests). */
+export function resetTelemetryCache() {
+  for (const key of Object.keys(sessionByOrg)) delete sessionByOrg[key]
+  lastAnalysis = null
 }

@@ -4,8 +4,17 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { analyze } from "./engine/gateway.mjs"
-import { immunizedEnvironments, listFingerprints, storeFingerprint } from "./engine/memory.mjs"
+import {
+  fingerprintsAreIllustrative,
+  immunizedEnvironments,
+  listFingerprints,
+  storeFingerprint,
+} from "./engine/memory.mjs"
 import { listEvents, listSessionEvents, sessionSummary } from "./engine/telemetry.mjs"
+
+function orgFrom(url, body = {}) {
+  return String(url.searchParams.get("orgId") || body.orgId || "demo")
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -171,31 +180,39 @@ const server = http.createServer(async (req, res) => {
     if (pathname === "/api/analyze" && req.method === "POST") {
       const body = await parseJsonBody(req, res)
       if (body === null) return
-      const result = await analyze(body)
+      const orgId = orgFrom(url, body)
+      const result = await analyze({ ...body, orgId }, { orgId })
       sendJson(res, 200, result)
       return
     }
 
     if (pathname === "/api/events" && req.method === "GET") {
+      const orgId = orgFrom(url)
       sendJson(res, 200, {
         events: listEvents({
           status: url.searchParams.get("status") || "all",
           q: url.searchParams.get("q") || "",
+          orgId,
         }),
-        illustrative: listSessionEvents().length === 0,
+        illustrative: listSessionEvents(orgId).length === 0,
       })
       return
     }
 
     if (pathname === "/api/fingerprints" && req.method === "GET") {
-      sendJson(res, 200, { fingerprints: listFingerprints(), illustrative: true })
+      const orgId = orgFrom(url)
+      sendJson(res, 200, {
+        fingerprints: listFingerprints(orgId),
+        illustrative: fingerprintsAreIllustrative(orgId),
+      })
       return
     }
 
     if (pathname === "/api/fingerprints" && req.method === "POST") {
       const body = await parseJsonBody(req, res)
       if (body === null) return
-      const item = storeFingerprint(body)
+      const orgId = orgFrom(url, body)
+      const item = storeFingerprint(body, { orgId })
       sendJson(res, 201, { fingerprint: item })
       return
     }
@@ -203,33 +220,46 @@ const server = http.createServer(async (req, res) => {
     if (pathname === "/api/gateway/intercept" && req.method === "POST") {
       const body = await parseJsonBody(req, res)
       if (body === null) return
-      const result = await analyze(body, { source: "intercept", rulesOnly: true })
+      const orgId = orgFrom(url, body)
+      const result = await analyze(
+        { ...body, orgId },
+        { source: "intercept", rulesOnly: true, orgId }
+      )
       sendJson(res, 200, { executed: false, result })
+      return
+    }
+
+    if (pathname === "/api/agent/run" && req.method === "POST") {
+      const body = await parseJsonBody(req, res)
+      if (body === null) return
+      const orgId = orgFrom(url, body)
+      const { runOpsAgent } = await import("./engine/ops-agent.mjs")
+      const outcome = await runOpsAgent({ ...body, orgId })
+      sendJson(res, 200, outcome)
       return
     }
 
     if (pathname === "/api/sermg/run" && req.method === "POST") {
       const body = await parseJsonBody(req, res)
       if (body === null) return
-      // Stub comment removed — mutate replays the gateway and writes immunity.
+      const orgId = orgFrom(url, body)
       const { mutate } = await import("./engine/sermg.mjs")
-      sendJson(res, 200, mutate(body))
+      sendJson(res, 200, await mutate({ ...body, orgId }))
       return
     }
 
     if (pathname === "/api/reports/metrics" && req.method === "GET") {
-      const summary = sessionSummary()
+      const orgId = orgFrom(url)
+      const summary = sessionSummary(orgId)
       if (!summary.hasSession) {
         sendJson(res, 200, {
           illustrative: true,
           fromSession: false,
-          metrics: [
-            { label: "دقة إعادة البناء", value: 0.92 },
-            { label: "دقة مطابقة Reformation", value: 0.96 },
-            { label: "Recall للمسارات الخطرة", value: 0.89 },
-            { label: "السماح الصحيح بالنشاط المشروع", value: 0.94 },
-          ],
+          metrics: [],
           decisions: [],
+          matchRate: 0,
+          prevention: 0,
+          correctAllow: 0,
         })
         return
       }
@@ -239,6 +269,9 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, {
         illustrative: false,
         fromSession: true,
+        matchRate: summary.matchRate,
+        prevention: summary.prevention,
+        correctAllow: summary.correctAllow,
         metrics: [
           { label: "دقة المطابقة في الجلسة", value: summary.matchRate },
           { label: "نسبة المنع للمسارات الخطرة", value: summary.prevention },
@@ -247,7 +280,7 @@ const server = http.createServer(async (req, res) => {
           { label: "متوسط الاختزال السببي", value: summary.avgReduction ?? 0 },
           {
             label: "بيئات اكتسبت المناعة",
-            value: Math.min(immunizedEnvironments().length, 3) / 3,
+            value: Math.min(immunizedEnvironments(orgId).length, 3) / 3,
           },
         ],
         decisions: summary.decisions,
@@ -261,9 +294,10 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === "/api/session" && req.method === "GET") {
+      const orgId = orgFrom(url)
       sendJson(res, 200, {
-        ...sessionSummary(),
-        fingerprintCount: listFingerprints().length,
+        ...sessionSummary(orgId),
+        fingerprintCount: listFingerprints(orgId).length,
       })
       return
     }

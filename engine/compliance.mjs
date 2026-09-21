@@ -13,14 +13,14 @@ export function evaluate() {
     (event) =>
       event.status === "blocked" &&
       String(event.path || "").includes("بيانات حساسة") &&
-      String(event.path || "").includes("وجهة خارجية")
+      String(event.path || "").includes("وجهة غير معتمدة")
   )
   const injectionBlock = events.some(
     (event) => event.status === "blocked" && String(event.matchedSignature || "").startsWith("X-CFS")
   )
   const intercepted = events.some((event) => event.source === "intercept")
   const memoryPoison = fingerprints.some((fingerprint) =>
-    (fingerprint.invariants || []).includes("تسميم ذاكرة")
+    (fingerprint.invariants || []).includes("تعليمة في النص المسترجع")
   )
 
   return [
@@ -39,7 +39,7 @@ export function evaluate() {
       title: "ضوابط الوصول للبيانات الحساسة",
       status: sensitiveBlock ? "mapped" : "partial",
       notes: sensitiveBlock
-        ? "الجلسة تحتوي منعًا لبيانات حساسة متجهة إلى وجهة خارجية."
+        ? "الجلسة تحتوي منعًا لبيانات حساسة متجهة إلى وجهة غير معتمدة."
         : "القاعدة جاهزة؛ شغّل حادثة تسريب ليظهر الدليل في الجلسة.",
     },
     {
@@ -66,8 +66,8 @@ export function evaluate() {
       title: "Memory Poisoning",
       status: memoryPoison ? "mapped" : "planned",
       notes: memoryPoison
-        ? "بصمة تسميم الذاكرة موجودة وتُستخدم في المطابقة."
-        : "لا توجد بصمة تسميم ذاكرة بعد.",
+        ? "بصمة تعليمة في النص المسترجع موجودة وتُستخدم في المطابقة."
+        : "لا توجد بصمة تعليمة مسترجعة بعد.",
     },
   ]
 }

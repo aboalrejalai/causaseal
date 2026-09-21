@@ -1,68 +1,118 @@
-/** X-CFS fingerprint store. Seeds, then disk if a previous session exists. */
+/** X-CFS fingerprint store. Seeds, then disk per org. */
 
 import { readState, writeState } from "./persist.mjs"
 
 const MATCH_THRESHOLD = 0.6
+const DEFAULT_ORG = "demo"
 
 const SEEDS = [
   {
     id: "X-CFS-001",
-    title: "مسار تسريب بيانات عبر تعليمات غير موثوقة",
-    desc: "تأثير خارجي يغيّر قرار الوكيل ثم يستغل أداة مصرحاً بها لإرسال بيانات حساسة.",
-    tags: ["مصدر غير موثوق", "تأثير قرار", "بيانات حساسة", "وجهة خارجية"],
-    invariants: ["مصدر غير موثوق", "تأثير قرار", "بيانات حساسة", "وجهة خارجية"],
+    title: "مسار تسريب عبر أداة إرسال ووجهة غير معتمدة",
+    desc: "تعليمة في النص المسترجع مع بيانات حساسة وأداة إرسال إلى وجهة غير معتمدة.",
+    tags: ["أداة إرسال", "بيانات حساسة", "وجهة غير معتمدة", "تعليمة في النص المسترجع"],
+    invariants: ["أداة إرسال", "بيانات حساسة", "وجهة غير معتمدة", "تعليمة في النص المسترجع"],
     nodes: [
-      { label: "مصدر الإدخال", value: "غير موثوق", risk: true },
-      { label: "تأثير القرار", value: "تعليمة خفية", risk: true },
+      { label: "مصدر الإدخال", value: "نص مسترجع موجّه", risk: true },
+      { label: "تأثير القرار", value: "تعليمة في المسترجع", risk: true },
       { label: "بيانات", value: "حساسة", risk: true },
       { label: "سياق الوجهة", value: "غير معتمد", risk: true },
     ],
     environment: "dev",
     coveredEnvironments: ["dev"],
-    matches: 14,
-    confidence: "94%",
+    matches: 0,
+    confidence: "—",
     date: "18 سبتمبر 2026",
+    origin: "seed",
   },
   {
     id: "X-CFS-002",
-    title: "تصعيد صلاحيات غير مباشر",
-    desc: "طلب طبيعي ظاهرياً يؤدي إلى توسيع نطاق الأداة خارج متطلبات المهمة.",
-    tags: ["صلاحية مرتفعة", "استدعاء أداة خارج النطاق"],
-    invariants: ["صلاحية مرتفعة", "استدعاء أداة خارج النطاق"],
+    title: "تصعيد صلاحيات مع أداة إرسال",
+    desc: "صلاحية مرتفعة مع أداة إرسال إلى وجهة غير معتمدة.",
+    tags: ["صلاحية مرتفعة", "أداة إرسال", "وجهة غير معتمدة"],
+    invariants: ["صلاحية مرتفعة", "أداة إرسال", "وجهة غير معتمدة"],
     nodes: [
       { label: "استدعاء أداة", value: "export_document", risk: true },
       { label: "صلاحية", value: "مرتفعة", risk: true },
+      { label: "سياق الوجهة", value: "غير معتمد", risk: true },
     ],
     environment: "enterprise",
     coveredEnvironments: ["enterprise"],
-    matches: 7,
-    confidence: "88%",
+    matches: 0,
+    confidence: "—",
     date: "17 سبتمبر 2026",
+    origin: "seed",
   },
   {
     id: "X-CFS-003",
-    title: "تسميم ذاكرة وكيل",
-    desc: "إدخال غير موثوق يستقر في الذاكرة ويؤثر في قرارات لاحقة ضمن سياق جديد.",
-    tags: ["تسميم ذاكرة", "انتقال سياق", "تعليمات خفية"],
-    invariants: ["تسميم ذاكرة", "انتقال سياق", "تعليمات خفية"],
+    title: "تعليمة مسترجعة قبل استعلام",
+    desc: "تعليمة في النص المسترجع تؤثر على قرار لاحق في سياق جديد.",
+    tags: ["تعليمة في النص المسترجع"],
+    invariants: ["تعليمة في النص المسترجع"],
     nodes: [
-      { label: "مصدر الإدخال", value: "غير موثوق", risk: true },
-      { label: "تأثير القرار", value: "تعليمة خفية", risk: true },
+      { label: "مصدر الإدخال", value: "نص مسترجع موجّه", risk: true },
+      { label: "تأثير القرار", value: "تعليمة في المسترجع", risk: true },
     ],
     environment: "cloud",
     coveredEnvironments: ["cloud"],
-    matches: 5,
-    confidence: "91%",
+    matches: 0,
+    confidence: "—",
     date: "16 سبتمبر 2026",
+    origin: "seed",
   },
 ]
 
-const saved = readState().fingerprints
-/** @type {typeof SEEDS} */
-let fingerprints = Array.isArray(saved) && saved.length ? saved : SEEDS.map((item) => ({ ...item }))
+/**
+ * Normalize legacy flat state into orgs[demo].
+ */
+function ensureOrgs() {
+  const state = readState()
+  if (state.orgs && typeof state.orgs === "object") {
+    return state.orgs
+  }
+  /** @type {Record<string, { fingerprints?: unknown, sessionEvents?: unknown }>} */
+  const orgs = {
+    [DEFAULT_ORG]: {
+      fingerprints: Array.isArray(state.fingerprints) ? state.fingerprints : undefined,
+      sessionEvents: Array.isArray(state.sessionEvents) ? state.sessionEvents : undefined,
+    },
+  }
+  writeState({ orgs, fingerprints: undefined, sessionEvents: undefined })
+  return orgs
+}
 
-function persist() {
-  writeState({ fingerprints })
+/**
+ * @param {string} [orgId]
+ */
+function orgBucket(orgId = DEFAULT_ORG) {
+  const id = orgId || DEFAULT_ORG
+  const orgs = ensureOrgs()
+  if (!orgs[id]) {
+    orgs[id] = {}
+  }
+  return { id, orgs, bucket: orgs[id] }
+}
+
+/**
+ * @param {string} [orgId]
+ */
+function loadFingerprints(orgId = DEFAULT_ORG) {
+  const { bucket } = orgBucket(orgId)
+  if (Array.isArray(bucket.fingerprints) && bucket.fingerprints.length) {
+    return bucket.fingerprints
+  }
+  return SEEDS.map((item) => ({ ...item, orgId }))
+}
+
+/**
+ * @param {string} orgId
+ * @param {typeof SEEDS} list
+ */
+function saveFingerprints(orgId, list) {
+  const { id, orgs, bucket } = orgBucket(orgId)
+  bucket.fingerprints = list
+  orgs[id] = bucket
+  writeState({ orgs })
 }
 
 /**
@@ -82,35 +132,52 @@ export function jaccard(left = [], right = []) {
 }
 
 /**
- * Surface names (tool, file, time) are ignored. Labels are the causal structure.
  * @param {Array<{ label?: string }>} leftNodes
  * @param {Array<{ label?: string }>} rightNodes
  */
 export function graphSimilarity(leftNodes = [], rightNodes = []) {
   const labels = (nodes) =>
-    nodes.map((node) => node.label).filter((label) => label && label !== "سطر سجل غير حرج")
+    nodes.map((node) => node.label).filter((label) => label && label !== "نداء سابق")
   return jaccard(labels(leftNodes), labels(rightNodes))
 }
 
-export function listFingerprints() {
-  return fingerprints.map((item) => ({
+/**
+ * @param {string} [orgId]
+ */
+export function listFingerprints(orgId = DEFAULT_ORG) {
+  return loadFingerprints(orgId).map((item) => ({
     ...item,
     invariants: [...(item.invariants || [])],
     nodes: [...(item.nodes || [])],
     coveredEnvironments: [...(item.coveredEnvironments || [item.environment || "dev"])],
+    origin: item.origin || "seed",
+    orgId: item.orgId || orgId,
   }))
 }
 
 /**
- * @param {string} id
+ * True only when every fingerprint is still a seed and none were stored.
+ * @param {string} [orgId]
  */
-export function getFingerprint(id) {
-  return fingerprints.find((item) => item.id === id) || null
+export function fingerprintsAreIllustrative(orgId = DEFAULT_ORG) {
+  const list = loadFingerprints(orgId)
+  return list.every((item) => (item.origin || "seed") === "seed")
 }
 
-export function immunizedEnvironments() {
+/**
+ * @param {string} id
+ * @param {string} [orgId]
+ */
+export function getFingerprint(id, orgId = DEFAULT_ORG) {
+  return loadFingerprints(orgId).find((item) => item.id === id) || null
+}
+
+/**
+ * @param {string} [orgId]
+ */
+export function immunizedEnvironments(orgId = DEFAULT_ORG) {
   const found = new Set()
-  for (const fingerprint of fingerprints) {
+  for (const fingerprint of loadFingerprints(orgId)) {
     for (const environment of fingerprint.coveredEnvironments || [fingerprint.environment]) {
       if (environment) found.add(environment)
     }
@@ -120,10 +187,12 @@ export function immunizedEnvironments() {
 
 /**
  * @param {string[]} invariants
- * @param {{ record?: boolean, environment?: string, nodes?: Array<{ label?: string }> }} [options]
+ * @param {{ record?: boolean, environment?: string, nodes?: Array<{ label?: string }>, orgId?: string }} [options]
  */
 export function matchByInvariants(invariants = [], options = {}) {
   if (!invariants.length) return null
+  const orgId = options.orgId || DEFAULT_ORG
+  const fingerprints = loadFingerprints(orgId)
   let best = null
   for (const fingerprint of fingerprints) {
     const invariantScore = jaccard(invariants, fingerprint.invariants || [])
@@ -144,8 +213,11 @@ export function matchByInvariants(invariants = [], options = {}) {
     best.fingerprint.coveredEnvironments.push(appliedIn)
   }
   if (options.record !== false) {
-    best.fingerprint.matches += 1
-    persist()
+    best.fingerprint.matches = Number(best.fingerprint.matches || 0) + 1
+    saveFingerprints(
+      orgId,
+      fingerprints.map((item) => (item.id === best.fingerprint.id ? best.fingerprint : item))
+    )
   }
   return {
     id: best.fingerprint.id,
@@ -159,8 +231,11 @@ export function matchByInvariants(invariants = [], options = {}) {
 
 /**
  * @param {Partial<{title:string,desc:string,tags:string[],confidence:string,date:string,invariants:string[],environment:string,nodes:Array<{label:string,value:string,risk:boolean}>}>} input
+ * @param {{ orgId?: string }} [options]
  */
-export function storeFingerprint(input = {}) {
+export function storeFingerprint(input = {}, options = {}) {
+  const orgId = options.orgId || DEFAULT_ORG
+  const fingerprints = loadFingerprints(orgId)
   const id = `X-CFS-${String(fingerprints.length + 1).padStart(3, "0")}`
   const invariants = input.invariants?.length ? [...input.invariants] : [...(input.tags || [])]
   const environment = input.environment || "dev"
@@ -176,18 +251,21 @@ export function storeFingerprint(input = {}) {
     matches: 0,
     confidence: input.confidence || "—",
     date: input.date || new Date().toLocaleDateString("ar-SA"),
+    origin: "stored",
+    orgId,
   }
-  fingerprints = [...fingerprints, item]
-  persist()
+  fingerprints.push(item)
+  saveFingerprints(orgId, fingerprints)
   return { ...item }
 }
 
 /**
  * @param {string} query
+ * @param {string} [orgId]
  */
-export function searchFingerprints(query) {
+export function searchFingerprints(query, orgId = DEFAULT_ORG) {
   const q = (query || "").toLowerCase()
-  const all = listFingerprints()
+  const all = listFingerprints(orgId)
   if (!q) return all
   return all.filter((fingerprint) =>
     [
@@ -203,3 +281,5 @@ export function searchFingerprints(query) {
       .includes(q)
   )
 }
+
+export { MATCH_THRESHOLD, DEFAULT_ORG as DEFAULT_ORG_ID }
