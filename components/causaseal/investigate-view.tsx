@@ -68,6 +68,7 @@ const DEMO: IncidentInput = {
   trustedDestination: false,
   elevatedPrivilege: false,
   sensitiveData: true,
+  environment: "cloud",
 }
 
 const SAIF_STEPS: Array<{ title: string; input: IncidentInput }> = [
@@ -86,6 +87,7 @@ const SAIF_STEPS: Array<{ title: string; input: IncidentInput }> = [
       trustedDestination: false,
       elevatedPrivilege: false,
       sensitiveData: true,
+      environment: "cloud",
     },
   },
   {
@@ -98,6 +100,7 @@ const SAIF_STEPS: Array<{ title: string; input: IncidentInput }> = [
       trustedDestination: true,
       elevatedPrivilege: false,
       sensitiveData: false,
+      environment: "enterprise",
     },
   },
 ]
@@ -120,6 +123,7 @@ export function InvestigateView() {
       trustedDestination: false,
       elevatedPrivilege: false,
       sensitiveData: true,
+      environment: "cloud",
     },
   })
 
@@ -315,6 +319,27 @@ export function InvestigateView() {
                 <FieldLegend>سياسات التنفيذ</FieldLegend>
                 <Controller
                   control={form.control}
+                  name="environment"
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>البيئة</FieldLabel>
+                      <Select value={field.value || "enterprise"} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="cloud">السحابة</SelectItem>
+                            <SelectItem value="enterprise">المؤسسة</SelectItem>
+                            <SelectItem value="dev">التطوير</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  )}
+                />
+                <Controller
+                  control={form.control}
                   name="trustedDestination"
                   render={({ field }) => (
                     <Field orientation="horizontal">
@@ -398,6 +423,9 @@ export function InvestigateView() {
                 <AlertTitle>{DECISION_LABELS[result.decision]}</AlertTitle>
                 <AlertDescription>
                   <p>{result.reason}</p>
+                  {result.crossContext ? (
+                    <p className="mt-2">مناعة عابرة للسياقات: السبب تُعلّم في بيئة ومُنع في أخرى.</p>
+                  ) : null}
                   {result.warning ? <p className="mt-2">{result.warning}</p> : null}
                 </AlertDescription>
               </Alert>

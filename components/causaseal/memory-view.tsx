@@ -79,6 +79,13 @@ export function MemoryView() {
               <CardHeader className="px-4 pb-0">
                 <div className="flex items-center justify-between gap-2">
                   <Badge variant="outline">{fp.id}</Badge>
+                  <Badge variant="secondary">
+                    {fp.environment === "cloud"
+                      ? "السحابة"
+                      : fp.environment === "dev"
+                        ? "التطوير"
+                        : "المؤسسة"}
+                  </Badge>
                   <time className="text-xs text-muted-foreground">{fp.date}</time>
                 </div>
                 <CardTitle className="line-clamp-2 text-base">{fp.title}</CardTitle>

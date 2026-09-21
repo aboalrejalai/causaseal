@@ -80,6 +80,7 @@ export async function runSermg(body: {
   changeTool?: boolean
   changeData?: boolean
   changePrivilege?: boolean
+  environment?: "cloud" | "enterprise" | "dev"
 }) {
   const response = await fetch("/api/sermg/run", {
     method: "POST",
@@ -111,6 +112,9 @@ export type SessionSummary = {
   sermgDetected: number
   sermgTotal: number
   lastLatencyMs: number | null
+  avgLatencyMs: number | null
+  avgReduction: number | null
+  environmentCount: number
   riskScore: number | null
   recent: import("@/lib/contracts").AgentEvent[] | null
   decisions: Array<{ decision: string; note: string; time: string }>
@@ -121,6 +125,23 @@ export type SessionSummary = {
     nodes: CausalNode[]
     reason: string
   } | null
+}
+
+export async function interceptAgent(body: IncidentInput) {
+  const response = await fetch("/api/gateway/intercept", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  return readJson<{ executed: false; result: AnalysisResult }>(response)
+}
+
+export async function fetchCompliance() {
+  const response = await fetch("/api/compliance")
+  return readJson<{
+    controls: import("@/lib/contracts").ComplianceControl[]
+    illustrative: boolean
+  }>(response)
 }
 
 export async function fetchSession() {

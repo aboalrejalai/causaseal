@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { fetchReportMetrics } from "@/lib/api/client"
+import { fetchCompliance, fetchReportMetrics } from "@/lib/api/client"
 import type { ComplianceControl } from "@/lib/contracts"
 import { evaluate as evaluateCompliance } from "@/lib/compliance-client"
 
@@ -71,7 +71,7 @@ export function ReportsView() {
   const [fromSession, setFromSession] = React.useState(false)
   const [decisions, setDecisions] = React.useState(DECISION_LOG)
   const [experiments, setExperiments] = React.useState(EXPERIMENTS)
-  const [controls] = React.useState<ComplianceControl[]>(() => evaluateCompliance())
+  const [controls, setControls] = React.useState<ComplianceControl[]>(() => evaluateCompliance())
 
   React.useEffect(() => {
     let cancelled = false
@@ -103,6 +103,13 @@ export function ReportsView() {
             setMetrics(DEFAULT_METRICS)
             setFromSession(false)
           }
+        })
+      void fetchCompliance()
+        .then((data) => {
+          if (!cancelled) setControls(data.controls)
+        })
+        .catch(() => {
+          if (!cancelled) setControls(evaluateCompliance())
         })
     }
     load()

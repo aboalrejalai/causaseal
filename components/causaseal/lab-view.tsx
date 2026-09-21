@@ -42,6 +42,7 @@ import type { MutationResult } from "@/lib/contracts"
 
 export function LabView() {
   const [signatureId, setSignatureId] = React.useState("X-CFS-001")
+  const [environment, setEnvironment] = React.useState<"cloud" | "enterprise" | "dev">("cloud")
   const [count, setCount] = React.useState(6)
   const [options, setOptions] = React.useState({
     changePrompt: true,
@@ -60,7 +61,7 @@ export function LabView() {
     setScore(null)
     setSubtitle("جاري توليد الطفرات السببية…")
     try {
-      const data = await runSermg({ signatureId, count, ...options })
+      const data = await runSermg({ signatureId, count, environment, ...options })
       // Stream rows for demo feel
       for (let i = 0; i < data.results.length; i++) {
         await new Promise((r) => setTimeout(r, 120))
@@ -107,6 +108,27 @@ export function LabView() {
                     <SelectItem value="X-CFS-001">X-CFS-001 · تسريب بيانات</SelectItem>
                     <SelectItem value="X-CFS-002">X-CFS-002 · تجاوز صلاحيات</SelectItem>
                     <SelectItem value="X-CFS-003">X-CFS-003 · تسميم ذاكرة</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field>
+              <FieldLabel>البيئة المستهدفة</FieldLabel>
+              <Select
+                value={environment}
+                onValueChange={(value) =>
+                  setEnvironment(value as "cloud" | "enterprise" | "dev")
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="cloud">السحابة</SelectItem>
+                    <SelectItem value="enterprise">المؤسسة</SelectItem>
+                    <SelectItem value="dev">التطوير</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -187,6 +209,10 @@ export function LabView() {
                     <strong className="text-sm">{row.title}</strong>
                     <span className="text-xs text-muted-foreground">
                       التشابه السببي {Math.round(row.similarity * 100)}%
+                      {row.crossContext
+                        ? ` · اكتُشف في ${row.learnedIn === "dev" ? "التطوير" : row.learnedIn === "cloud" ? "السحابة" : "المؤسسة"} ومُنع في ${row.appliedIn === "cloud" ? "السحابة" : row.appliedIn === "dev" ? "التطوير" : "المؤسسة"}`
+                        : ""}
+                      {row.immunized ? " · لقاح جديد" : ""}
                     </span>
                   </div>
                   <Badge variant={row.outcome === "ALLOW" ? "success" : "destructive"}>
