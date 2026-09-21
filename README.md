@@ -13,7 +13,7 @@
 ```bash
 npm install
 npm run dev      # الواجهة :3000 + الـ API :4000
-npm run build    # next export → out/ + تحقق Hostinger
+npm run build    # next build --webpack (export → out/) + تحقق Hostinger
 npm start        # يخدم out/ عبر server.js
 ```
 
@@ -23,16 +23,16 @@ npm start        # يخدم out/ عبر server.js
 ## البناء والنشر
 
 ```bash
-npm run build   # next build (output: export) ثم التحقق من out/
+npm run build   # next build --webpack (output: export) ثم التحقق من out/
 npm start       # node server.js — يخدم out/ + /api/*
 ```
 
 ### Hostinger (الإنتاج)
 
-- Framework في hPanel: **Express**
+- Framework في hPanel: **Express** (صحيح — التشغيل عبر `server.js`، ليس Next standalone)
 - Entry file: `server.js`
 - Output directory: فارغ (لا تستخدم `public` أو `out` كمخرج بناء في اللوحة)
-- Build script: `build`
+- Build script: `build` → يشغّل `next build --webpack` (Webpack إلزامي: بيئة Hostinger قديمة GLIBC ولا تدعم Turbopack/native SWC)
 - يستمع على `process.env.PORT`
 
 مسار المنتج على Hostinger لا يحتاج vinext؛ استخدم `npm run build` ثم `npm start`.
