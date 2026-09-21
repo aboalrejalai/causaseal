@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url"
 
 import { analyze } from "./engine/gateway.mjs"
 import { listFingerprints, storeFingerprint } from "./engine/memory.mjs"
-import { listEvents } from "./engine/telemetry.mjs"
+import { listEvents, sessionSummary } from "./engine/telemetry.mjs"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -210,14 +210,47 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === "/api/reports/metrics" && req.method === "GET") {
+      const summary = sessionSummary()
+      if (!summary.hasSession) {
+        sendJson(res, 200, {
+          illustrative: true,
+          fromSession: false,
+          metrics: [
+            { label: "دقة إعادة البناء", value: 0.92 },
+            { label: "دقة مطابقة Reformation", value: 0.96 },
+            { label: "Recall للمسارات الخطرة", value: 0.89 },
+            { label: "السماح الصحيح بالنشاط المشروع", value: 0.94 },
+          ],
+          decisions: [],
+        })
+        return
+      }
+      const sermgScore = summary.sermgTotal
+        ? summary.sermgDetected / summary.sermgTotal
+        : 0
       sendJson(res, 200, {
-        illustrative: true,
+        illustrative: false,
+        fromSession: true,
         metrics: [
-          { label: "دقة إعادة البناء", value: 0.92 },
-          { label: "دقة مطابقة Reformation", value: 0.96 },
-          { label: "Recall للمسارات الخطرة", value: 0.89 },
-          { label: "السماح الصحيح بالنشاط المشروع", value: 0.94 },
+          { label: "دقة المطابقة في الجلسة", value: summary.matchRate },
+          { label: "نسبة المنع للمسارات الخطرة", value: summary.prevention },
+          { label: "السماح الصحيح بالنشاط المشروع", value: summary.correctAllow },
+          { label: "اكتشاف طفرات SERMG", value: sermgScore },
         ],
+        decisions: summary.decisions,
+        experiments: {
+          learn: summary.blocked > 0,
+          recognize: summary.matchRate > 0,
+          allow: summary.correctAllow > 0,
+        },
+      })
+      return
+    }
+
+    if (pathname === "/api/session" && req.method === "GET") {
+      sendJson(res, 200, {
+        ...sessionSummary(),
+        fingerprintCount: listFingerprints().length,
       })
       return
     }
