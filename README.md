@@ -6,18 +6,26 @@
 
 **تدقيق التصميم:** [`docs/DESIGN_SYSTEM_AUDIT.md`](./docs/DESIGN_SYSTEM_AUDIT.md) · **مطابقة الفكرة مع الكود:** [`docs/مطابقة-الفكرة-مع-الكود.md`](./docs/مطابقة-الفكرة-مع-الكود.md)
 
-## Capacitor (بدون إصدار)
+## دعم المنصات (Capacitor & Electron)
 
 الواجهة الثابتة في `out/` تُزامَن إلى مشاريع Android / iOS / Electron عبر Capacitor. التطبيق المغلف يستدعي الـ API على Hostinger عبر `NEXT_PUBLIC_API_BASE` (انظر `.env.example`).
 
+كافة ملفات وبيانات وتكوينات المنصات الخمس (Android، iOS، macOS، Linux، Windows) مهيأة بالكامل وجاهزة للبناء المستقبلي:
+
 ```bash
+# المزامنة والفتح في بيئة التطوير
 npm run cap:sync              # بناء out/ + مزامنة المنصات
 npm run cap:open:android      # فتح Android Studio محليًا
 npm run cap:open:ios          # فتح Xcode محليًا
 npm run cap:open:electron     # فتح مشروع Electron محليًا
-```
 
-**ممنوع حتى موافقة صريحة بعد انتهاء التعديلات:** بناء APK/AAB أو IPA أو مثبتات ويندوز/ماك/لينكس، أو رفع أي متجر. لا توجد سكربتات `release` في جذر المشروع لهذه المرحلة.
+# أوامر استخراج الحزم (جاهزة للاستخدام متى رغبت بدون تشغيلها تلقائياً):
+npm run build:android         # بناء حزمة أندرويد
+npm run build:ios             # بناء حزمة iOS
+npm run build:mac             # بناء حزمة macOS (DMG / ZIP)
+npm run build:linux           # بناء حزمة Linux (AppImage / DEB)
+npm run build:win             # بناء حزمة Windows (NSIS Installer)
+```
 
 ## التشغيل
 

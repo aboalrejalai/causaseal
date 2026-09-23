@@ -1,7 +1,9 @@
 {
-  "appId": "com.yourdoamnin.yourapp",
+  "appId": "sa.causaseal.app",
+  "productName": "CAUSASEAL",
   "directories": {
-    "buildResources": "resources"
+    "buildResources": "resources",
+    "output": "dist"
   },
   "files": [
     "assets/**/*",
@@ -22,7 +24,21 @@
     "icon": "assets/appIcon.ico"
   },
   "mac": {
-    "category": "your.app.category.type",
-    "target": "dmg"
+    "category": "public.app-category.developer-tools",
+    "target": [
+      "dmg",
+      "zip"
+    ],
+    "icon": "assets/appIcon.png"
+  },
+  "linux": {
+    "target": [
+      "AppImage",
+      "deb"
+    ],
+    "category": "Security",
+    "icon": "assets/appIcon.png",
+    "synopsis": "Causal AI Governance Gateway & SERMG Platform",
+    "description": "Enterprise causal-invariants gateway for autonomous AI agents."
   }
 }
