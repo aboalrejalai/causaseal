@@ -8,6 +8,8 @@ import { toast } from "sonner"
 import { useSearchParams } from "next/navigation"
 
 import { CausalPath } from "@/components/causaseal/causal-path"
+import { ChartRadarDots } from "@/components/chart-radar-dots"
+import { ChartRadialText } from "@/components/chart-radial-text"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
@@ -47,6 +49,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { analyzeIncident, createFingerprint } from "@/lib/api/client"
+import { invariantsToRadar } from "@/lib/chart-session"
 import {
   IncidentInputSchema,
   type AnalysisResult,
@@ -211,6 +214,26 @@ export function InvestigateView() {
   }
 
   return (
+    <div className="flex flex-col gap-4">
+      {result ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ChartRadarDots
+            title="شكل الثوابت"
+            description="ست محاور من عقد المسار — 100 إن وُجد الثابت"
+            data={invariantsToRadar(result.reduction?.invariants)}
+            valueLabel="ثابت"
+          />
+          <ChartRadialText
+            title="قوة المطابقة"
+            description="درجة تطابق البصمة أو الثقة"
+            value={Math.round(
+              (result.matchScore ?? result.confidence ?? 0) * 100
+            )}
+            centerLabel="%"
+          />
+        </div>
+      ) : null}
+
     <div className="grid items-start gap-4 xl:grid-cols-2">
       <Card className="gap-4 py-4">
         <CardHeader className="px-4 pb-0">
@@ -508,6 +531,7 @@ export function InvestigateView() {
           )}
         </CardContent>
       </Card>
+    </div>
     </div>
   )
 }
