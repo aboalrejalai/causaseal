@@ -157,13 +157,42 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`)
     const pathname = url.pathname
 
-    if (req.method === "OPTIONS" && pathname.startsWith("/api/")) {
+    if (
+      req.method === "OPTIONS" &&
+      (pathname.startsWith("/api/") || pathname === "/mcp")
+    ) {
       res.writeHead(204, {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Accept, Mcp-Session-Id",
       })
       res.end()
+      return
+    }
+
+    if (pathname === "/mcp") {
+      const { NodeStreamableHTTPServerTransport } = await import(
+        "@modelcontextprotocol/node"
+      )
+      const { createCausasealMcpServer } = await import(
+        "./connectors/mcp-server.mjs"
+      )
+      const raw = await readBody(req)
+      let parsedBody
+      if (raw) {
+        try {
+          parsedBody = JSON.parse(raw)
+        } catch {
+          sendJson(res, 400, { error: "Invalid JSON body" })
+          return
+        }
+      }
+      const mcp = createCausasealMcpServer()
+      const transport = new NodeStreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+      })
+      await mcp.connect(transport)
+      await transport.handleRequest(req, res, parsedBody)
       return
     }
 
