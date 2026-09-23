@@ -5,7 +5,6 @@ import * as React from "react"
 import { toast } from "sonner"
 
 import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
-import { ChartBarHorizontal } from "@/components/chart-bar-horizontal"
 import { ChartRadarDots } from "@/components/chart-radar-dots"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -27,7 +26,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { fetchCompliance, fetchReportMetrics } from "@/lib/api/client"
-import { metricsToHorizontalBars, metricsToRadar } from "@/lib/chart-session"
+import { DEMO_METRICS } from "@/lib/chart-demo"
+import { metricsToRadar } from "@/lib/chart-session"
 import type { ComplianceControl } from "@/lib/contracts"
 import { evaluate as evaluateCompliance } from "@/lib/compliance-client"
 
@@ -177,29 +177,47 @@ export function ReportsView() {
           <InfoIcon />
           <AlertTitle>بيانات توضيحية</AlertTitle>
           <AlertDescription>
-            لم تُسجَّل تحليلات في هذه الجلسة بعد. شغّل التحليل أو عرض SAIF لتظهر أرقام
-            الجلسة.
+            الأشكال أدناه توضيحية حتى تشغّل الأثر أو التحليل. بعدها تُستبدل بأرقام هذه الجلسة.
           </AlertDescription>
         </Alert>
       )}
 
-      {fromSession && metrics.length > 0 ? (
+      {(() => {
+        const chartMetrics = fromSession && metrics.length > 0 ? metrics : DEMO_METRICS
+        return (
         <div className="grid gap-4 lg:grid-cols-2">
           <ChartRadarDots
             title="ملف الجلسة"
-            description="المقاييس الستة من أحداث هذه الجلسة"
-            data={metricsToRadar(metrics)}
+            description={
+              fromSession
+                ? "المقاييس الستة من أحداث هذه الجلسة"
+                : "شكل توضيحي — يتحدث بعد تشغيل الجلسة"
+            }
+            data={metricsToRadar(chartMetrics)}
             valueLabel="%"
           />
-          <ChartBarHorizontal
-            title="مقاييس الجلسة"
-            description="نفس الأرقام كأعمدة أفقية للقراءة"
-            data={metricsToHorizontalBars(metrics)}
-            valueLabel="%"
-            valueFormatter={(value) => `${value}%`}
-          />
+          <Card className="gap-4 py-4">
+            <CardHeader className="px-4 pb-0">
+              <CardTitle className="text-base">مقاييس الجلسة</CardTitle>
+              <CardDescription>
+                {fromSession ? "نسب قابلة للقراءة بالعربية" : "شكل توضيحي"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4 px-4">
+              {chartMetrics.map((m) => (
+                <div key={m.label} className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span>{m.label}</span>
+                    <strong>{Math.round(m.value * 100)}%</strong>
+                  </div>
+                  <Progress value={m.value * 100} />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
-      ) : null}
+        )
+      })()}
 
       <div className="grid gap-4 md:grid-cols-3">
         {experiments.map((exp) => (

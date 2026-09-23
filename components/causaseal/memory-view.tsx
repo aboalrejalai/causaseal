@@ -4,7 +4,7 @@ import Link from "next/link"
 import * as React from "react"
 
 import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
-import { ChartBarHorizontal } from "@/components/chart-bar-horizontal"
+import { ChartBarMultiple } from "@/components/chart-bar-multiple"
 import { ChartPieDonut } from "@/components/chart-pie-donut"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -32,7 +32,7 @@ import {
 import { fetchFingerprints } from "@/lib/api/client"
 import {
   fingerprintsToEnvironmentPie,
-  fingerprintsToInvariantBars,
+  fingerprintsToInvariantShortBars,
 } from "@/lib/chart-session"
 import type { Fingerprint } from "@/lib/contracts"
 import { SEED_FINGERPRINTS } from "@/lib/seed-data"
@@ -73,11 +73,15 @@ export function MemoryView() {
 
       {fingerprints.length > 0 ? (
         <div className="grid gap-4 lg:grid-cols-2">
-          <ChartBarHorizontal
+          <ChartBarMultiple
             title="تكرار الثوابت"
             description="كم بصمة تحمل كل ثابت سببي"
-            data={fingerprintsToInvariantBars(fingerprints)}
-            valueLabel="بصمات"
+            data={fingerprintsToInvariantShortBars(fingerprints)}
+            config={{
+              seriesA: { label: "بصمات", color: "var(--chart-1)" },
+            }}
+            showSeriesB={false}
+            valueFormatter={(value) => `${value} بصمة`}
           />
           <ChartPieDonut
             title="البصمات حسب البيئة"
