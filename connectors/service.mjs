@@ -17,6 +17,7 @@ import { mutate } from "../engine/sermg.mjs"
 import {
   listEvents,
   listSessionEvents,
+  recordEvent,
   sessionSummary,
 } from "../engine/telemetry.mjs"
 
@@ -93,10 +94,36 @@ export function formatResult(data, responseFormat = "markdown", toMarkdown) {
 }
 
 /**
+ * Light telemetry so MCP read tools move the hub counter.
+ * @param {string} toolName
+ * @param {string} [orgId]
+ */
+export function noteMcpRead(toolName, orgId = DEFAULT_ORG) {
+  const id = assertOrgId(orgId)
+  recordEvent(
+    {
+      time: new Date().toLocaleTimeString("en-GB", { hour12: false }),
+      agent: "MCP",
+      tool: toolName,
+      path: "قراءة عبر MCP",
+      status: "allowed",
+      label: "MCP-READ",
+      confidence: "—",
+      source: "mcp",
+      channel: "mcp",
+      risky: false,
+      orgId: id,
+    },
+    { orgId: id }
+  )
+}
+
+/**
  * @param {Record<string, unknown>} [params]
  */
 export function getSession(params = {}) {
   const orgId = assertOrgId(params.orgId)
+  if (params.channel === "mcp") noteMcpRead("causaseal_get_session", orgId)
   const summary = sessionSummary(orgId)
   return {
     ...summary,
@@ -110,6 +137,7 @@ export function getSession(params = {}) {
  */
 export function listEventsPage(params = {}) {
   const orgId = assertOrgId(params.orgId)
+  if (params.channel === "mcp") noteMcpRead("causaseal_list_events", orgId)
   const events = listEvents({
     status: params.status || "all",
     q: params.q || "",
@@ -129,6 +157,7 @@ export function listEventsPage(params = {}) {
  */
 export function listFingerprintsPage(params = {}) {
   const orgId = assertOrgId(params.orgId)
+  if (params.channel === "mcp") noteMcpRead("causaseal_list_fingerprints", orgId)
   const q = typeof params.q === "string" ? params.q : ""
   const fingerprints = q
     ? searchFingerprints(q, orgId)
@@ -147,6 +176,7 @@ export function listFingerprintsPage(params = {}) {
  */
 export function getReport(params = {}) {
   const orgId = assertOrgId(params.orgId)
+  if (params.channel === "mcp") noteMcpRead("causaseal_get_report", orgId)
   const summary = sessionSummary(orgId)
   if (!summary.hasSession) {
     return {
@@ -195,6 +225,9 @@ export function getReport(params = {}) {
  * @param {Record<string, unknown>} [params]
  */
 export function listCompliancePage(params = {}) {
+  if (params.channel === "mcp") {
+    noteMcpRead("causaseal_list_compliance", assertOrgId(params.orgId))
+  }
   const controls = evaluate()
   const page = paginate(controls, params.limit, params.offset)
   return {
@@ -210,12 +243,17 @@ export function listCompliancePage(params = {}) {
  */
 export async function interceptTool(body = {}) {
   const orgId = assertOrgId(body.orgId)
+  const channel = ["http", "mcp", "sdk"].includes(String(body.channel))
+    ? String(body.channel)
+    : "http"
   const incident = { ...body, orgId, preferRules: true }
+  delete incident.channel
   const harness = harnessDecision(incident)
   const result = await analyze(incident, {
     source: "intercept",
     rulesOnly: true,
     orgId,
+    channel,
   })
   const decision = result.decision
   const sendOriginal = decision === "ALLOW"
@@ -231,6 +269,7 @@ export async function interceptTool(body = {}) {
     harness,
     result,
     orgId,
+    channel,
     ...(redactedBody ? { redactedBody } : {}),
     guidance:
       decision === "ALLOW"
@@ -247,7 +286,10 @@ export async function interceptTool(body = {}) {
  */
 export async function runAgent(options = {}) {
   const orgId = assertOrgId(options.orgId)
-  const outcome = await runOpsAgent({ ...options, orgId })
+  const channel = ["http", "mcp", "sdk"].includes(String(options.channel))
+    ? String(options.channel)
+    : "http"
+  const outcome = await runOpsAgent({ ...options, orgId, channel })
   return {
     ...outcome,
     decision: outcome.result?.decision,
@@ -260,11 +302,14 @@ export async function runAgent(options = {}) {
  */
 export async function analyzePath(body = {}) {
   const orgId = assertOrgId(body.orgId)
+  const channel = ["http", "mcp", "sdk"].includes(String(body.channel))
+    ? String(body.channel)
+    : "http"
   const result = await analyze(
     { ...body, orgId, preferRules: true },
-    { rulesOnly: true, orgId }
+    { rulesOnly: true, orgId, channel }
   )
-  return { result, orgId }
+  return { result, orgId, channel }
 }
 
 /**
@@ -274,6 +319,24 @@ export function storeFingerprintItem(input = {}) {
   const orgId = assertOrgId(input.orgId)
   if (!input.title || String(input.title).trim() === "") {
     throw new Error("title مطلوب. مرّر عنوان البصمة ثم أعد المحاولة.")
+  }
+  if (input.channel === "mcp") {
+    recordEvent(
+      {
+        time: new Date().toLocaleTimeString("en-GB", { hour12: false }),
+        agent: "MCP",
+        tool: "causaseal_store_fingerprint",
+        path: "حفظ بصمة عبر MCP",
+        status: "allowed",
+        label: "MCP-WRITE",
+        confidence: "—",
+        source: "mcp",
+        channel: "mcp",
+        risky: false,
+        orgId,
+      },
+      { orgId }
+    )
   }
   const fingerprint = storeFingerprint(input, { orgId })
   return { fingerprint, orgId }
@@ -286,6 +349,24 @@ export async function runSermg(options = {}) {
   const orgId = assertOrgId(options.orgId)
   const signatureId = options.signatureId || "X-CFS-001"
   const count = Math.min(24, Math.max(1, Number(options.count) || 6))
+  if (options.channel === "mcp") {
+    recordEvent(
+      {
+        time: new Date().toLocaleTimeString("en-GB", { hour12: false }),
+        agent: "MCP",
+        tool: "causaseal_run_sermg",
+        path: "طفرات SERMG عبر MCP",
+        status: "allowed",
+        label: "MCP-WRITE",
+        confidence: "—",
+        source: "mcp",
+        channel: "mcp",
+        risky: false,
+        orgId,
+      },
+      { orgId }
+    )
+  }
   const result = await mutate({
     ...options,
     signatureId,

@@ -129,6 +129,26 @@ export type SessionSummary = {
     nodes: CausalNode[]
     reason: string
   } | null
+  channels?: { http: number; mcp: number; sdk: number }
+  interceptCount?: number
+  connectorHttp?: {
+    intercepts: number
+    delivered: number
+    redacted: number
+    intervene: number
+  }
+  connectorMcp?: {
+    total: number
+    reads: number
+    writes: number
+    tools: number
+  }
+  connectorSdk?: {
+    total: number
+    allow: number
+    redacted: number
+    verify: number
+  }
 }
 
 export async function interceptAgent(body: IncidentInput) {

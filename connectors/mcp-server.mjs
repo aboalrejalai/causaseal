@@ -130,7 +130,7 @@ Args: orgId (اختياري), response_format.
     },
     async (params) => {
       try {
-        const data = getSession(params)
+        const data = getSession({ ...params, channel: "mcp" })
         return ok(data, params.response_format, (d) => {
           const s = /** @type {Record<string, unknown>} */ (d)
           return [
@@ -181,7 +181,7 @@ Args: orgId, status (all|blocked|verify|allowed), q, limit, offset, response_for
     },
     async (params) => {
       try {
-        const data = listEventsPage(params)
+        const data = listEventsPage({ ...params, channel: "mcp" })
         return ok(data, params.response_format, (d) => {
           const page = /** @type {{ events: Array<Record<string, unknown>>, total_count: number }} */ (
             d
@@ -227,7 +227,7 @@ Args: orgId, q, limit, offset, response_format.
     },
     async (params) => {
       try {
-        const data = listFingerprintsPage(params)
+        const data = listFingerprintsPage({ ...params, channel: "mcp" })
         return ok(data, params.response_format, (d) => {
           const page = /** @type {{ fingerprints: Array<Record<string, unknown>>, total_count: number }} */ (
             d
@@ -267,7 +267,7 @@ Args: orgId, response_format.`,
     },
     async (params) => {
       try {
-        const data = getReport(params)
+        const data = getReport({ ...params, channel: "mcp" })
         return ok(data, params.response_format, (d) => {
           const r = /** @type {Record<string, unknown>} */ (d)
           if (r.illustrative) {
@@ -312,7 +312,7 @@ Args: limit, offset, response_format.`,
     },
     async (params) => {
       try {
-        const data = listCompliancePage(params)
+        const data = listCompliancePage({ ...params, channel: "mcp" })
         return ok(data, params.response_format, (d) => {
           const page = /** @type {{ controls: Array<Record<string, unknown>>, total_count: number }} */ (
             d
@@ -362,7 +362,7 @@ Args: حقول الحادث (prompt, tool, trustedDestination, elevatedPrivilege
     async (params) => {
       try {
         const { response_format, ...body } = params
-        const data = await interceptTool(body)
+        const data = await interceptTool({ ...body, channel: "mcp" })
         return ok(data, response_format, (d) => {
           const o = /** @type {Record<string, unknown>} */ (d)
           return [
@@ -421,7 +421,7 @@ Args: kind (leak|safe|cross|mutated|lookalike) أو body كامل، orgId, envir
     async (params) => {
       try {
         const { response_format, ...options } = params
-        const data = await runAgent(options)
+        const data = await runAgent({ ...options, channel: "mcp" })
         return ok(data, response_format, (d) => {
           const o = /** @type {Record<string, unknown>} */ (d)
           return [
@@ -469,7 +469,7 @@ Args: نفس حقول الحادث + response_format.`,
     async (params) => {
       try {
         const { response_format, ...body } = params
-        const data = await analyzePath(body)
+        const data = await analyzePath({ ...body, channel: "mcp" })
         return ok(data, response_format, (d) => {
           const o = /** @type {{ result: Record<string, unknown> }} */ (d)
           return `# تحليل\n- قرار: ${o.result.decision}\n- سبب: ${o.result.reason}`
@@ -529,7 +529,7 @@ Args: title, desc, tags, invariants, environment, nodes, orgId, response_format.
     async (params) => {
       try {
         const { response_format, ...input } = params
-        const data = storeFingerprintItem(input)
+        const data = storeFingerprintItem({ ...input, channel: "mcp" })
         return ok(data, response_format, (d) => {
           const o = /** @type {{ fingerprint: Record<string, unknown> }} */ (d)
           return `# محفوظ\n- ${o.fingerprint.id}: ${o.fingerprint.title}`
@@ -575,7 +575,7 @@ Args: signatureId, count (1–24), changePrompt, changeTool, changeData, changeP
     async (params) => {
       try {
         const { response_format, ...options } = params
-        const data = await runSermg(options)
+        const data = await runSermg({ ...options, channel: "mcp" })
         return ok(data, response_format, (d) => {
           const o = /** @type {Record<string, unknown>} */ (d)
           return `# SERMG\n- بصمة: ${o.signatureId}\n- درجة: ${o.score}`

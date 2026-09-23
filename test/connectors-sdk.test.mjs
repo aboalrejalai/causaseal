@@ -5,11 +5,12 @@ import test from "node:test"
 const { beforeTool, applySend } = await import("../connectors/sdk.mjs")
 
 test("beforeTool posts to intercept without Authorization", async () => {
-  /** @type {{ path?: string, auth?: string | undefined, body?: Record<string, unknown> }} */
+  /** @type {{ path?: string, auth?: string | undefined, channel?: string | string[] | undefined, body?: Record<string, unknown> }} */
   const seen = {}
   const server = http.createServer(async (req, res) => {
     seen.path = req.url
     seen.auth = req.headers.authorization
+    seen.channel = req.headers["x-causaseal-channel"]
     const chunks = []
     for await (const chunk of req) chunks.push(chunk)
     seen.body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}")
@@ -44,6 +45,7 @@ test("beforeTool posts to intercept without Authorization", async () => {
 
   assert.equal(seen.path, "/api/gateway/intercept")
   assert.equal(seen.auth, undefined)
+  assert.equal(seen.channel, "sdk")
   assert.equal(seen.body?.orgId, "sdk-test")
   assert.equal(response.result.decision, "INTERVENE")
 

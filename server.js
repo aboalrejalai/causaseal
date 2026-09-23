@@ -16,6 +16,17 @@ function orgFrom(url, body = {}) {
   return String(url.searchParams.get("orgId") || body.orgId || "demo")
 }
 
+/**
+ * Partner channel from header. SDK clients send X-Causaseal-Channel: sdk.
+ * @param {import("node:http").IncomingMessage} req
+ */
+function channelFrom(req) {
+  const raw = String(req.headers["x-causaseal-channel"] || "").toLowerCase()
+  if (raw === "sdk") return "sdk"
+  if (raw === "mcp") return "mcp"
+  return "http"
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Prefer Next static export (`out/`), then legacy `public/`, then flattened deploy root.
@@ -210,7 +221,8 @@ const server = http.createServer(async (req, res) => {
       const body = await parseJsonBody(req, res)
       if (body === null) return
       const orgId = orgFrom(url, body)
-      const result = await analyze({ ...body, orgId }, { orgId })
+      const channel = channelFrom(req)
+      const result = await analyze({ ...body, orgId }, { orgId, channel })
       sendJson(res, 200, result)
       return
     }
@@ -250,9 +262,10 @@ const server = http.createServer(async (req, res) => {
       const body = await parseJsonBody(req, res)
       if (body === null) return
       const orgId = orgFrom(url, body)
+      const channel = channelFrom(req)
       const result = await analyze(
         { ...body, orgId },
-        { source: "intercept", rulesOnly: true, orgId }
+        { source: "intercept", rulesOnly: true, orgId, channel }
       )
       sendJson(res, 200, { executed: false, result })
       return
@@ -262,8 +275,9 @@ const server = http.createServer(async (req, res) => {
       const body = await parseJsonBody(req, res)
       if (body === null) return
       const orgId = orgFrom(url, body)
+      const channel = channelFrom(req)
       const { runOpsAgent } = await import("./engine/ops-agent.mjs")
-      const outcome = await runOpsAgent({ ...body, orgId })
+      const outcome = await runOpsAgent({ ...body, orgId, channel })
       sendJson(res, 200, outcome)
       return
     }

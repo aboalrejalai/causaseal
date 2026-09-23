@@ -138,11 +138,14 @@ function statusFor(decision) {
 
 /**
  * @param {Record<string, unknown>} body
- * @param {{ rulesOnly?: boolean, source?: string, orgId?: string }} [options]
+ * @param {{ rulesOnly?: boolean, source?: string, orgId?: string, channel?: string }} [options]
  */
 export async function analyze(body = {}, options = {}) {
   const rulesOnly = Boolean(options.rulesOnly || body.preferRules)
   const orgId = String(options.orgId || body.orgId || "demo")
+  const channel = ["http", "mcp", "sdk"].includes(String(options.channel))
+    ? String(options.channel)
+    : "http"
   const started = Date.now()
   const reduction = reduce(body)
   const risky = reduction.invariants.some((name) => name !== "أداة إرسال")
@@ -255,6 +258,7 @@ export async function analyze(body = {}, options = {}) {
     source: options.source || "analyze",
     risky,
     orgId,
+    channel,
   }
   recordEvent(event, { orgId })
   rememberAnalysis({

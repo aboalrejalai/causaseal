@@ -47,10 +47,13 @@ export function redactSensitive(body) {
  * Local outbox.
  * @param {Record<string, unknown>} body
  * @param {string} orgId
- * @param {{ redacted?: boolean }} [meta]
+ * @param {{ redacted?: boolean, channel?: string }} [meta]
  */
 function deliver(body, orgId, meta = {}) {
   const isRedacted = Boolean(meta.redacted || body.redacted)
+  const channel = ["http", "mcp", "sdk"].includes(String(meta.channel))
+    ? String(meta.channel)
+    : "http"
   const delivered = {
     time: new Date().toLocaleTimeString("en-GB", { hour12: false }),
     agent: String(body.agent || "Operations Assistant"),
@@ -65,6 +68,7 @@ function deliver(body, orgId, meta = {}) {
     redacted: isRedacted,
     environment: body.environment || "dev",
     orgId,
+    channel,
   }
   recordEvent(delivered, { orgId })
   return delivered
@@ -76,11 +80,15 @@ function deliver(body, orgId, meta = {}) {
  *   orgId?: string,
  *   environment?: string,
  *   body?: Record<string, unknown>,
+ *   channel?: string,
  * }} [options]
  */
 export async function runOpsAgent(options = {}) {
   const orgId = options.orgId || "demo"
   const kind = options.kind || "leak"
+  const channel = ["http", "mcp", "sdk"].includes(String(options.channel))
+    ? String(options.channel)
+    : "http"
 
   /** @type {Record<string, unknown>} */
   let body
@@ -114,6 +122,7 @@ export async function runOpsAgent(options = {}) {
     rulesOnly: true,
     source: "intercept",
     orgId,
+    channel,
   })
 
   const intervene = result.decision === "INTERVENE"
@@ -124,11 +133,11 @@ export async function runOpsAgent(options = {}) {
   let deliveredOriginal = false
 
   if (result.decision === "ALLOW") {
-    delivery = deliver(body, orgId)
+    delivery = deliver(body, orgId, { channel })
     deliveredOriginal = true
   } else if (intervene) {
     const redacted = redactSensitive(body)
-    delivery = deliver(redacted, orgId, { redacted: true })
+    delivery = deliver(redacted, orgId, { redacted: true, channel })
     intervention = "redact-sensitive"
     deliveredOriginal = false
   }

@@ -141,6 +141,15 @@ export function sessionSummary(orgId = DEFAULT_ORG) {
     events.map((event) => event.environment).filter((value) => typeof value === "string")
   )
 
+  const byChannel = (name) =>
+    events.filter((event) => String(event.channel || "http") === name).length
+  const channelEvents = (name) =>
+    events.filter((event) => String(event.channel || "http") === name)
+
+  const httpEvents = channelEvents("http")
+  const mcpEvents = channelEvents("mcp")
+  const sdkEvents = channelEvents("sdk")
+
   return {
     hasSession,
     blocked,
@@ -169,6 +178,33 @@ export function sessionSummary(orgId = DEFAULT_ORG) {
     })),
     lastAnalysis,
     orgId,
+    channels: {
+      http: byChannel("http"),
+      mcp: byChannel("mcp"),
+      sdk: byChannel("sdk"),
+    },
+    interceptCount: events.filter((event) => event.source === "intercept").length,
+    connectorHttp: {
+      intercepts: httpEvents.filter((event) => event.source === "intercept").length,
+      delivered: httpEvents.filter((event) => event.label === "DELIVERED").length,
+      redacted: httpEvents.filter((event) => event.label === "DELIVERED-REDACTED").length,
+      intervene: httpEvents.filter((event) => event.label === "INTERVENE").length,
+    },
+    connectorMcp: {
+      total: mcpEvents.length,
+      reads: mcpEvents.filter((event) => event.label === "MCP-READ").length,
+      writes: mcpEvents.filter((event) => event.label !== "MCP-READ").length,
+      tools: 10,
+    },
+    connectorSdk: {
+      total: sdkEvents.length,
+      allow: sdkEvents.filter((event) => event.label === "ALLOW").length,
+      redacted: sdkEvents.filter(
+        (event) =>
+          event.label === "DELIVERED-REDACTED" || event.label === "INTERVENE"
+      ).length,
+      verify: sdkEvents.filter((event) => event.label === "VERIFY").length,
+    },
   }
 }
 

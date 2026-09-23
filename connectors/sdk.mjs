@@ -19,7 +19,10 @@ export async function beforeTool(incident = {}, options = {}) {
   const url = `${baseUrl}/api/gateway/intercept`
 
   /** @type {Record<string, string>} */
-  const headers = { "Content-Type": "application/json" }
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Causaseal-Channel": "sdk",
+  }
   // عمدًا: لا نضع Authorization حتى لو مُرّر في options
 
   let response
