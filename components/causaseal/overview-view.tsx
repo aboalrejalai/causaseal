@@ -13,6 +13,9 @@ import { CausalPath } from "@/components/causaseal/causal-path"
 import { useLanguage } from "@/components/causaseal/language-provider"
 import { PageHeading } from "@/components/causaseal/page-heading"
 import { Stat } from "@/components/causaseal/stat"
+import { ChartAreaInteractive } from "@/components/chart-area-interactive"
+import { ChartPieDonut } from "@/components/chart-pie-donut"
+import { ChartRadialText } from "@/components/chart-radial-text"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,7 +33,12 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { fetchSession, type SessionSummary } from "@/lib/api/client"
+import { fetchEvents, fetchSession, type SessionSummary } from "@/lib/api/client"
+import {
+  eventsToAreaSeries,
+  eventsToDecisionPie,
+} from "@/lib/chart-session"
+import type { AgentEvent } from "@/lib/contracts"
 import { formatDecision } from "@/lib/decisions"
 import { HARNESS_DIFF } from "@/lib/nav"
 
@@ -44,6 +52,7 @@ const EXAMPLE_NODES = [
 export function OverviewView() {
   const { t } = useLanguage()
   const [session, setSession] = React.useState<SessionSummary | null>(null)
+  const [events, setEvents] = React.useState<AgentEvent[]>([])
 
   React.useEffect(() => {
     let cancelled = false
@@ -51,6 +60,11 @@ export function OverviewView() {
       void fetchSession()
         .then((data) => {
           if (!cancelled) setSession(data)
+        })
+        .catch(() => {})
+      void fetchEvents()
+        .then((data) => {
+          if (!cancelled) setEvents(data.events)
         })
         .catch(() => {})
     }
@@ -67,6 +81,8 @@ export function OverviewView() {
   const nodes =
     live && session?.lastAnalysis?.nodes?.length ? session.lastAnalysis.nodes : EXAMPLE_NODES
   const riskScore = live && session?.riskScore != null ? session.riskScore : null
+  const areaData = live ? eventsToAreaSeries(events) : []
+  const pieData = live ? eventsToDecisionPie(events) : []
 
   return (
     <>
@@ -96,6 +112,43 @@ export function OverviewView() {
             ثم السماح.
           </AlertDescription>
         </Alert>
+      ) : null}
+
+      {live && areaData.length > 0 ? (
+        <div className="flex flex-col gap-4">
+          <ChartAreaInteractive
+            title="تدفق الجلسة"
+            description="تراكم المنع والسماح عبر أحداث هذه الجلسة"
+            data={areaData}
+            config={{
+              seriesA: { label: "منع", color: "var(--chart-1)" },
+              seriesB: { label: "سماح", color: "var(--chart-2)" },
+            }}
+            defaultRange="all"
+          />
+          <div className="grid gap-4 lg:grid-cols-2">
+            {pieData.length > 0 ? (
+              <ChartPieDonut
+                title="توزيع القرارات"
+                description="تدخل · تحقق · سماح من أحداث الجلسة"
+                data={pieData}
+                config={{
+                  intervene: { label: "تدخل", color: "var(--chart-1)" },
+                  verify: { label: "تحقق", color: "var(--chart-3)" },
+                  allow: { label: "سماح", color: "var(--chart-2)" },
+                }}
+              />
+            ) : null}
+            {riskScore != null ? (
+              <ChartRadialText
+                title="درجة الخطر"
+                description="من نسبة المنع في هذه الجلسة"
+                value={riskScore}
+                centerLabel="خطر"
+              />
+            ) : null}
+          </div>
+        </div>
       ) : null}
 
       {live ? (

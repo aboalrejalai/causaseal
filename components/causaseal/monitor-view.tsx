@@ -6,6 +6,8 @@ import { toast } from "sonner"
 
 import { useLanguage } from "@/components/causaseal/language-provider"
 import { PageHeading } from "@/components/causaseal/page-heading"
+import { ChartAreaInteractive } from "@/components/chart-area-interactive"
+import { ChartBarMultiple } from "@/components/chart-bar-multiple"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,6 +31,10 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { fetchEvents, interceptAgent } from "@/lib/api/client"
+import {
+  eventsToAreaSeries,
+  eventsToStatusCategoryBars,
+} from "@/lib/chart-session"
 import type { AgentEvent } from "@/lib/contracts"
 import { formatDecision } from "@/lib/decisions"
 import { cn } from "@/lib/utils"
@@ -132,6 +138,30 @@ export function MonitorView() {
           </Badge>
         }
       />
+
+      {events.length > 0 ? (
+        <div className="flex flex-col gap-4">
+          <ChartAreaInteractive
+            title="المنع والسماح عبر الزمن"
+            description="تراكم قرارات الجلسة الظاهرة في الجدول"
+            data={eventsToAreaSeries(events)}
+            config={{
+              seriesA: { label: "منع", color: "var(--chart-1)" },
+              seriesB: { label: "سماح", color: "var(--chart-2)" },
+            }}
+            defaultRange="20"
+          />
+          <ChartBarMultiple
+            title="حسب الحالة"
+            description="مُنع · تحقق · سُمح من الفلتر الحالي"
+            data={eventsToStatusCategoryBars(events)}
+            config={{
+              seriesA: { label: "العدد", color: "var(--chart-1)" },
+            }}
+            showSeriesB={false}
+          />
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
