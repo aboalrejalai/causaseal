@@ -51,6 +51,9 @@ export const VIEW_TITLES: Record<string, string> = {
   "/reports": "التقارير",
   "/impact": "الأثر",
   "/connectors": "الموصّلات",
+  "/connectors/http": "واجهة HTTP",
+  "/connectors/mcp": "خادم MCP",
+  "/connectors/sdk": "SDK للشريك",
   "/monitor": "المراقبة الحية",
 }
 
