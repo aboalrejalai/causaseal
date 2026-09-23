@@ -4,6 +4,9 @@ import * as React from "react"
 import { toast } from "sonner"
 
 import { PageHeading } from "@/components/causaseal/page-heading"
+import { ChartLineLinear } from "@/components/chart-line-linear"
+import { ChartPieDonut } from "@/components/chart-pie-donut"
+import { ChartRadialText } from "@/components/chart-radial-text"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,6 +41,7 @@ import {
 import { Slider } from "@/components/ui/slider"
 import { Spinner } from "@/components/ui/spinner"
 import { runSermg } from "@/lib/api/client"
+import { mutationsToLine, mutationsToOutcomePie } from "@/lib/chart-session"
 import type { MutationResult } from "@/lib/contracts"
 
 export function LabView() {
@@ -91,6 +95,36 @@ export function LabView() {
           </>
         }
       />
+
+      {results.length > 0 ? (
+        <div className="flex flex-col gap-4">
+          <ChartLineLinear
+            title="التشابه السببي لكل طفرة"
+            description="النسبة المئوية لكل محاكاة بعد تغيير السياق"
+            data={mutationsToLine(results)}
+            valueLabel="تشابه %"
+          />
+          <div className="grid gap-4 lg:grid-cols-2">
+            {score !== null ? (
+              <ChartRadialText
+                title="درجة الاكتشاف"
+                description="نسبة الطفرات المكتشفة في هذه التجربة"
+                value={Math.round(score * 100)}
+                centerLabel="اكتشاف"
+              />
+            ) : null}
+            <ChartPieDonut
+              title="النتيجة"
+              description="اكتشاف مقابل سماح"
+              data={mutationsToOutcomePie(results)}
+              config={{
+                detected: { label: "اكتشاف", color: "var(--chart-1)" },
+                allow: { label: "سماح", color: "var(--chart-2)" },
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,22rem)_1fr]">
         <Card className="gap-4 py-4">

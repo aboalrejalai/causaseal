@@ -4,6 +4,8 @@ import Link from "next/link"
 import * as React from "react"
 
 import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
+import { ChartBarHorizontal } from "@/components/chart-bar-horizontal"
+import { ChartPieDonut } from "@/components/chart-pie-donut"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,6 +30,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { fetchFingerprints } from "@/lib/api/client"
+import {
+  fingerprintsToEnvironmentPie,
+  fingerprintsToInvariantBars,
+} from "@/lib/chart-session"
 import type { Fingerprint } from "@/lib/contracts"
 import { SEED_FINGERPRINTS } from "@/lib/seed-data"
 
@@ -64,6 +70,27 @@ export function MemoryView() {
           </>
         }
       />
+
+      {fingerprints.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ChartBarHorizontal
+            title="تكرار الثوابت"
+            description="كم بصمة تحمل كل ثابت سببي"
+            data={fingerprintsToInvariantBars(fingerprints)}
+            valueLabel="بصمات"
+          />
+          <ChartPieDonut
+            title="البصمات حسب البيئة"
+            description="تطوير · مؤسسة · سحابة"
+            data={fingerprintsToEnvironmentPie(fingerprints)}
+            config={{
+              dev: { label: "التطوير", color: "var(--chart-1)" },
+              enterprise: { label: "المؤسسة", color: "var(--chart-2)" },
+              cloud: { label: "السحابة", color: "var(--chart-3)" },
+            }}
+          />
+        </div>
+      ) : null}
 
       {fingerprints.length === 0 ? (
         <Empty className="border border-dashed py-16">

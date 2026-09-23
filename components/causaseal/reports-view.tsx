@@ -5,6 +5,8 @@ import * as React from "react"
 import { toast } from "sonner"
 
 import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
+import { ChartBarHorizontal } from "@/components/chart-bar-horizontal"
+import { ChartRadarDots } from "@/components/chart-radar-dots"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -25,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { fetchCompliance, fetchReportMetrics } from "@/lib/api/client"
+import { metricsToHorizontalBars, metricsToRadar } from "@/lib/chart-session"
 import type { ComplianceControl } from "@/lib/contracts"
 import { evaluate as evaluateCompliance } from "@/lib/compliance-client"
 
@@ -179,6 +182,24 @@ export function ReportsView() {
           </AlertDescription>
         </Alert>
       )}
+
+      {fromSession && metrics.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ChartRadarDots
+            title="ملف الجلسة"
+            description="المقاييس الستة من أحداث هذه الجلسة"
+            data={metricsToRadar(metrics)}
+            valueLabel="%"
+          />
+          <ChartBarHorizontal
+            title="مقاييس الجلسة"
+            description="نفس الأرقام كأعمدة أفقية للقراءة"
+            data={metricsToHorizontalBars(metrics)}
+            valueLabel="%"
+            valueFormatter={(value) => `${value}%`}
+          />
+        </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         {experiments.map((exp) => (
