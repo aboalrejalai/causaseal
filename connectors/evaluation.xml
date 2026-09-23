@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<evaluation>
+  <!-- Read-only questions only. Answers are stable seed/compliance IDs — not session status. -->
+  <qa_pair>
+    <question>كم عدد ضوابط الامتثال التي يرجعها الخادم؟</question>
+    <answer>5</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>كم ضابطًا إطارها NCA؟</question>
+    <answer>2</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>ما معرّف ضابط إساءة استخدام الأداة (Tool Misuse)؟</question>
+    <answer>OWASP-ASI02</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>ما معرّف ضابط تسميم الذاكرة (Memory Poisoning)؟</question>
+    <answer>OWASP-ASI06</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>ما معرّف البصمة التي بيئتها المؤسسة (enterprise)؟</question>
+    <answer>X-CFS-002</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>كم ثابتًا (invariants) على بصمة البيئة enterprise؟</question>
+    <answer>3</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>ما تاريخ البصمة التي بيئتها السحابة (cloud)؟</question>
+    <answer>16 سبتمبر 2026</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>ما أصل (origin) البصمة المؤرخة 18 سبتمبر 2026؟</question>
+    <answer>seed</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>كم بيئة مغطاة (coveredEnvironments) للبصمة المؤرخة 18 سبتمبر 2026؟</question>
+    <answer>1</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>ما بيئة البصمة التي ثابتها الوحيد تعليمة في النص المسترجع؟</question>
+    <answer>cloud</answer>
+  </qa_pair>
+</evaluation>

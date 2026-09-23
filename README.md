@@ -76,16 +76,20 @@ npm start       # node server.js — يخدم out/ + /api/*
 | `GET /api/events` | أحداث المراقبة (بيانات بذرية) |
 | `GET\|POST /api/fingerprints` | ذاكرة X-CFS |
 | `POST /api/sermg/run` | محاكاة SERMG (stub) |
+| `POST /api/gateway/intercept` | اعتراض قبل الأداة (`executed: false`) |
+| `POST /api/agent/run` | حلقة التجربة: هارنس مقابل بصمة ثم تسليم |
+| `POST /mcp` | خادم MCP بعيد بلا مفتاح (10 أدوات) |
 | `GET /api/reports/metrics` | مقاييس توضيحية |
 | `GET /api/compliance` | خريطة NCA / OWASP |
 | `GET /healthz` | فحص الصحة |
 
 - بدون `OPENAI_API_KEY` يعمل محرك القواعد السببية الآمن.
 - لتفعيل تحليل النموذج، أضف `OPENAI_API_KEY` (واختياريًا `OPENAI_MODEL`) في متغيرات البيئة على الخادم فقط.
+- MCP للتجربة: الصق `http://127.0.0.1:4000/mcp` (تطوير) أو `https://<مضيفك>/mcp` (إنتاج) في Cursor/Claude/ChatGPT — بدون مصادقة.
 
 ## الصفحات
 
-`/` · `/monitor` · `/investigate` · `/memory` · `/lab` · `/reports` · `/team`
+`/` · `/monitor` · `/investigate` · `/memory` · `/lab` · `/reports` · `/impact` · `/connectors` · `/team`
 
 ## تنبيه
 
