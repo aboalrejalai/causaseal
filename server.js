@@ -1,6 +1,7 @@
 import http from "node:http"
 import fs from "node:fs"
 import path from "node:path"
+import { Readable } from "node:stream"
 import { fileURLToPath } from "node:url"
 
 import { analyze } from "./engine/gateway.mjs"
@@ -26,6 +27,28 @@ function channelFrom(req) {
   if (raw === "mcp") return "mcp"
   return "http"
 }
+
+/**
+ * Hosted Node runtimes (Hostinger) can throw `open EEXIST` the first time
+ * anything touches `process.stdin`. MCP packages import `node:process` and
+ * sync that export, so patch stdin before loading the MCP transport.
+ */
+function patchProcessStdinForHostedRuntimes() {
+  const inert = new Readable({
+    read() {
+      this.push(null)
+    },
+  })
+  Object.defineProperty(process, "stdin", {
+    configurable: true,
+    enumerable: true,
+    get() {
+      return inert
+    },
+  })
+}
+
+patchProcessStdinForHostedRuntimes()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
