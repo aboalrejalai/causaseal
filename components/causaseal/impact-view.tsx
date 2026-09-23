@@ -3,7 +3,7 @@
 import * as React from "react"
 import { toast } from "sonner"
 
-import { PageHeading } from "@/components/causaseal/page-heading"
+import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
 import { ChartBarMultiple } from "@/components/chart-bar-multiple"
 import { ChartPieDonut } from "@/components/chart-pie-donut"
 import { Badge } from "@/components/ui/badge"
@@ -17,24 +17,64 @@ import {
 } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { fetchSession, runOpsAgentClient, type SessionSummary } from "@/lib/api/client"
+import { DEMO_IMPACT_ROWS, type DemoImpactRow } from "@/lib/chart-demo"
 import { formatDecision } from "@/lib/decisions"
 import { HARNESS_DIFF } from "@/lib/nav"
 
-type RunRow = {
-  kind: string
-  decision: string
-  delivered: boolean
-  deliveredOriginal?: boolean
-  change: string
-  harness?: string
-  crossContext?: boolean
-  intervention?: string | null
-}
+type RunRow = DemoImpactRow
 
 function harnessLabel(value?: string) {
   if (value === "BLOCK") return "هارنس: منع"
   if (value === "ALLOW") return "هارنس: سماح"
   return null
+}
+
+function impactChartBlock(rows: RunRow[], live: boolean) {
+  return (
+    <div className="flex flex-col gap-4">
+      <ChartBarMultiple
+        title="هارنس مقابل البصمة"
+        description={
+          live
+            ? "100 = منع · 0 = سماح — العمود المختلف هو فرق المنتج"
+            : "شكل توضيحي — اضغط التشغيل لاستبداله بنتيجة هذه الجلسة"
+        }
+        data={rows.map((row) => ({
+          category: row.kind.split("—")[0]?.trim().slice(0, 14) || row.kind.slice(0, 14),
+          seriesA: row.harness === "BLOCK" ? 100 : 0,
+          seriesB:
+            row.decision === "INTERVENE" || row.decision === "VERIFY" ? 100 : 0,
+          fullLabel: row.kind,
+        }))}
+        config={{
+          seriesA: { label: "هارنس", color: "var(--chart-3)" },
+          seriesB: { label: "بصمة", color: "var(--chart-1)" },
+        }}
+        valueFormatter={(value) => (value >= 100 ? "منع" : "سماح")}
+        truncateTick
+      />
+      <ChartPieDonut
+        title="ماذا أُرسل"
+        description="نسخة محذوفة مقابل أصل مُرسل"
+        data={[
+          {
+            key: "redacted",
+            label: "نسخة محذوفة",
+            value: rows.filter((row) => row.intervention === "redact-sensitive").length,
+          },
+          {
+            key: "original",
+            label: "أصل مُرسل",
+            value: rows.filter((row) => row.deliveredOriginal).length,
+          },
+        ].filter((slice) => slice.value > 0)}
+        config={{
+          redacted: { label: "نسخة محذوفة", color: "var(--chart-1)" },
+          original: { label: "أصل مُرسل", color: "var(--chart-2)" },
+        }}
+      />
+    </div>
+  )
 }
 
 export function ImpactView() {
@@ -164,9 +204,16 @@ export function ImpactView() {
         title="أثر المنع على سير العمل"
         description="نفس الطلب مرتين: هارنس الأداة الآن، والبصمة للصياغة التالية. عند المنع تُرسل نسخة محذوفة."
         actions={
-          <Button disabled={running} onClick={() => void runDemo()}>
-            {running ? "جاري التشغيل…" : "تشغيل سيناريوهات الفرق"}
-          </Button>
+          <>
+            {rows.length > 0 ? (
+              <Badge variant="success">أرقام هذه الجلسة</Badge>
+            ) : (
+              <IllustrativeBadge />
+            )}
+            <Button disabled={running} onClick={() => void runDemo()}>
+              {running ? "جاري التشغيل…" : "تشغيل سيناريوهات الفرق"}
+            </Button>
+          </>
         }
       />
 
@@ -180,46 +227,7 @@ export function ImpactView() {
         </AlertDescription>
       </Alert>
 
-      {rows.length > 0 ? (
-        <div className="flex flex-col gap-4">
-          <ChartBarMultiple
-            title="هارنس مقابل البصمة"
-            description="100 = منع · 0 = سماح — العمود المختلف هو فرق المنتج"
-            data={rows.map((row) => ({
-              category: row.kind.split("—")[0]?.trim().slice(0, 14) || row.kind.slice(0, 14),
-              seriesA: row.harness === "BLOCK" ? 100 : 0,
-              seriesB:
-                row.decision === "INTERVENE" || row.decision === "VERIFY" ? 100 : 0,
-            }))}
-            config={{
-              seriesA: { label: "هارنس", color: "var(--chart-3)" },
-              seriesB: { label: "بصمة", color: "var(--chart-1)" },
-            }}
-            valueFormatter={(value) => (value >= 100 ? "منع" : "سماح")}
-            truncateTick
-          />
-          <ChartPieDonut
-            title="ماذا أُرسل"
-            description="نسخة محذوفة مقابل أصل مُرسل"
-            data={[
-              {
-                key: "redacted",
-                label: "نسخة محذوفة",
-                value: rows.filter((row) => row.intervention === "redact-sensitive").length,
-              },
-              {
-                key: "original",
-                label: "أصل مُرسل",
-                value: rows.filter((row) => row.deliveredOriginal).length,
-              },
-            ].filter((slice) => slice.value > 0)}
-            config={{
-              redacted: { label: "نسخة محذوفة", color: "var(--chart-1)" },
-              original: { label: "أصل مُرسل", color: "var(--chart-2)" },
-            }}
-          />
-        </div>
-      ) : null}
+      {impactChartBlock(rows.length > 0 ? rows : DEMO_IMPACT_ROWS, rows.length > 0)}
 
       <Card>
         <CardHeader>

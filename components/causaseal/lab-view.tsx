@@ -3,7 +3,7 @@
 import * as React from "react"
 import { toast } from "sonner"
 
-import { PageHeading } from "@/components/causaseal/page-heading"
+import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
 import { ChartLineLinear } from "@/components/chart-line-linear"
 import { ChartPieDonut } from "@/components/chart-pie-donut"
 import { ChartRadialText } from "@/components/chart-radial-text"
@@ -41,6 +41,7 @@ import {
 import { Slider } from "@/components/ui/slider"
 import { Spinner } from "@/components/ui/spinner"
 import { runSermg } from "@/lib/api/client"
+import { DEMO_LAB_RESULTS, DEMO_LAB_SCORE } from "@/lib/chart-demo"
 import { mutationsToLine, mutationsToOutcomePie } from "@/lib/chart-session"
 import type { MutationResult } from "@/lib/contracts"
 
@@ -91,40 +92,57 @@ export function LabView() {
         description="محاكاة تغيّر السياق مع الحفاظ على ثوابت الفشل السببية."
         actions={
           <>
-            <Badge variant="success">إعادة تشغيل التحليل</Badge>
+            {results.length > 0 ? (
+              <Badge variant="success">نتيجة هذه التجربة</Badge>
+            ) : (
+              <IllustrativeBadge />
+            )}
           </>
         }
       />
 
-      {results.length > 0 ? (
-        <div className="flex flex-col gap-4">
-          <ChartLineLinear
-            title="التشابه السببي لكل طفرة"
-            description="النسبة المئوية لكل محاكاة بعد تغيير السياق"
-            data={mutationsToLine(results)}
-            valueLabel="تشابه %"
-          />
-          <div className="grid gap-4 lg:grid-cols-2">
-            {score !== null ? (
-              <ChartRadialText
-                title="درجة الاكتشاف"
-                description="نسبة الطفرات المكتشفة في هذه التجربة"
-                value={Math.round(score * 100)}
-                centerLabel="اكتشاف"
-              />
-            ) : null}
-            <ChartPieDonut
-              title="النتيجة"
-              description="اكتشاف مقابل سماح"
-              data={mutationsToOutcomePie(results)}
-              config={{
-                detected: { label: "اكتشاف", color: "var(--chart-1)" },
-                allow: { label: "سماح", color: "var(--chart-2)" },
-              }}
+      {(() => {
+        const liveLab = results.length > 0
+        const chartResults = liveLab ? results : DEMO_LAB_RESULTS
+        const chartScore = liveLab ? score : DEMO_LAB_SCORE
+        return (
+          <div className="flex flex-col gap-4">
+            <ChartLineLinear
+              title="التشابه السببي لكل طفرة"
+              description={
+                liveLab
+                  ? "النسبة المئوية لكل محاكاة بعد تغيير السياق"
+                  : "شكل توضيحي — اضغط التوليد لاستبداله بنتيجة حقيقية"
+              }
+              data={mutationsToLine(chartResults)}
+              valueLabel="تشابه %"
             />
+            <div className="grid gap-4 lg:grid-cols-2">
+              {chartScore !== null ? (
+                <ChartRadialText
+                  title="درجة الاكتشاف"
+                  description={
+                    liveLab
+                      ? "نسبة الطفرات المكتشفة في هذه التجربة"
+                      : "شكل توضيحي"
+                  }
+                  value={Math.round(chartScore * 100)}
+                  centerLabel="اكتشاف"
+                />
+              ) : null}
+              <ChartPieDonut
+                title="النتيجة"
+                description="اكتشاف مقابل سماح"
+                data={mutationsToOutcomePie(chartResults)}
+                config={{
+                  detected: { label: "اكتشاف", color: "var(--chart-1)" },
+                  allow: { label: "سماح", color: "var(--chart-2)" },
+                }}
+              />
+            </div>
           </div>
-        </div>
-      ) : null}
+        )
+      })()}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,22rem)_1fr]">
         <Card className="gap-4 py-4">

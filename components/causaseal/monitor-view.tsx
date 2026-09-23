@@ -5,7 +5,7 @@ import * as React from "react"
 import { toast } from "sonner"
 
 import { useLanguage } from "@/components/causaseal/language-provider"
-import { PageHeading } from "@/components/causaseal/page-heading"
+import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { ChartBarMultiple } from "@/components/chart-bar-multiple"
 import { Badge } from "@/components/ui/badge"
@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { fetchEvents, interceptAgent } from "@/lib/api/client"
+import { DEMO_EVENTS } from "@/lib/chart-demo"
 import {
   eventsToAreaSeries,
   eventsToStatusCategoryBars,
@@ -125,6 +126,9 @@ export function MonitorView() {
     return () => window.clearInterval(timer)
   }, [filter, query])
 
+  const liveCharts = events.length > 0
+  const chartEvents = liveCharts ? events : DEMO_EVENTS
+
   return (
     <>
       <PageHeading
@@ -132,36 +136,42 @@ export function MonitorView() {
         title={t("nav.monitor")}
         description="تتبّع قرارات الوكلاء قبل تنفيذ الأدوات."
         actions={
-          <Badge variant="success" className="gap-1.5">
-            <span className="size-1.5 animate-pulse rounded-full bg-success" aria-hidden />
-            {t("live")}
-          </Badge>
+          liveCharts ? (
+            <Badge variant="success" className="gap-1.5">
+              <span className="size-1.5 animate-pulse rounded-full bg-success" aria-hidden />
+              {t("live")}
+            </Badge>
+          ) : (
+            <IllustrativeBadge />
+          )
         }
       />
 
-      {events.length > 0 ? (
-        <div className="flex flex-col gap-4">
-          <ChartAreaInteractive
-            title="المنع والسماح عبر الزمن"
-            description="تراكم قرارات الجلسة الظاهرة في الجدول"
-            data={eventsToAreaSeries(events)}
-            config={{
-              seriesA: { label: "منع", color: "var(--chart-1)" },
-              seriesB: { label: "سماح", color: "var(--chart-2)" },
-            }}
-            defaultRange="20"
-          />
-          <ChartBarMultiple
-            title="حسب الحالة"
-            description="مُنع · تحقق · سُمح من الفلتر الحالي"
-            data={eventsToStatusCategoryBars(events)}
-            config={{
-              seriesA: { label: "العدد", color: "var(--chart-1)" },
-            }}
-            showSeriesB={false}
-          />
-        </div>
-      ) : null}
+      <div className="flex flex-col gap-4">
+        <ChartAreaInteractive
+          title="المنع والسماح عبر الزمن"
+          description={
+            liveCharts
+              ? "تراكم قرارات الجلسة الظاهرة في الجدول"
+              : "شكل توضيحي — الجدول أسفل يبقى للجلسة الحية"
+          }
+          data={eventsToAreaSeries(chartEvents)}
+          config={{
+            seriesA: { label: "منع", color: "var(--chart-1)" },
+            seriesB: { label: "سماح", color: "var(--chart-2)" },
+          }}
+          defaultRange="20"
+        />
+        <ChartBarMultiple
+          title="حسب الحالة"
+          description="مُنع · تحقق · سُمح"
+          data={eventsToStatusCategoryBars(chartEvents)}
+          config={{
+            seriesA: { label: "العدد", color: "var(--chart-1)" },
+          }}
+          showSeriesB={false}
+        />
+      </div>
 
       <div className="flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-1">
