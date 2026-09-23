@@ -22,8 +22,17 @@ type RunRow = {
   kind: string
   decision: string
   delivered: boolean
+  deliveredOriginal?: boolean
   change: string
+  harness?: string
   crossContext?: boolean
+  intervention?: string | null
+}
+
+function harnessLabel(value?: string) {
+  if (value === "BLOCK") return "هارنس: منع"
+  if (value === "ALLOW") return "هارنس: سماح"
+  return null
 }
 
 export function ImpactView() {
@@ -59,12 +68,52 @@ export function ImpactView() {
       setRows((prev) => [
         ...prev,
         {
-          kind: "تسريب → منع",
+          kind: "تسريب معروف — هارنس والبصمة معًا",
           decision: String(leak.result.decision),
           delivered: leak.delivered,
+          deliveredOriginal: leak.deliveredOriginal,
           change: leak.change,
+          harness: leak.harness,
+          intervention: leak.intervention,
         },
       ])
+
+      const mutated = await runOpsAgentClient({
+        kind: "mutated",
+        environment: "dev",
+        orgId: "demo",
+      })
+      setRows((prev) => [
+        ...prev,
+        {
+          kind: "صياغة متغيرة — هارنس يسمح، البصمة تمنع",
+          decision: String(mutated.result.decision),
+          delivered: mutated.delivered,
+          deliveredOriginal: mutated.deliveredOriginal,
+          change: mutated.change,
+          harness: mutated.harness,
+          intervention: mutated.intervention,
+        },
+      ])
+
+      const lookalike = await runOpsAgentClient({
+        kind: "lookalike",
+        environment: "dev",
+        orgId: "demo",
+      })
+      setRows((prev) => [
+        ...prev,
+        {
+          kind: "يشبه الخطر لفظيًا — السبب مختلف → سماح",
+          decision: String(lookalike.result.decision),
+          delivered: lookalike.delivered,
+          deliveredOriginal: lookalike.deliveredOriginal,
+          change: lookalike.change,
+          harness: lookalike.harness,
+          intervention: lookalike.intervention,
+        },
+      ])
+
       const safe = await runOpsAgentClient({ kind: "safe", environment: "dev", orgId: "demo" })
       setRows((prev) => [
         ...prev,
@@ -72,9 +121,12 @@ export function ImpactView() {
           kind: "مسار مشروع → سماح",
           decision: String(safe.result.decision),
           delivered: safe.delivered,
+          deliveredOriginal: safe.deliveredOriginal,
           change: safe.change,
+          harness: safe.harness,
         },
       ])
+
       const cross = await runOpsAgentClient({
         kind: "cross",
         environment: "enterprise",
@@ -86,11 +138,15 @@ export function ImpactView() {
           kind: "نفس الثوابت في المؤسسة",
           decision: String(cross.result.decision),
           delivered: cross.delivered,
+          deliveredOriginal: cross.deliveredOriginal,
           change: cross.change,
+          harness: cross.harness,
           crossContext: Boolean(cross.result.crossContext),
+          intervention: cross.intervention,
         },
       ])
-      toast.success("اكتمل تشغيل الأثر: منع، سماح، ثم منع عبر السياق")
+
+      toast.success("اكتمل تشغيل الأثر: مقارنة هارنس، نسخة محذوفة، وشبيه لفظي")
       await refreshSession()
     } catch {
       toast.error("تعذر تشغيل وكيل العمليات. تأكد أن الخادم يعمل: npm start")
@@ -104,10 +160,10 @@ export function ImpactView() {
       <PageHeading
         eyebrow="IMPACT"
         title="أثر المنع على سير العمل"
-        description="وكيل العمليات ينادي البوابة قبل الإرسال. عند المنع لا تُستدعى أداة الإرسال."
+        description="نفس الطلب مرتين: هارنس الأداة الآن، والبصمة للصياغة التالية. عند المنع تُرسل نسخة محذوفة."
         actions={
           <Button disabled={running} onClick={() => void runDemo()}>
-            {running ? "جاري التشغيل…" : "تشغيل السيناريوهات الثلاثة"}
+            {running ? "جاري التشغيل…" : "تشغيل سيناريوهات الفرق"}
           </Button>
         }
       />
@@ -115,9 +171,10 @@ export function ImpactView() {
       <Alert>
         <AlertTitle>المستفيد والقياس</AlertTitle>
         <AlertDescription>
-          المستفيد: فريق تشغيل الوكيل داخل المؤسسة. التغيّر: الإرسال الخارجي لا يتم عند INTERVENE،
-          ويتم محليًا عند ALLOW. القياس من الجلسة: منع {session?.blocked ?? 0} · مطابقة{" "}
-          {Math.round((session?.matchRate ?? 0) * 100)}% · بيئات {session?.environmentCount ?? 0}.
+          المستفيد: فريق تشغيل الوكيل داخل المؤسسة. التغيّر: عند INTERVENE تُرسل نسخة بلا بيانات
+          حساسة، والأصل لا يُرسل. عند ALLOW يُرسل الأصل. القياس من الجلسة: منع{" "}
+          {session?.blocked ?? 0} · مطابقة {Math.round((session?.matchRate ?? 0) * 100)}% · بيئات{" "}
+          {session?.environmentCount ?? 0}.
         </AlertDescription>
       </Alert>
 
@@ -129,7 +186,8 @@ export function ImpactView() {
         <CardContent className="flex flex-col gap-3">
           {rows.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              اضغط التشغيل لترى المنع دون deliver، ثم السماح مع deliver، ثم النقل بين البيئات.
+              اضغط التشغيل: تسريب معروف (الاثنان يمنعان)، صياغة متغيرة (هارنس يسمح / بصمة تمنع)،
+              شبيه لفظي (سماح)، مسار مشروع، ثم عبر السياق.
             </p>
           ) : (
             rows.map((row) => (
@@ -141,11 +199,22 @@ export function ImpactView() {
                   <p className="text-sm font-medium">{row.kind}</p>
                   <p className="text-xs text-muted-foreground">{row.change}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {harnessLabel(row.harness) ? (
+                    <Badge variant="outline">{harnessLabel(row.harness)}</Badge>
+                  ) : null}
                   <Badge variant={row.decision === "INTERVENE" ? "destructive" : "secondary"}>
-                    {formatDecision(row.decision)}
+                    بصمة: {formatDecision(row.decision)}
                   </Badge>
-                  <Badge variant="outline">{row.delivered ? "delivered" : "لا إرسال"}</Badge>
+                  <Badge variant="outline">
+                    {row.intervention === "redact-sensitive"
+                      ? "نسخة محذوفة"
+                      : row.deliveredOriginal
+                        ? "أصل مُرسل"
+                        : row.delivered
+                          ? "delivered"
+                          : "لا إرسال"}
+                  </Badge>
                   {row.crossContext ? <Badge variant="success">عبر السياق</Badge> : null}
                 </div>
               </div>
@@ -160,7 +229,10 @@ export function ImpactView() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>من يستدعي البوابة: وكيل المؤسسة عبر POST /api/agent/run قبل أداة الإرسال.</p>
-          <p>نتيجة INTERVENE: دالة deliver لا تُستدعى، والحدث يُسجَّل بمصدر intercept.</p>
+          <p>
+            نتيجة INTERVENE: تُستدعى deliver بنسخة محذوفة (بدون بيانات حساسة)، والأصل لا يُرسل.
+            الحدث يُسجَّل بمصدر intercept ثم deliver.
+          </p>
           <p>أين البصمة: ملف حالة الجهة تحت data/causaseal-state.json داخل orgs[orgId].</p>
           <p>التكلفة: عملية server.js واحدة وملف JSON لكل جهة معزولة.</p>
           <p>
