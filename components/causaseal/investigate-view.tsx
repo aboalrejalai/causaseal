@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { DownloadIcon, FingerprintIcon, PlayIcon, ScanSearchIcon } from "lucide-react"
 import * as React from "react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, type Resolver } from "react-hook-form"
 import { toast } from "sonner"
 import { useSearchParams } from "next/navigation"
 
@@ -107,7 +107,7 @@ export function InvestigateView() {
   const demoStarted = React.useRef(false)
 
   const form = useForm<IncidentInput>({
-    resolver: zodResolver(IncidentInputSchema),
+    resolver: zodResolver(IncidentInputSchema) as Resolver<IncidentInput>,
     defaultValues: {
       prompt: "لخّص المرفق للفريق الداخلي.",
       untrustedContent:
