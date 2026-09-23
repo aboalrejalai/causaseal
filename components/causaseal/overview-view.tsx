@@ -11,7 +11,7 @@ import {
 
 import { CausalPath } from "@/components/causaseal/causal-path"
 import { useLanguage } from "@/components/causaseal/language-provider"
-import { PageHeading } from "@/components/causaseal/page-heading"
+import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
 import { Stat } from "@/components/causaseal/stat"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { ChartPieDonut } from "@/components/chart-pie-donut"
@@ -25,15 +25,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { fetchEvents, fetchSession, type SessionSummary } from "@/lib/api/client"
+import { DEMO_EVENTS, DEMO_SESSION_STATS } from "@/lib/chart-demo"
 import {
   eventsToAreaSeries,
   eventsToDecisionPie,
@@ -77,12 +71,23 @@ export function OverviewView() {
   }, [])
 
   const live = Boolean(session?.hasSession)
+  const chartEvents = live && events.length > 0 ? events : DEMO_EVENTS
   const feed = live && session?.recent?.length ? session.recent : []
   const nodes =
     live && session?.lastAnalysis?.nodes?.length ? session.lastAnalysis.nodes : EXAMPLE_NODES
-  const riskScore = live && session?.riskScore != null ? session.riskScore : null
-  const areaData = live ? eventsToAreaSeries(events) : []
-  const pieData = live ? eventsToDecisionPie(events) : []
+  const blocked = live ? (session?.blocked ?? 0) : DEMO_SESSION_STATS.blocked
+  const fingerprintCount = live
+    ? (session?.fingerprintCount ?? 0)
+    : DEMO_SESSION_STATS.fingerprintCount
+  const matchRate = live ? (session?.matchRate ?? 0) : DEMO_SESSION_STATS.matchRate
+  const latencyMs = live ? session?.lastLatencyMs : DEMO_SESSION_STATS.lastLatencyMs
+  const riskScore = live
+    ? session?.riskScore != null
+      ? session.riskScore
+      : null
+    : DEMO_SESSION_STATS.riskScore
+  const areaData = eventsToAreaSeries(chartEvents)
+  const pieData = eventsToDecisionPie(chartEvents)
 
   return (
     <>
@@ -92,7 +97,11 @@ export function OverviewView() {
         description={HARNESS_DIFF}
         actions={
           <>
-            {live ? <Badge variant="success">{t("session")}</Badge> : null}
+            {live ? (
+              <Badge variant="success">{t("session")}</Badge>
+            ) : (
+              <IllustrativeBadge />
+            )}
             <Button asChild variant="outline">
               <Link href="/investigate?demo=1">عرض SAIF</Link>
             </Button>
@@ -103,110 +112,94 @@ export function OverviewView() {
         }
       />
 
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Stat
+          variant="gradient"
+          icon={<ShieldAlertIcon className="size-5" />}
+          label="تهديدات تم منعها"
+          value={String(blocked)}
+          changeLabel={live ? "من هذه الجلسة" : "شكل توضيحي"}
+          trend="flat"
+          sentiment="positive"
+        />
+        <Stat
+          variant="gradient"
+          icon={<FingerprintIcon className="size-5" />}
+          label="بصمات X-CFS"
+          value={String(fingerprintCount)}
+          changeLabel={live ? "في الذاكرة" : "شكل توضيحي"}
+          trend="flat"
+          sentiment="positive"
+        />
+        <Stat
+          variant="gradient"
+          icon={<GaugeIcon className="size-5" />}
+          label="دقة المطابقة"
+          value={`${Math.round(matchRate * 100)}%`}
+          changeLabel={live ? "من أحداث الجلسة" : "شكل توضيحي"}
+          trend="flat"
+          sentiment="positive"
+        />
+        <Stat
+          variant="gradient"
+          icon={<TimerIcon className="size-5" />}
+          label="زمن القرار"
+          value={latencyMs != null ? `${latencyMs} ms` : "—"}
+          changeLabel="Causal Gate"
+          trend="flat"
+          sentiment="neutral"
+        />
+      </div>
+
       {!live ? (
         <Alert>
           <AlertTitle>مثال واحد قبل أي جلسة</AlertTitle>
           <AlertDescription>
-            مهمة المستخدم: لخّص المرفق. النص المسترجع يطلب نقل أسرار الدخول إلى قناة خارج الفريق.
-            الأداة: send_to_workspace. الوجهة غير معتمدة. شغّل عرض SAIF أو صفحة الأثر لترى المنع
-            ثم السماح.
+            الأشكال أعلاه توضيحية حتى تشغّل الأثر أو عرض SAIF. بعد التشغيل تُستبدل بأرقام هذه
+            الجلسة. المهمة: لخّص المرفق؛ النص المسترجع يطلب نقل أسرار الدخول؛ الأداة
+            send_to_workspace.
           </AlertDescription>
         </Alert>
       ) : null}
 
-      {live && areaData.length > 0 ? (
-        <div className="flex flex-col gap-4">
-          <ChartAreaInteractive
-            title="تدفق الجلسة"
-            description="تراكم المنع والسماح عبر أحداث هذه الجلسة"
-            data={areaData}
-            config={{
-              seriesA: { label: "منع", color: "var(--chart-1)" },
-              seriesB: { label: "سماح", color: "var(--chart-2)" },
-            }}
-            defaultRange="all"
-          />
-          <div className="grid gap-4 lg:grid-cols-2">
-            {pieData.length > 0 ? (
-              <ChartPieDonut
-                title="توزيع القرارات"
-                description="تدخل · تحقق · سماح من أحداث الجلسة"
-                data={pieData}
-                config={{
-                  intervene: { label: "تدخل", color: "var(--chart-1)" },
-                  verify: { label: "تحقق", color: "var(--chart-3)" },
-                  allow: { label: "سماح", color: "var(--chart-2)" },
-                }}
-              />
-            ) : null}
-            {riskScore != null ? (
-              <ChartRadialText
-                title="درجة الخطر"
-                description="من نسبة المنع في هذه الجلسة"
-                value={riskScore}
-                centerLabel="خطر"
-              />
-            ) : null}
-          </div>
+      <div className="flex flex-col gap-4">
+        <ChartAreaInteractive
+          title="تدفق الجلسة"
+          description={
+            live
+              ? "تراكم المنع والسماح عبر أحداث هذه الجلسة"
+              : "شكل توضيحي — يتحدث بعد تشغيل الأثر"
+          }
+          data={areaData}
+          config={{
+            seriesA: { label: "منع", color: "var(--chart-1)" },
+            seriesB: { label: "سماح", color: "var(--chart-2)" },
+          }}
+          defaultRange="all"
+        />
+        <div className="grid gap-4 lg:grid-cols-2">
+          {pieData.length > 0 ? (
+            <ChartPieDonut
+              title="توزيع القرارات"
+              description="تدخل · تحقق · سماح"
+              data={pieData}
+              config={{
+                intervene: { label: "تدخل", color: "var(--chart-1)" },
+                verify: { label: "تحقق", color: "var(--chart-3)" },
+                allow: { label: "سماح", color: "var(--chart-2)" },
+              }}
+            />
+          ) : null}
+          {riskScore != null ? (
+            <ChartRadialText
+              title="درجة الخطر"
+              description={live ? "من نسبة المنع في هذه الجلسة" : "شكل توضيحي"}
+              value={riskScore}
+              centerLabel="خطر"
+            />
+          ) : null}
         </div>
-      ) : null}
-
-      {live ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <Stat
-            variant="gradient"
-            icon={<ShieldAlertIcon className="size-5" />}
-            label="تهديدات تم منعها"
-            value={String(session?.blocked ?? 0)}
-            changeLabel="من هذه الجلسة"
-            trend="flat"
-            sentiment="positive"
-          />
-          <Stat
-            variant="gradient"
-            icon={<FingerprintIcon className="size-5" />}
-            label="بصمات X-CFS"
-            value={String(session?.fingerprintCount ?? 0)}
-            changeLabel="في الذاكرة"
-            trend="flat"
-            sentiment="positive"
-          />
-          <Stat
-            variant="gradient"
-            icon={<GaugeIcon className="size-5" />}
-            label="دقة المطابقة"
-            value={`${Math.round((session?.matchRate ?? 0) * 100)}%`}
-            changeLabel="من أحداث الجلسة"
-            trend="flat"
-            sentiment="positive"
-          />
-          <Stat
-            variant="gradient"
-            icon={<TimerIcon className="size-5" />}
-            label="زمن القرار"
-            value={
-              session?.lastLatencyMs != null ? `${session.lastLatencyMs} ms` : "—"
-            }
-            changeLabel="Causal Gate"
-            trend="flat"
-            sentiment="neutral"
-          />
-        </div>
-      ) : (
-        <Empty className="border">
-          <EmptyHeader>
-            <EmptyTitle>لا توجد أرقام جلسة بعد</EmptyTitle>
-            <EmptyDescription>
-              العدادات تظهر فقط بعد تحليل أو تشغيل وكيل العمليات. لا نعرض أرقامًا مزروعة.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button asChild>
-              <Link href="/impact">اذهب إلى الأثر</Link>
-            </Button>
-          </EmptyContent>
-        </Empty>
-      )}
+      </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
         <Card className="gap-4 py-4 xl:col-span-2">
@@ -222,7 +215,7 @@ export function OverviewView() {
           <CardContent className="flex flex-col gap-3 px-4">
             {feed.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                فارغ حتى يمر طلب عبر البوابة.
+                فارغ حتى يمر طلب عبر البوابة. شغّل صفحة الأثر لملء الجلسة.
               </p>
             ) : (
               feed.map((event) => (
@@ -260,7 +253,7 @@ export function OverviewView() {
           <CardHeader className="px-4 pb-0">
             <CardTitle className="text-base">مؤشر الخطر</CardTitle>
             <CardDescription>
-              {live ? "من أحداث الجلسة" : "يظهر بعد أول منع أو سماح"}
+              {live ? "من أحداث الجلسة" : "شكل توضيحي حتى أول تشغيل"}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-2 px-4">
