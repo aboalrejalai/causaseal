@@ -29,9 +29,10 @@ export function harnessDecision(body = {}) {
 }
 
 /**
+ * Strip sensitive payload for a safe local deliver. Shared with connectors.
  * @param {Record<string, unknown>} body
  */
-function redactSensitive(body) {
+export function redactSensitive(body) {
   const redactedNote = "أُزيلت البيانات الحساسة؛ أُرسلت نسخة آمنة فقط."
   return {
     ...body,
