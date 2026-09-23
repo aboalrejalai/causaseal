@@ -15,7 +15,7 @@ const { jaccard, MATCH_THRESHOLD, matchByInvariants, storeFingerprint, listFinge
 const { deriveInvariants } = await import("../engine/xcfs.mjs")
 const { analyze } = await import("../engine/gateway.mjs")
 const { runOpsAgent } = await import("../engine/ops-agent.mjs")
-const { NOVEL_LEAK, BENIGN_SEND } = await import("../engine/fixtures/novel-leak.mjs")
+const { NOVEL_LEAK, BENIGN_SEND, MUTATED_LEAK } = await import("../engine/fixtures/novel-leak.mjs")
 const { resetTelemetryCache } = await import("../engine/telemetry.mjs")
 
 test.after(() => {
@@ -50,14 +50,18 @@ test("jaccard at or above threshold matches structural leak", () => {
   assert.ok(score >= MATCH_THRESHOLD)
 })
 
-test("novel leak intervenes and does not deliver", async () => {
+test("novel leak intervenes and delivers redacted copy only", async () => {
   resetTelemetryCache()
   resetPersistCache()
   const orgId = "test-leak"
   const outcome = await runOpsAgent({ kind: "leak", orgId, environment: "dev" })
   assert.equal(outcome.result.decision, "INTERVENE")
   assert.equal(outcome.executed, false)
-  assert.equal(outcome.delivered, false)
+  assert.equal(outcome.deliveredOriginal, false)
+  assert.equal(outcome.delivered, true)
+  assert.equal(outcome.intervention, "redact-sensitive")
+  assert.equal(outcome.harness, "BLOCK")
+  assert.equal(outcome.delivery?.redacted, true)
 })
 
 test("benign send allows and delivers", async () => {
@@ -67,6 +71,9 @@ test("benign send allows and delivers", async () => {
   const outcome = await runOpsAgent({ kind: "safe", orgId })
   assert.equal(outcome.result.decision, "ALLOW")
   assert.equal(outcome.delivered, true)
+  assert.equal(outcome.deliveredOriginal, true)
+  assert.equal(outcome.intervention, null)
+  assert.equal(outcome.harness, "ALLOW")
 })
 
 test("cross-context blocks after learning in dev", async () => {
@@ -78,6 +85,43 @@ test("cross-context blocks after learning in dev", async () => {
   const second = await runOpsAgent({ kind: "cross", orgId, environment: "enterprise" })
   assert.equal(second.result.decision, "INTERVENE")
   assert.equal(second.result.crossContext, true)
+})
+
+test("mutated leak: harness allows, fingerprint intervenes", async () => {
+  resetTelemetryCache()
+  resetPersistCache()
+  const orgId = "test-mutated"
+  const invariants = deriveInvariants(MUTATED_LEAK)
+  assert.ok(!invariants.includes("أداة إرسال"))
+  assert.ok(invariants.includes("بيانات حساسة"))
+  assert.ok(invariants.includes("وجهة غير معتمدة"))
+  assert.ok(invariants.includes("تعليمة في النص المسترجع"))
+  const score = jaccard(invariants, [
+    "أداة إرسال",
+    "بيانات حساسة",
+    "وجهة غير معتمدة",
+    "تعليمة في النص المسترجع",
+  ])
+  assert.ok(score >= MATCH_THRESHOLD)
+
+  const outcome = await runOpsAgent({ kind: "mutated", orgId, environment: "dev" })
+  assert.equal(outcome.harness, "ALLOW")
+  assert.equal(outcome.result.decision, "INTERVENE")
+  assert.equal(outcome.deliveredOriginal, false)
+  assert.equal(outcome.delivered, true)
+  assert.equal(outcome.intervention, "redact-sensitive")
+})
+
+test("lookalike allows — wording alone does not block", async () => {
+  resetTelemetryCache()
+  resetPersistCache()
+  const orgId = "test-lookalike"
+  const outcome = await runOpsAgent({ kind: "lookalike", orgId })
+  assert.equal(outcome.result.decision, "ALLOW")
+  assert.equal(outcome.delivered, true)
+  assert.equal(outcome.deliveredOriginal, true)
+  assert.equal(outcome.intervention, null)
+  assert.equal(outcome.harness, "ALLOW")
 })
 
 test("org alpha fingerprints are invisible to org beta", async () => {

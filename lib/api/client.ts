@@ -141,7 +141,7 @@ export async function interceptAgent(body: IncidentInput) {
 }
 
 export async function runOpsAgentClient(body: {
-  kind?: "leak" | "safe" | "cross"
+  kind?: "leak" | "safe" | "cross" | "mutated" | "lookalike"
   orgId?: string
   environment?: string
 }) {
@@ -153,6 +153,9 @@ export async function runOpsAgentClient(body: {
   return readJson<{
     executed: false
     delivered: boolean
+    deliveredOriginal: boolean
+    intervention: "redact-sensitive" | null
+    harness: "ALLOW" | "BLOCK"
     result: AnalysisResult
     beneficiary: string
     change: string

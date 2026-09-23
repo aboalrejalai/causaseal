@@ -48,7 +48,9 @@ export function deriveInvariants(body = {}) {
 
   if (isSend) invariants.push("أداة إرسال")
   if (body.sensitiveData) invariants.push("بيانات حساسة")
-  if (isSend && !body.trustedDestination) invariants.push("وجهة غير معتمدة")
+  // Destination is causal even when the outbound tool is outside SEND_TOOLS
+  // (e.g. mutated phrasing that still targets an untrusted channel).
+  if (body.trustedDestination === false) invariants.push("وجهة غير معتمدة")
   if (hasDirectiveInRetrieved(prompt, retrieved)) {
     invariants.push("تعليمة في النص المسترجع")
   }
