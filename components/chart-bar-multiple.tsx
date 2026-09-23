@@ -20,6 +20,8 @@ export type BarMultiplePoint = {
   category: string
   seriesA: number
   seriesB?: number
+  /** Full Arabic label for tooltip when category is abbreviated. */
+  fullLabel?: string
 }
 
 type ChartBarMultipleProps = {
@@ -82,6 +84,10 @@ export function ChartBarMultiple({
               content={
                 <ChartTooltipContent
                   indicator="dashed"
+                  labelFormatter={(_value, payload) => {
+                    const full = payload?.[0]?.payload?.fullLabel
+                    return typeof full === "string" ? full : String(_value ?? "")
+                  }}
                   formatter={
                     valueFormatter
                       ? (value) => valueFormatter(Number(value))

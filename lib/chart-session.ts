@@ -87,6 +87,24 @@ export function fingerprintsToInvariantBars(fingerprints: Fingerprint[]) {
     .sort((a, b) => b.value - a.value)
 }
 
+const INVARIANT_SHORT: Record<string, string> = {
+  "أداة إرسال": "إرسال",
+  "بيانات حساسة": "حساسة",
+  "وجهة غير معتمدة": "وجهة",
+  "تعليمة في النص المسترجع": "مسترجع",
+  "صلاحية مرتفعة": "صلاحية",
+  "نداء سابق": "نداء",
+}
+
+/** Vertical bar series with short X labels; full Arabic name for tooltips. */
+export function fingerprintsToInvariantShortBars(fingerprints: Fingerprint[]) {
+  return fingerprintsToInvariantBars(fingerprints).map((row) => ({
+    category: INVARIANT_SHORT[row.label] ?? row.label.slice(0, 6),
+    seriesA: row.value,
+    fullLabel: row.label,
+  }))
+}
+
 export function fingerprintsToEnvironmentPie(fingerprints: Fingerprint[]) {
   const buckets = { dev: 0, enterprise: 0, cloud: 0 }
   for (const fp of fingerprints) {
@@ -119,15 +137,6 @@ export function mutationsToOutcomePie(results: MutationResult[]) {
 export function metricsToRadar(metrics: Array<{ label: string; value: number }>) {
   return metrics.map((metric) => ({
     axis: metric.label.length > 18 ? `${metric.label.slice(0, 16)}…` : metric.label,
-    value: Math.round(metric.value * 100),
-  }))
-}
-
-export function metricsToHorizontalBars(
-  metrics: Array<{ label: string; value: number }>
-) {
-  return metrics.map((metric) => ({
-    label: metric.label,
     value: Math.round(metric.value * 100),
   }))
 }
