@@ -36,11 +36,6 @@ export const NAV_ITEMS = [
     icon: "Radio",
     live: true,
   },
-  {
-    title: "الفريق",
-    href: "/team",
-    icon: "Users",
-  },
 ] as const
 
 export const VIEW_TITLES: Record<string, string> = {
@@ -51,7 +46,6 @@ export const VIEW_TITLES: Record<string, string> = {
   "/reports": "التقارير",
   "/impact": "الأثر",
   "/monitor": "المراقبة الحية",
-  "/team": "الفريق",
 }
 
 /** One-line difference from a tool harness, shown on the first screen. */

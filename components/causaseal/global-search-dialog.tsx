@@ -9,7 +9,7 @@ import {
   GitBranchIcon,
   LayoutDashboardIcon,
   RadioIcon,
-  UsersIcon,
+  TargetIcon,
 } from "lucide-react"
 
 import { useLanguage } from "@/components/causaseal/language-provider"
@@ -34,7 +34,7 @@ const SEARCH_ITEMS: Array<{
   { href: "/memory", titleKey: "nav.memory", icon: FingerprintIcon },
   { href: "/lab", titleKey: "nav.lab", icon: FlaskConicalIcon },
   { href: "/reports", titleKey: "nav.reports", icon: FileBarChartIcon },
-  { href: "/team", titleKey: "nav.team", icon: UsersIcon },
+  { href: "/impact", titleKey: "nav.impact", icon: TargetIcon },
 ]
 
 export function GlobalSearchDialog({

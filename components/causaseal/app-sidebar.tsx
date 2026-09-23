@@ -8,24 +8,14 @@ import {
   LayoutDashboardIcon,
   RadioIcon,
   TargetIcon,
-  UsersIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { useLanguage } from "@/components/causaseal/language-provider"
-import { Badge } from "@/components/ui/badge"
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -47,7 +37,6 @@ const ICONS = {
   FlaskConical: FlaskConicalIcon,
   FileBarChart: FileBarChartIcon,
   Target: TargetIcon,
-  Users: UsersIcon,
 } as const
 
 type AppSidebarProps = {
@@ -65,7 +54,7 @@ export function AppSidebar({ memoryCount = 3 }: AppSidebarProps) {
     (item) => NAV_I18N[item.href]?.group === "analysis"
   )
 
-  function renderGroup(items: typeof NAV_ITEMS[number][], labelKey: TranslationKey) {
+  function renderGroup(items: (typeof NAV_ITEMS)[number][], labelKey: TranslationKey) {
     return (
       <SidebarGroup>
         <SidebarGroupLabel>{t(labelKey)}</SidebarGroupLabel>
@@ -133,23 +122,6 @@ export function AppSidebar({ memoryCount = 3 }: AppSidebarProps) {
         {renderGroup(analysis, "nav.analysis")}
       </SidebarContent>
 
-      <SidebarFooter>
-        <Item size="sm" variant="muted" className="group-data-[collapsible=icon]:hidden">
-          <ItemMedia variant="icon">
-            <span className="size-2 animate-pulse rounded-full bg-success" aria-hidden />
-          </ItemMedia>
-          <ItemContent>
-            <ItemTitle>{t("shell.health")}</ItemTitle>
-            <ItemDescription>{t("shell.healthMeta")}</ItemDescription>
-          </ItemContent>
-        </Item>
-        <Badge
-          variant="outline"
-          className="w-full justify-center group-data-[collapsible=icon]:hidden"
-        >
-          {t("shell.saif")}
-        </Badge>
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
