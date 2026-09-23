@@ -6,6 +6,7 @@ import {
   FlaskConicalIcon,
   GitBranchIcon,
   LayoutDashboardIcon,
+  PlugIcon,
   RadioIcon,
   TargetIcon,
 } from "lucide-react"
@@ -37,6 +38,7 @@ const ICONS = {
   FlaskConical: FlaskConicalIcon,
   FileBarChart: FileBarChartIcon,
   Target: TargetIcon,
+  Plug: PlugIcon,
 } as const
 
 type AppSidebarProps = {

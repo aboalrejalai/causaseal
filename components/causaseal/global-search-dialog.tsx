@@ -8,6 +8,7 @@ import {
   FlaskConicalIcon,
   GitBranchIcon,
   LayoutDashboardIcon,
+  PlugIcon,
   RadioIcon,
   TargetIcon,
 } from "lucide-react"
@@ -35,6 +36,7 @@ const SEARCH_ITEMS: Array<{
   { href: "/lab", titleKey: "nav.lab", icon: FlaskConicalIcon },
   { href: "/reports", titleKey: "nav.reports", icon: FileBarChartIcon },
   { href: "/impact", titleKey: "nav.impact", icon: TargetIcon },
+  { href: "/connectors", titleKey: "nav.connectors", icon: PlugIcon },
 ]
 
 export function GlobalSearchDialog({

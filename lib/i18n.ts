@@ -12,6 +12,7 @@ export const translations = {
     "nav.lab": "مختبر SERMG",
     "nav.reports": "التقارير",
     "nav.impact": "الأثر",
+    "nav.connectors": "الموصّلات",
     "topbar.search": "بحث في الصفحات…",
     "topbar.searchShortcut": "⌘K",
     "topbar.env": "البيئة الإنتاجية",
@@ -42,6 +43,7 @@ export const translations = {
     "nav.lab": "SERMG Lab",
     "nav.reports": "Reports",
     "nav.impact": "Impact",
+    "nav.connectors": "Connectors",
     "topbar.search": "Search pages…",
     "topbar.searchShortcut": "⌘K",
     "topbar.env": "Production",
@@ -76,4 +78,5 @@ export const NAV_I18N: Record<
   "/lab": { titleKey: "nav.lab", group: "analysis" },
   "/reports": { titleKey: "nav.reports", group: "operations" },
   "/impact": { titleKey: "nav.impact", group: "operations" },
+  "/connectors": { titleKey: "nav.connectors", group: "operations" },
 }

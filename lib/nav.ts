@@ -31,6 +31,11 @@ export const NAV_ITEMS = [
     icon: "Target",
   },
   {
+    title: "الموصّلات",
+    href: "/connectors",
+    icon: "Plug",
+  },
+  {
     title: "المراقبة الحية",
     href: "/monitor",
     icon: "Radio",
@@ -45,6 +50,7 @@ export const VIEW_TITLES: Record<string, string> = {
   "/lab": "مختبر SERMG",
   "/reports": "التقارير",
   "/impact": "الأثر",
+  "/connectors": "الموصّلات",
   "/monitor": "المراقبة الحية",
 }
 
