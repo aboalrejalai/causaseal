@@ -4,7 +4,7 @@
 
 الواجهة تُصدَّر كملفات ثابتة إلى `out/` بينما يبقى `server.js` مسؤولاً عن الـ API والنشر على Hostinger (ملفات ثابتة + `/api/*`).
 
-**تدقيق التصميم:** [`docs/DESIGN_SYSTEM_AUDIT.md`](./docs/DESIGN_SYSTEM_AUDIT.md) · **مطابقة الفكرة مع الكود:** [`docs/مطابقة-الفكرة-مع-الكود.md`](./docs/مطابقة-الفكرة-مع-الكود.md)
+**التوثيق:** [`docs/README.md`](./docs/README.md) · **مطابقة الفكرة مع الكود:** [`docs/idea-to-code.md`](./docs/idea-to-code.md) · **نص التسجيل:** [`docs/registration-copy.md`](./docs/registration-copy.md) · **رن بوك اللجنة:** [`docs/judge-runbook.md`](./docs/judge-runbook.md) · **مختصر سيف:** [`docs/saif.md`](./docs/saif.md) · **تدقيق التصميم:** [`docs/DESIGN_SYSTEM_AUDIT.md`](./docs/DESIGN_SYSTEM_AUDIT.md)
 
 ## دعم المنصات (Capacitor & Electron)
 
