@@ -5,34 +5,29 @@
 
 Not the live demo script — that is [`judge-runbook.md`](judge-runbook.md).
 
+**Technical docs (Drive):** [Saif-26 folder](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing)
+
 ---
 
-## Missing data — send these so we can fill the file
+## Still missing (only these)
 
-Copy this checklist to the group; reply with answers (no need to invent IDs in chat if sensitive — you can paste privately and we put them in the file locally).
-
-| # | What we need | Who | Status |
+| # | What | Who | Status |
 | ---: | --- | --- | --- |
-| 1 | **Full legal name in English** (as on ID) | Bushra | Missing — surname / full name |
-| 2 | **Full legal name in Arabic** (as on ID) | Bushra | Missing |
-| 3 | **ID number for the poster** (national ID or the ID SAIF shows on the form — say which) | Shadia | Missing |
-| 4 | Same **ID** | Bushra | Missing |
-| 5 | Same **ID** | Mohammed | Missing |
-| 6 | **Email** used on SAIF (if the form asks) | each member | Optional — confirm if needed |
-| 7 | **Mobile** used on SAIF (if the form asks) | each member | Optional — confirm if needed |
-| 8 | **Booth Number** | team | Later — after qualification |
-| 9 | **Poster flag choice** | team | Decide: Saudi only · Yemen only · both flags (mixed team: Shadia & Bushra Saudi, Mohammed Yemeni) |
-| 10 | **Google Drive link** for technical docs (view access for judges) | team | Missing if not created yet |
-| 11 | **Prototype screenshot** path/file for JPG/PNG upload | team | Missing if not exported yet |
-| 12 | Confirm English spelling: **Shadia Ahmed Taher** / **Mohammed Abo Alrejal** | Shadia, Mohammed | Confirm or correct |
+| 1 | **Email** for SAIF (if the form asks) | Bushra | Missing |
+| 2 | **Email** for SAIF | Mohammed | Missing |
+| 3 | **Poster flag choice** | team | Decide: Saudi · Yemen · both |
+| 4 | **Booth Number** | team | After qualification |
+| 5 | **Prototype screenshot** JPG/PNG for upload | team | If not already in Drive |
 
-**Already known (updated in this file):**
+Filled: names, IDs, mobiles, Shadia email, Drive link, nationalities.
 
-| Member | Nationality | Role (EN) |
-| --- | --- | --- |
-| Shadia Ahmed Taher | Saudi | Idea / innovation lead |
-| Bushra `[FILL surname]` | Saudi | Software engineering / prototype |
-| Mohammed Abo Alrejal | Yemeni | Systems / cybersecurity / AI platform |
+### Team roster (filled)
+
+| Member (EN) | Member (AR) | Nationality | ID | Mobile | Email |
+| --- | --- | --- | --- | --- | --- |
+| Shadia Ahmed Taher Albsheer | شادية أحمد طاهر البشير | Saudi | 1014444887 | 0543404892 | Shadia.ta10@gmail.com |
+| Bushra Fahad O Alshammari | بشرى فهد عبيد الشمري | Saudi | 1136396387 | 0553533657 | `[FILL email]` |
+| Mohammed Nadher Aboalrejal | محمد نذير أبو الرجال | Yemeni | 10491861 | 0533548021 | `[FILL email]` |
 
 ---
 
@@ -43,20 +38,20 @@ Copy this checklist to the group; reply with answers (no need to invent IDs in c
 | Field on template | Paste |
 | --- | --- |
 | **Innovation Title** | CAUSASEAL — Causal Decision Layer Before Agent Tool Impact |
-| **Student Name** (line 1) | Shadia Ahmed Taher |
-| **ID** (line 1) | `[FILL: Shadia ID]` |
+| **Student Name** (line 1) | Shadia Ahmed Taher Albsheer |
+| **ID** (line 1) | 1014444887 |
 | **Nationality** (line 1) | Saudi Arabia |
-| **Student Name** (line 2) | Bushra `[FILL: full family name]` |
-| **ID** (line 2) | `[FILL: Bushra ID]` |
+| **Student Name** (line 2) | Bushra Fahad O Alshammari |
+| **ID** (line 2) | 1136396387 |
 | **Nationality** (line 2) | Saudi Arabia |
-| **Student Name** (line 3) | Mohammed Abo Alrejal |
-| **ID** (line 3) | `[FILL: Mohammed ID]` |
+| **Student Name** (line 3) | Mohammed Nadher Aboalrejal |
+| **ID** (line 3) | 10491861 |
 | **Nationality** (line 3) | Yemen |
-| **Country Flag Here** | `[FILL: Saudi · Yemen · or both — see missing #9]` |
+| **Country Flag Here** | `[FILL: Saudi · Yemen · or both]` |
 | **Booth Number** | `[FILL after qualification]` |
 | **QR Code** | `https://causaseal.aboalrejal.com` (and/or `https://github.com/aboalrejalai/causaseal`) |
 
-If the platform allows one lead name only, use **Shadia Ahmed Taher**; list all three on the poster.
+If the platform allows one lead name only, use **Shadia Ahmed Taher Albsheer**; list all three on the poster.
 
 ---
 
@@ -91,7 +86,7 @@ AI agents fail in *actions*, not only in answers. Each tool call can look allowe
 **One-line product claim:**  
 We sit above the agent harness. The harness judges the current tool call. We store the cause of a past incident, recognize it when it returns in a new form, and cut that edge while the task completes.
 
-Prototype: `https://causaseal.aboalrejal.com` · Source: `https://github.com/aboalrejalai/causaseal`
+Prototype: `https://causaseal.aboalrejal.com` · Source: `https://github.com/aboalrejalai/causaseal` · Docs folder: [Google Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing)
 
 ### Innovation
 
@@ -108,7 +103,7 @@ CAUSASEAL is a working prototype for SAIF: a causal decision layer before agent 
 - One real beneficiary attach and one documented blocked incident.
 - Stronger matching only if evidence requires it.
 - IAM / real EHR / external SIEM after the causal difference is solid.
-- Judges: this repo · [`idea-to-code.md`](idea-to-code.md) · [`saif.md`](saif.md) · `/architecture` compare.
+- Judges: this repo · [`idea-to-code.md`](idea-to-code.md) · [`saif.md`](saif.md) · `/architecture` compare · [Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing).
 
 ### Acknowledgments
 
@@ -133,12 +128,12 @@ We affirm that CAUSASEAL is our team’s original work for SAIF 2026. Unmeasured
 | **How it works (short)** | Analyze path → match fingerprint → ALLOW / VERIFY / INTERVENE → deliver original or redacted or hold for human. |
 | **Impact / beneficiary** | Teams that run agents with send tools against sensitive systems. Demo uses a simulated outbox; not a production contract yet. |
 | **Tech stack** | Node.js gateway, Next.js UI, MCP server, partner SDK stub, session metrics, automated tests. |
-| **Demo / repo links** | `https://causaseal.aboalrejal.com` · `https://github.com/aboalrejalai/causaseal` |
-| **Team member 1** | Shadia Ahmed Taher — Saudi — idea / innovation lead — ID `[FILL]` |
-| **Team member 2** | Bushra `[FILL surname]` — Saudi — software engineering / prototype — ID `[FILL]` |
-| **Team member 3** | Mohammed Abo Alrejal — Yemeni — systems / cybersecurity / AI platform — ID `[FILL]` |
+| **Demo / repo / docs links** | `https://causaseal.aboalrejal.com` · `https://github.com/aboalrejalai/causaseal` · [Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing) |
+| **Team member 1** | Shadia Ahmed Taher Albsheer — Saudi — ID 1014444887 — mobile 0543404892 — Shadia.ta10@gmail.com — idea / innovation lead |
+| **Team member 2** | Bushra Fahad O Alshammari — Saudi — ID 1136396387 — mobile 0553533657 — email `[FILL]` — software engineering / prototype |
+| **Team member 3** | Mohammed Nadher Aboalrejal — Yemeni — ID 10491861 — mobile 0533548021 — email `[FILL]` — systems / cybersecurity / AI platform |
 | **Intellectual property** | Original team work; no plagiarized drop-in codebase presented as ours. |
-| **Attachments checklist** | Video ≤5 min MP4 · Scientific poster PDF · Prototype image JPG/PNG · Technical docs Drive link (view access). |
+| **Attachments checklist** | Video ≤5 min MP4 · Scientific poster PDF · Prototype image JPG/PNG · Technical docs: Drive link above (view access). |
 
 ### Do not paste as measured claims
 
@@ -151,32 +146,25 @@ We affirm that CAUSASEAL is our team’s original work for SAIF 2026. Unmeasured
 
 # ARABIC (للفريق فقط — فهم · لا للصق في حقول الإنجليزية)
 
-نفس جداول الإنجليزية، صف لكل شخص.
+## ما زال ناقصًا فقط
 
-## بيانات ناقصة — انسخ للواتساب
+| # | المطلوب | من |
+| ---: | --- | --- |
+| 1 | البريد الإلكتروني | بشرى |
+| 2 | البريد الإلكتروني | محمد |
+| 3 | علم الملصق: سعودي / يمني / الاثنان | الفريق |
+| 4 | رقم الجناح | بعد التأهل |
+| 5 | صورة النموذج JPG/PNG إن لم تكن في الدرايف | الفريق |
 
-| # | المطلوب | من | الحالة |
-| ---: | --- | --- | --- |
-| 1 | الاسم الكامل بالإنجليزية كما في الهوية | بشرى | ناقص |
-| 2 | الاسم الكامل بالعربية كما في الهوية | بشرى | ناقص |
-| 3 | رقم الهوية / معرف سيف للملصق | شادية | ناقص |
-| 4 | رقم الهوية / معرف سيف للملصق | بشرى | ناقص |
-| 5 | رقم الهوية / معرف سيف للملصق | محمد | ناقص |
-| 6 | البريد على منصة سيف (إن طُلب) | كل عضو | اختياري |
-| 7 | الجوال على منصة سيف (إن طُلب) | كل عضو | اختياري |
-| 8 | رقم الجناح | الفريق | لاحقًا بعد التأهل |
-| 9 | علم الملصق: سعودي فقط / يمني فقط / الاثنان | الفريق | قرّروا |
-| 10 | رابط Google Drive للتوثيق التقني | الفريق | ناقص إن لم يُنشأ |
-| 11 | صورة النموذج الأولي JPG/PNG | الفريق | ناقص إن لم تُصدَّر |
-| 12 | تأكيد تهجئة: Shadia Ahmed Taher / Mohammed Abo Alrejal | شادية، محمد | أكّدوا أو صحّحوا |
+### قائمة الفريق (مُعبَّأة)
 
-**معروف الآن:**
+| الاسم (EN) | الاسم (AR) | الجنسية | الهوية | الجوال | البريد |
+| --- | --- | --- | --- | --- | --- |
+| Shadia Ahmed Taher Albsheer | شادية أحمد طاهر البشير | سعودية | 1014444887 | 0543404892 | Shadia.ta10@gmail.com |
+| Bushra Fahad O Alshammari | بشرى فهد عبيد الشمري | سعودية | 1136396387 | 0553533657 | `[املأ البريد]` |
+| Mohammed Nadher Aboalrejal | محمد نذير أبو الرجال | يمني | 10491861 | 0533548021 | `[املأ البريد]` |
 
-| العضو | الجنسية | الدور |
-| --- | --- | --- |
-| شادية أحمد طاهر | سعودية | قائدة الفكرة والابتكار |
-| بشرى `[أكمل اللقب]` | سعودية | هندسة برمجيات / النموذج الأولي |
-| محمد أبو الرجال | يمني | أنظمة / أمن سيبراني / منصة ذكاء اصطناعي |
+**رابط التوثيق:** [مجلد Saif-26 على Drive](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing)
 
 ---
 
@@ -185,14 +173,14 @@ We affirm that CAUSASEAL is our team’s original work for SAIF 2026. Unmeasured
 | الحقل في القالب | المقابل |
 | --- | --- |
 | عنوان الابتكار | CAUSASEAL — طبقة قرار سببي قبل أثر أداة الوكيل |
-| اسم الطالبة (سطر 1) | شادية أحمد طاهر |
-| الهوية (سطر 1) | `[املأ: هوية شادية]` |
+| اسم الطالبة (سطر 1) | شادية أحمد طاهر البشير |
+| الهوية (سطر 1) | 1014444887 |
 | الجنسية (سطر 1) | سعودية |
-| اسم الطالبة (سطر 2) | بشرى `[املأ: اللقب الكامل]` |
-| الهوية (سطر 2) | `[املأ: هوية بشرى]` |
+| اسم الطالبة (سطر 2) | بشرى فهد عبيد الشمري |
+| الهوية (سطر 2) | 1136396387 |
 | الجنسية (سطر 2) | سعودية |
-| اسم الطالب (سطر 3) | محمد أبو الرجال |
-| الهوية (سطر 3) | `[املأ: هوية محمد]` |
+| اسم الطالب (سطر 3) | محمد نذير أبو الرجال |
+| الهوية (سطر 3) | 10491861 |
 | الجنسية (سطر 3) | يمني |
 | مكان العلم | `[املأ: سعودي · يمني · أو الاثنان]` |
 | رقم الجناح | `[بعد التأهل]` |
@@ -223,7 +211,7 @@ We affirm that CAUSASEAL is our team’s original work for SAIF 2026. Unmeasured
 | --- | --- |
 | Introduction | الوكيل يخطئ في الفعل؛ الهارنس على النداء الحالي؛ نحن نتذكر شكل السبب بعد تغيّر الصياغة |
 | Methodology | ثوابت شكل المسار · Jaccard · بوابة قبل الإرسال · قطع مسمّى · موصّلات · أربع حالات |
-| Results | الجدول أعلاه + رابط الديمو والمستودع |
+| Results | الجدول أعلاه + رابط الديمو والمستودع والدرايف |
 | Innovation | الفرق عن الهارنس + أصغر تدخل + صدق النطاق |
 | Conclusion | نموذج أولي لسيف؛ ليس بديل IAM/SIEM |
 | Future Work | مستفيد حقيقي لاحقًا؛ لا نوسّع IAM قبل إثبات الفرق |
@@ -240,9 +228,9 @@ We affirm that CAUSASEAL is our team’s original work for SAIF 2026. Unmeasured
 | المسار | الأمن السيبراني والتقنيات الدفاعية |
 | الفئة | أكبر من 18 |
 | الملخص | طبقة فوق الهارنس · بصمة سبب · نسخة محذوفة عند التدخل · أربع حالات حية |
-| العضو 1 | شادية أحمد طاهر — سعودية — قائدة الفكرة — هوية `[املأ]` |
-| العضو 2 | بشرى `[لقب]` — سعودية — هندسة برمجيات — هوية `[املأ]` |
-| العضو 3 | محمد أبو الرجال — يمني — أنظمة وأمن وذكاء اصطناعي — هوية `[املأ]` |
+| العضو 1 | شادية أحمد طاهر البشير — سعودية — 1014444887 — 0543404892 — Shadia.ta10@gmail.com |
+| العضو 2 | بشرى فهد عبيد الشمري — سعودية — 1136396387 — 0553533657 — بريد `[املأ]` |
+| العضو 3 | محمد نذير أبو الرجال — يمني — 10491861 — 0533548021 — بريد `[املأ]` |
 
 ---
 
