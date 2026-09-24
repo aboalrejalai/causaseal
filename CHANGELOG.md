@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-24
+
+### Added
+- Name the severed causal invariant on INTERVENE and show it in the harness-compare Cut column while the original stays unsent.
+- Add a fourth harness-compare case (`partial`): harness ALLOW, fingerprint VERIFY, no send.
+- Add paste-ready registration copy in `docs/نص-التسجيل.md` aligned with the four-case demo.
+
+### Changed
+- Replace the one-line harness difference copy with the registration sentence used on Architecture and Impact.
+
 ## [0.9.1] - 2026-09-24
 
 ### Added
@@ -148,7 +158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Serve static UI and API from a plain Node server to clear Hostinger 503s.
 - Align Hostinger deploy with the Express entry and stop publishing `public` as the site root.
 
-[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/aboalrejalai/causaseal/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/aboalrejalai/causaseal/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/aboalrejalai/causaseal/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/aboalrejalai/causaseal/compare/v0.8.0...v0.8.1
