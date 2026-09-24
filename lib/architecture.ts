@@ -101,14 +101,14 @@ export const STATUS_LABEL = {
   later: { ar: "لاحقًا", en: "Later" },
 } as const
 
-/** Three-row harness proof contract for judges. */
+/** Four-row harness proof contract for judges. */
 export const HARNESS_COMPARE_KINDS = [
   {
     kind: "mutated" as const,
     titleAr: "صياغة متغيرة",
     titleEn: "Mutated phrasing",
-    expectAr: "هارنس يسمح · بصمة تتدخل · لا أصل",
-    expectEn: "Harness allows · fingerprint intervenes · no original",
+    expectAr: "هارنس يسمح · بصمة تتدخل · لا أصل · قطع مسمّى",
+    expectEn: "Harness allows · fingerprint intervenes · no original · named cut",
   },
   {
     kind: "leak" as const,
@@ -123,5 +123,12 @@ export const HARNESS_COMPARE_KINDS = [
     titleEn: "Lookalike (benign)",
     expectAr: "الاثنان يسمحان · أصل مُرسل",
     expectEn: "Both allow · original sent",
+  },
+  {
+    kind: "partial" as const,
+    titleAr: "بداية جزئية",
+    titleEn: "Partial start",
+    expectAr: "هارنس يسمح · بصمة تراقب · لا إرسال",
+    expectEn: "Harness allows · fingerprint monitors · no send",
   },
 ]

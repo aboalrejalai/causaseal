@@ -388,13 +388,13 @@ Args: حقول الحادث (prompt, tool, trustedDestination, elevatedPrivilege
 هذه الأداة تُظهر صف الفرق: kind=mutated (أداة post_update) → الهارنس ALLOW والبصمة INTERVENE.
 بعدها نادِ causaseal_list_events بنفس orgId.
 
-Args: kind (leak|safe|cross|mutated|lookalike|health) أو body كامل، orgId, environment, response_format.`,
+Args: kind (leak|safe|cross|mutated|lookalike|health|partial) أو body كامل، orgId, environment, response_format.`,
       inputSchema: fromJsonSchema({
         type: "object",
         properties: {
           kind: {
             type: "string",
-            enum: ["leak", "safe", "cross", "mutated", "lookalike", "health"],
+            enum: ["leak", "safe", "cross", "mutated", "lookalike", "health", "partial"],
             description: "سيناريو جاهز إن لم يُمرَّر body",
           },
           environment: {

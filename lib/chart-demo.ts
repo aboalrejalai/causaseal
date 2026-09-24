@@ -187,6 +187,7 @@ export type DemoImpactRow = {
   harness?: string
   crossContext?: boolean
   intervention?: string | null
+  cut?: string | null
 }
 
 export const DEMO_IMPACT_ROWS: DemoImpactRow[] = [
@@ -207,6 +208,7 @@ export const DEMO_IMPACT_ROWS: DemoImpactRow[] = [
     change: "هارنس ALLOW · بصمة INTERVENE",
     harness: "ALLOW",
     intervention: "redact-sensitive",
+    cut: "تعليمة في النص المسترجع",
   },
   {
     kind: "يشبه الخطر لفظيًا — السبب مختلف → سماح",

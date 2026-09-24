@@ -35,15 +35,21 @@ function humanSentence(row: {
   harness?: string
   decision: string
   deliveredOriginal?: boolean
+  cut?: string | null
 }) {
   if (row.harness === "ALLOW" && row.decision === "INTERVENE" && !row.deliveredOriginal) {
-    return "الهارنس سمح. البصمة منعت الأصل وأرسلت نسخة محذوفة."
+    return row.cut
+      ? `الهارنس سمح. البصمة منعت الأصل وأرسلت نسخة محذوفة. قُطعت: ${row.cut}.`
+      : "الهارنس سمح. البصمة منعت الأصل وأرسلت نسخة محذوفة."
   }
   if (row.harness === "BLOCK" && row.decision === "INTERVENE") {
     return "الهارنس منع الأداة الآن. البصمة سجّلت الشكل للنسخ التالية."
   }
   if (row.harness === "ALLOW" && row.decision === "ALLOW" && row.deliveredOriginal) {
     return "الاثنان سمحا؛ الأصل وصل."
+  }
+  if (row.harness === "ALLOW" && row.decision === "VERIFY" && !row.deliveredOriginal) {
+    return "الهارنس يسمح. البصمة تراقب (VERIFY)؛ لا إرسال حتى يراجع شخص."
   }
   return null
 }
@@ -142,10 +148,11 @@ export function ImpactView() {
           change: outcome.change,
           harness: outcome.harness,
           intervention: outcome.intervention,
+          cut: outcome.cut ?? null,
         })
       }
       setCompareRows(next)
-      toast.success("اكتملت مقارنة الهارنس (ثلاث حالات)")
+      toast.success("اكتملت مقارنة الهارنس (أربع حالات)")
       await refreshSession()
     } catch {
       toast.error("تعذر تشغيل مقارنة الهارنس. تأكد أن الخادم يعمل: npm start")
@@ -187,6 +194,7 @@ export function ImpactView() {
           change: mutated.change,
           harness: mutated.harness,
           intervention: mutated.intervention,
+          cut: mutated.cut ?? null,
         },
       ])
 
@@ -304,13 +312,14 @@ export function ImpactView() {
             <CardDescription>{HARNESS_DIFF}</CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto">
-            <table className="w-full min-w-[32rem] text-start text-sm">
+            <table className="w-full min-w-[40rem] text-start text-sm">
               <thead>
                 <tr className="border-b text-muted-foreground">
                   <th className="p-2 font-medium">الحالة</th>
                   <th className="p-2 font-medium">هارنس</th>
                   <th className="p-2 font-medium">بصمة</th>
                   <th className="p-2 font-medium">أصل مُرسل</th>
+                  <th className="p-2 font-medium">القطع</th>
                   <th className="p-2 font-medium">جملة</th>
                 </tr>
               </thead>
@@ -324,13 +333,24 @@ export function ImpactView() {
                     <td className="p-2">
                       <Badge
                         variant={
-                          row.decision === "INTERVENE" ? "destructive" : "secondary"
+                          row.decision === "INTERVENE"
+                            ? "destructive"
+                            : row.decision === "VERIFY"
+                              ? "outline"
+                              : "secondary"
                         }
                       >
                         {formatDecision(row.decision)}
                       </Badge>
                     </td>
                     <td className="p-2">{row.deliveredOriginal ? "نعم" : "لا"}</td>
+                    <td className="p-2 text-xs">
+                      {row.cut ? (
+                        <Badge variant="secondary">{row.cut}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
                     <td className="p-2 text-xs text-muted-foreground">
                       {humanSentence(row) || row.change}
                     </td>
@@ -350,7 +370,7 @@ export function ImpactView() {
         <CardContent className="flex flex-col gap-3">
           {rows.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              للمقارنة السريعة أمام اللجنة: «شغّل مقارنة الهارنس» (ثلاث حالات). للسيناريوهات
+              للمقارنة السريعة أمام اللجنة: «شغّل مقارنة الهارنس» (أربع حالات). للسيناريوهات
               الأوسع: «تشغيل سيناريوهات الفرق».
             </p>
           ) : (

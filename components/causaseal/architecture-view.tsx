@@ -43,6 +43,7 @@ type CompareRow = {
   decision: string
   deliveredOriginal: boolean
   intervention: string | null
+  cut: string | null
   change: string
   sentence: string
 }
@@ -57,12 +58,18 @@ function sentenceFor(
   harness: string,
   decision: string,
   deliveredOriginal: boolean,
-  ar: boolean
+  ar: boolean,
+  cut: string | null
 ) {
   if (harness === "ALLOW" && decision === "INTERVENE" && !deliveredOriginal) {
+    const cutBit = cut
+      ? ar
+        ? ` قُطعت: ${cut}.`
+        : ` Cut: ${cut}.`
+      : ""
     return ar
-      ? "الهارنس سمح. البصمة منعت الأصل وأرسلت نسخة محذوفة."
-      : "Harness allowed. Fingerprint blocked the original and sent a redacted copy."
+      ? `الهارنس سمح. البصمة منعت الأصل وأرسلت نسخة محذوفة.${cutBit}`
+      : `Harness allowed. Fingerprint blocked the original and sent a redacted copy.${cutBit}`
   }
   if (harness === "BLOCK" && decision === "INTERVENE") {
     return ar
@@ -73,6 +80,11 @@ function sentenceFor(
     return ar
       ? "الاثنان سمحا؛ الأصل وصل للصندوق المحاكى."
       : "Both allowed; original reached the simulated outbox."
+  }
+  if (harness === "ALLOW" && decision === "VERIFY" && !deliveredOriginal) {
+    return ar
+      ? "الهارنس يسمح. البصمة تراقب (VERIFY)؛ لا إرسال حتى يراجع شخص."
+      : "Harness allows. Fingerprint monitors (VERIFY); no send until a person reviews."
   }
   return ar
     ? `هارنس: ${harness} · بصمة: ${decision}`
@@ -100,6 +112,7 @@ export function ArchitectureView() {
           environment: "dev",
         })
         const decision = String(outcome.result.decision)
+        const cut = outcome.cut ?? null
         next.push({
           kind: spec.kind,
           title: ar ? spec.titleAr : spec.titleEn,
@@ -107,17 +120,19 @@ export function ArchitectureView() {
           decision,
           deliveredOriginal: outcome.deliveredOriginal,
           intervention: outcome.intervention,
+          cut,
           change: outcome.change,
           sentence: sentenceFor(
             outcome.harness,
             decision,
             outcome.deliveredOriginal,
-            ar
+            ar,
+            cut
           ),
         })
       }
       setRows(next)
-      toast.success(ar ? "اكتملت مقارنة الهارنس" : "Harness compare finished")
+      toast.success(ar ? "اكتملت مقارنة الهارنس (أربع حالات)" : "Harness compare finished (four cases)")
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -272,12 +287,12 @@ export function ArchitectureView() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            {ar ? "مقارنة الهارنس (ثلاث حالات)" : "Harness compare (three cases)"}
+            {ar ? "مقارنة الهارنس (أربع حالات)" : "Harness compare (four cases)"}
           </CardTitle>
           <CardDescription>
             {ar
-              ? "أرقام حية من الجلسة — مو مزروعة. الصف الحرج: صياغة متغيرة."
-              : "Live session numbers — not seeded. Critical row: mutated phrasing."}
+              ? "أرقام حية من الجلسة — مو مزروعة. الصف الحرج: صياغة متغيرة مع قطع مسمّى. الصف الرابع: راقب ولا تمنع."
+              : "Live session numbers — not seeded. Critical row: mutated phrasing with a named cut. Fourth row: monitor, do not block."}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
@@ -289,7 +304,7 @@ export function ArchitectureView() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[36rem] text-start text-sm">
+              <table className="w-full min-w-[42rem] text-start text-sm">
                 <thead>
                   <tr className="border-b text-muted-foreground">
                     <th className="p-2 font-medium">{ar ? "الحالة" : "Case"}</th>
@@ -298,6 +313,7 @@ export function ArchitectureView() {
                     <th className="p-2 font-medium">
                       {ar ? "أصل مُرسل" : "Original sent"}
                     </th>
+                    <th className="p-2 font-medium">{ar ? "القطع" : "Cut"}</th>
                     <th className="p-2 font-medium">{ar ? "جملة" : "Sentence"}</th>
                   </tr>
                 </thead>
@@ -311,7 +327,11 @@ export function ArchitectureView() {
                       <td className="p-2">
                         <Badge
                           variant={
-                            row.decision === "INTERVENE" ? "destructive" : "secondary"
+                            row.decision === "INTERVENE"
+                              ? "destructive"
+                              : row.decision === "VERIFY"
+                                ? "outline"
+                                : "secondary"
                           }
                         >
                           {formatDecision(row.decision)}
@@ -325,6 +345,13 @@ export function ArchitectureView() {
                           : ar
                             ? "لا"
                             : "No"}
+                      </td>
+                      <td className="p-2 text-xs">
+                        {row.cut ? (
+                          <Badge variant="secondary">{row.cut}</Badge>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="max-w-xs p-2 text-xs text-muted-foreground">
                         {row.sentence}
