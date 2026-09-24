@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-09-24
+
+### Changed
+- Restructure the idea-to-code match doc: core idea tasks first, then extras (MCP/SDK/architecture/named cut), with a clearer internal SAIF score table.
+
 ## [0.10.0] - 2026-09-24
 
 ### Added
@@ -158,7 +163,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Serve static UI and API from a plain Node server to clear Hostinger 503s.
 - Align Hostinger deploy with the Express entry and stop publishing `public` as the site root.
 
-[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.1...HEAD
+[0.10.1]: https://github.com/aboalrejalai/causaseal/compare/v0.10.0...v0.10.1
 [0.10.0]: https://github.com/aboalrejalai/causaseal/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/aboalrejalai/causaseal/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/aboalrejalai/causaseal/compare/v0.8.1...v0.9.0
