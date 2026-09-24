@@ -31,6 +31,11 @@ export const NAV_ITEMS = [
     icon: "Target",
   },
   {
+    title: "المعمارية",
+    href: "/architecture",
+    icon: "Network",
+  },
+  {
     title: "الموصّلات",
     href: "/connectors",
     icon: "Plug",
@@ -50,6 +55,7 @@ export const VIEW_TITLES: Record<string, string> = {
   "/lab": "مختبر SERMG",
   "/reports": "التقارير",
   "/impact": "الأثر",
+  "/architecture": "المعمارية",
   "/connectors": "الموصّلات",
   "/connectors/http": "واجهة HTTP",
   "/connectors/mcp": "خادم MCP",

@@ -161,7 +161,7 @@ export async function interceptAgent(body: IncidentInput) {
 }
 
 export async function runOpsAgentClient(body: {
-  kind?: "leak" | "safe" | "cross" | "mutated" | "lookalike"
+  kind?: "leak" | "safe" | "cross" | "mutated" | "lookalike" | "health"
   orgId?: string
   environment?: string
 }) {

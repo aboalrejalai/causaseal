@@ -8,6 +8,7 @@ import {
   FlaskConicalIcon,
   GitBranchIcon,
   LayoutDashboardIcon,
+  NetworkIcon,
   PlugIcon,
   RadioIcon,
   TargetIcon,
@@ -36,6 +37,7 @@ const SEARCH_ITEMS: Array<{
   { href: "/lab", titleKey: "nav.lab", icon: FlaskConicalIcon },
   { href: "/reports", titleKey: "nav.reports", icon: FileBarChartIcon },
   { href: "/impact", titleKey: "nav.impact", icon: TargetIcon },
+  { href: "/architecture", titleKey: "nav.architecture", icon: NetworkIcon },
   { href: "/connectors", titleKey: "nav.connectors", icon: PlugIcon },
 ]
 

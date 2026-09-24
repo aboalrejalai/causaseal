@@ -5,6 +5,7 @@
 
 import {
   BENIGN_SEND,
+  HEALTH_LEAK,
   LOOKALIKE,
   MUTATED_LEAK,
   NOVEL_LEAK,
@@ -54,11 +55,15 @@ function deliver(body, orgId, meta = {}) {
   const channel = ["http", "mcp", "sdk"].includes(String(meta.channel))
     ? String(meta.channel)
     : "http"
+  const path =
+    body.simulatedTarget === "ehr-email"
+      ? "نظام السجلات الصحية / بوابة البريد (محاكاة)"
+      : "صندوق صادر محلي"
   const delivered = {
     time: new Date().toLocaleTimeString("en-GB", { hour12: false }),
     agent: String(body.agent || "Operations Assistant"),
     tool: String(body.tool || "send_to_workspace"),
-    path: "صندوق صادر محلي",
+    path,
     status: "allowed",
     label: isRedacted ? "DELIVERED-REDACTED" : "DELIVERED",
     confidence: "—",
@@ -76,7 +81,7 @@ function deliver(body, orgId, meta = {}) {
 
 /**
  * @param {{
- *   kind?: "leak" | "safe" | "cross" | "mutated" | "lookalike",
+ *   kind?: "leak" | "safe" | "cross" | "mutated" | "lookalike" | "health",
  *   orgId?: string,
  *   environment?: string,
  *   body?: Record<string, unknown>,
@@ -109,6 +114,12 @@ export async function runOpsAgent(options = {}) {
       ...LOOKALIKE,
       orgId,
       environment: options.environment || LOOKALIKE.environment,
+    }
+  } else if (kind === "health") {
+    body = {
+      ...HEALTH_LEAK,
+      orgId,
+      environment: options.environment || HEALTH_LEAK.environment,
     }
   } else {
     body = { ...NOVEL_LEAK, orgId, environment: options.environment || "dev" }
@@ -152,11 +163,18 @@ export async function runOpsAgent(options = {}) {
     result,
     orgId,
     kind,
-    beneficiary: "فريق تشغيل الوكيل داخل المؤسسة",
+    beneficiary:
+      kind === "health"
+        ? "فريق تشغيل الوكيل السريري (سيناريو محاكى)"
+        : "فريق تشغيل الوكيل داخل المؤسسة",
     change: intervene
-      ? "المهمة اكتملت بنسخة محذوفة؛ الأصل الحساس لم يُرسل"
+      ? kind === "health"
+        ? "الأصل لم يُرسل إلى نظام السجلات الصحية (محاكاة)؛ أُرسلت نسخة محذوفة فقط"
+        : "المهمة اكتملت بنسخة محذوفة؛ الأصل الحساس لم يُرسل"
       : delivery
-        ? "الإرسال المحلي تم بعد السماح"
+        ? kind === "health"
+          ? "الإرسال للمحاكى (EHR/بريد) بعد السماح"
+          : "الإرسال المحلي تم بعد السماح"
         : "لم يُنفَّذ إرسال",
   }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { toast } from "sonner"
 
 import { IllustrativeBadge, PageHeading } from "@/components/causaseal/page-heading"
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { fetchSession, runOpsAgentClient, type SessionSummary } from "@/lib/api/client"
+import { HARNESS_COMPARE_KINDS } from "@/lib/architecture"
 import { DEMO_IMPACT_ROWS, type DemoImpactRow } from "@/lib/chart-demo"
 import { formatDecision } from "@/lib/decisions"
 import { HARNESS_DIFF } from "@/lib/nav"
@@ -26,6 +28,23 @@ type RunRow = DemoImpactRow
 function harnessLabel(value?: string) {
   if (value === "BLOCK") return "هارنس: منع"
   if (value === "ALLOW") return "هارنس: سماح"
+  return null
+}
+
+function humanSentence(row: {
+  harness?: string
+  decision: string
+  deliveredOriginal?: boolean
+}) {
+  if (row.harness === "ALLOW" && row.decision === "INTERVENE" && !row.deliveredOriginal) {
+    return "الهارنس سمح. البصمة منعت الأصل وأرسلت نسخة محذوفة."
+  }
+  if (row.harness === "BLOCK" && row.decision === "INTERVENE") {
+    return "الهارنس منع الأداة الآن. البصمة سجّلت الشكل للنسخ التالية."
+  }
+  if (row.harness === "ALLOW" && row.decision === "ALLOW" && row.deliveredOriginal) {
+    return "الاثنان سمحا؛ الأصل وصل."
+  }
   return null
 }
 
@@ -79,7 +98,9 @@ function impactChartBlock(rows: RunRow[], live: boolean) {
 
 export function ImpactView() {
   const [running, setRunning] = React.useState(false)
+  const [compareRunning, setCompareRunning] = React.useState(false)
   const [rows, setRows] = React.useState<RunRow[]>([])
+  const [compareRows, setCompareRows] = React.useState<RunRow[]>([])
   const [session, setSession] = React.useState<SessionSummary | null>(null)
 
   async function refreshSession() {
@@ -101,6 +122,37 @@ export function ImpactView() {
       cancelled = true
     }
   }, [])
+
+  async function runHarnessCompare() {
+    setCompareRunning(true)
+    setCompareRows([])
+    try {
+      const next: RunRow[] = []
+      for (const spec of HARNESS_COMPARE_KINDS) {
+        const outcome = await runOpsAgentClient({
+          kind: spec.kind,
+          environment: "dev",
+          orgId: "demo",
+        })
+        next.push({
+          kind: spec.titleAr,
+          decision: String(outcome.result.decision),
+          delivered: outcome.delivered,
+          deliveredOriginal: outcome.deliveredOriginal,
+          change: outcome.change,
+          harness: outcome.harness,
+          intervention: outcome.intervention,
+        })
+      }
+      setCompareRows(next)
+      toast.success("اكتملت مقارنة الهارنس (ثلاث حالات)")
+      await refreshSession()
+    } catch {
+      toast.error("تعذر تشغيل مقارنة الهارنس. تأكد أن الخادم يعمل: npm start")
+    } finally {
+      setCompareRunning(false)
+    }
+  }
 
   async function runDemo() {
     setRunning(true)
@@ -197,6 +249,8 @@ export function ImpactView() {
     }
   }
 
+  const tableRows = compareRows.length > 0 ? compareRows : rows
+
   return (
     <>
       <PageHeading
@@ -205,11 +259,18 @@ export function ImpactView() {
         description="نفس الطلب مرتين: هارنس الأداة الآن، والبصمة للصياغة التالية. عند المنع تُرسل نسخة محذوفة."
         actions={
           <>
-            {rows.length > 0 ? (
+            {tableRows.length > 0 ? (
               <Badge variant="success">أرقام هذه الجلسة</Badge>
             ) : (
               <IllustrativeBadge />
             )}
+            <Button
+              variant="outline"
+              disabled={compareRunning}
+              onClick={() => void runHarnessCompare()}
+            >
+              {compareRunning ? "جاري المقارنة…" : "شغّل مقارنة الهارنس"}
+            </Button>
             <Button disabled={running} onClick={() => void runDemo()}>
               {running ? "جاري التشغيل…" : "تشغيل سيناريوهات الفرق"}
             </Button>
@@ -223,11 +284,63 @@ export function ImpactView() {
           المستفيد: فريق تشغيل الوكيل داخل المؤسسة. التغيّر: عند INTERVENE تُرسل نسخة بلا بيانات
           حساسة، والأصل لا يُرسل. عند ALLOW يُرسل الأصل. القياس من الجلسة: منع{" "}
           {session?.blocked ?? 0} · مطابقة {Math.round((session?.matchRate ?? 0) * 100)}% · بيئات{" "}
-          {session?.environmentCount ?? 0}.
+          {session?.environmentCount ?? 0}. خريطة الربط الصادقة:{" "}
+          <Link className="underline underline-offset-4" href="/architecture">
+            المعمارية
+          </Link>
+          .
         </AlertDescription>
       </Alert>
 
-      {impactChartBlock(rows.length > 0 ? rows : DEMO_IMPACT_ROWS, rows.length > 0)}
+      {impactChartBlock(
+        tableRows.length > 0 ? tableRows : DEMO_IMPACT_ROWS,
+        tableRows.length > 0
+      )}
+
+      {compareRows.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">جدول مقارنة الهارنس</CardTitle>
+            <CardDescription>{HARNESS_DIFF}</CardDescription>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <table className="w-full min-w-[32rem] text-start text-sm">
+              <thead>
+                <tr className="border-b text-muted-foreground">
+                  <th className="p-2 font-medium">الحالة</th>
+                  <th className="p-2 font-medium">هارنس</th>
+                  <th className="p-2 font-medium">بصمة</th>
+                  <th className="p-2 font-medium">أصل مُرسل</th>
+                  <th className="p-2 font-medium">جملة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {compareRows.map((row) => (
+                  <tr key={row.kind} className="border-b last:border-0">
+                    <td className="p-2 font-medium">{row.kind}</td>
+                    <td className="p-2">
+                      <Badge variant="outline">{row.harness}</Badge>
+                    </td>
+                    <td className="p-2">
+                      <Badge
+                        variant={
+                          row.decision === "INTERVENE" ? "destructive" : "secondary"
+                        }
+                      >
+                        {formatDecision(row.decision)}
+                      </Badge>
+                    </td>
+                    <td className="p-2">{row.deliveredOriginal ? "نعم" : "لا"}</td>
+                    <td className="p-2 text-xs text-muted-foreground">
+                      {humanSentence(row) || row.change}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -237,8 +350,8 @@ export function ImpactView() {
         <CardContent className="flex flex-col gap-3">
           {rows.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              اضغط التشغيل: تسريب معروف (الاثنان يمنعان)، صياغة متغيرة (هارنس يسمح / بصمة تمنع)،
-              شبيه لفظي (سماح)، مسار مشروع، ثم عبر السياق.
+              للمقارنة السريعة أمام اللجنة: «شغّل مقارنة الهارنس» (ثلاث حالات). للسيناريوهات
+              الأوسع: «تشغيل سيناريوهات الفرق».
             </p>
           ) : (
             rows.map((row) => (
@@ -248,7 +361,9 @@ export function ImpactView() {
               >
                 <div>
                   <p className="text-sm font-medium">{row.kind}</p>
-                  <p className="text-xs text-muted-foreground">{row.change}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {humanSentence(row) || row.change}
+                  </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {harnessLabel(row.harness) ? (

@@ -2,7 +2,7 @@ export type Language = "ar" | "en"
 
 export const translations = {
   ar: {
-    "brand.subtitle": "المناعة السببية التنبؤية",
+    "brand.subtitle": "قرار قبل أثر الأداة",
     "nav.operations": "عمليات",
     "nav.analysis": "تحليل",
     "nav.overview": "مركز العمليات",
@@ -12,6 +12,7 @@ export const translations = {
     "nav.lab": "مختبر SERMG",
     "nav.reports": "التقارير",
     "nav.impact": "الأثر",
+    "nav.architecture": "المعمارية",
     "nav.connectors": "الموصّلات",
     "nav.connectorsHttp": "واجهة HTTP",
     "nav.connectorsMcp": "خادم MCP",
@@ -36,7 +37,7 @@ export const translations = {
     "live": "بث مباشر",
   },
   en: {
-    "brand.subtitle": "Predictive causal immunity",
+    "brand.subtitle": "Decision before tool impact",
     "nav.operations": "Operations",
     "nav.analysis": "Analysis",
     "nav.overview": "Operations Center",
@@ -46,6 +47,7 @@ export const translations = {
     "nav.lab": "SERMG Lab",
     "nav.reports": "Reports",
     "nav.impact": "Impact",
+    "nav.architecture": "Architecture",
     "nav.connectors": "Connectors",
     "nav.connectorsHttp": "HTTP API",
     "nav.connectorsMcp": "MCP server",
@@ -84,6 +86,7 @@ export const NAV_I18N: Record<
   "/lab": { titleKey: "nav.lab", group: "analysis" },
   "/reports": { titleKey: "nav.reports", group: "operations" },
   "/impact": { titleKey: "nav.impact", group: "operations" },
+  "/architecture": { titleKey: "nav.architecture", group: "operations" },
   "/connectors": { titleKey: "nav.connectors", group: "operations" },
   "/connectors/http": { titleKey: "nav.connectorsHttp", group: "operations" },
   "/connectors/mcp": { titleKey: "nav.connectorsMcp", group: "operations" },

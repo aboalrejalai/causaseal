@@ -124,6 +124,20 @@ test("lookalike allows — wording alone does not block", async () => {
   assert.equal(outcome.harness, "ALLOW")
 })
 
+test("health sim: harness ALLOW, fingerprint INTERVENE, simulated EHR path", async () => {
+  resetTelemetryCache()
+  resetPersistCache()
+  const orgId = "test-health"
+  const outcome = await runOpsAgent({ kind: "health", orgId, environment: "enterprise" })
+  assert.equal(outcome.harness, "ALLOW")
+  assert.equal(outcome.result.decision, "INTERVENE")
+  assert.equal(outcome.deliveredOriginal, false)
+  assert.equal(outcome.delivered, true)
+  assert.equal(outcome.intervention, "redact-sensitive")
+  assert.ok(String(outcome.change).includes("محاكاة"))
+  assert.ok(String(outcome.delivery?.path || "").includes("محاكاة"))
+})
+
 test("org alpha fingerprints are invisible to org beta", async () => {
   resetTelemetryCache()
   resetPersistCache()

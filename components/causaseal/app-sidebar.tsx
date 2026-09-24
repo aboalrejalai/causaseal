@@ -6,6 +6,7 @@ import {
   FlaskConicalIcon,
   GitBranchIcon,
   LayoutDashboardIcon,
+  NetworkIcon,
   PlugIcon,
   RadioIcon,
   TargetIcon,
@@ -38,6 +39,7 @@ const ICONS = {
   FlaskConical: FlaskConicalIcon,
   FileBarChart: FileBarChartIcon,
   Target: TargetIcon,
+  Network: NetworkIcon,
   Plug: PlugIcon,
 } as const
 
