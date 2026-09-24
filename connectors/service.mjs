@@ -12,7 +12,7 @@ import {
   searchFingerprints,
   storeFingerprint,
 } from "../engine/memory.mjs"
-import { harnessDecision, redactSensitive, runOpsAgent } from "../engine/ops-agent.mjs"
+import { causalCut, harnessDecision, redactSensitive, runOpsAgent } from "../engine/ops-agent.mjs"
 import { mutate } from "../engine/sermg.mjs"
 import {
   listEvents,
@@ -257,16 +257,21 @@ export async function interceptTool(body = {}) {
   })
   const decision = result.decision
   const sendOriginal = decision === "ALLOW"
+  const invariants = Array.isArray(result.reduction?.invariants)
+    ? result.reduction.invariants
+    : []
+  const cut = decision === "INTERVENE" ? causalCut(invariants) : null
   /** @type {Record<string, unknown> | undefined} */
   let redactedBody
   if (decision === "INTERVENE") {
-    redactedBody = redactSensitive(incident)
+    redactedBody = redactSensitive(incident, { cut })
   }
   return {
     executed: false,
     decision,
     sendOriginal,
     harness,
+    cut,
     result,
     orgId,
     channel,
@@ -275,7 +280,9 @@ export async function interceptTool(body = {}) {
       decision === "ALLOW"
         ? "أرسل الأصل إلى أداة الإرسال."
         : decision === "INTERVENE"
-          ? "لا ترسل الأصل. استخدم redactedBody فقط."
+          ? cut
+            ? `لا ترسل الأصل. قُطعت: ${cut}. استخدم redactedBody فقط.`
+            : "لا ترسل الأصل. استخدم redactedBody فقط."
           : "أوقف التنفيذ لشخص (VERIFY).",
   }
 }
@@ -376,4 +383,4 @@ export async function runSermg(options = {}) {
   return { ...result, orgId }
 }
 
-export { harnessDecision, redactSensitive }
+export { causalCut, harnessDecision, redactSensitive }

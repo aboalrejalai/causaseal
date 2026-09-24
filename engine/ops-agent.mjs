@@ -9,6 +9,7 @@ import {
   LOOKALIKE,
   MUTATED_LEAK,
   NOVEL_LEAK,
+  PARTIAL,
   novelLeakIn,
 } from "./fixtures/novel-leak.mjs"
 import { analyze } from "./gateway.mjs"
@@ -30,17 +31,44 @@ export function harnessDecision(body = {}) {
 }
 
 /**
- * Strip sensitive payload for a safe local deliver. Shared with connectors.
- * @param {Record<string, unknown>} body
+ * Name the causal edge to sever on INTERVENE. Priority matches the demo story:
+ * directive-in-retrieved is the classic indirect-injection edge; destination /
+ * sensitive / privilege follow. "أداة إرسال" is the call shape, not the cut.
+ * @param {string[]} [invariants]
+ * @returns {string | null}
  */
-export function redactSensitive(body) {
-  const redactedNote = "أُزيلت البيانات الحساسة؛ أُرسلت نسخة آمنة فقط."
+export function causalCut(invariants = []) {
+  const list = Array.isArray(invariants) ? invariants : []
+  const priority = [
+    "تعليمة في النص المسترجع",
+    "وجهة غير معتمدة",
+    "بيانات حساسة",
+    "صلاحية مرتفعة",
+  ]
+  for (const name of priority) {
+    if (list.includes(name)) return name
+  }
+  return null
+}
+
+/**
+ * Strip sensitive payload for a safe local deliver. Shared with connectors.
+ * Mentions the named cut when known so the judge sees what edge was severed.
+ * @param {Record<string, unknown>} body
+ * @param {{ cut?: string | null }} [meta]
+ */
+export function redactSensitive(body, meta = {}) {
+  const cut = meta.cut ? String(meta.cut) : ""
+  const redactedNote = cut
+    ? `قُطعت: ${cut}. أُزيلت البيانات الحساسة؛ أُرسلت نسخة آمنة فقط.`
+    : "أُزيلت البيانات الحساسة؛ أُرسلت نسخة آمنة فقط."
   return {
     ...body,
     sensitiveData: false,
     retrievedText: redactedNote,
     untrustedContent: redactedNote,
     redacted: true,
+    ...(cut ? { cut } : {}),
   }
 }
 
@@ -81,7 +109,7 @@ function deliver(body, orgId, meta = {}) {
 
 /**
  * @param {{
- *   kind?: "leak" | "safe" | "cross" | "mutated" | "lookalike" | "health",
+ *   kind?: "leak" | "safe" | "cross" | "mutated" | "lookalike" | "health" | "partial",
  *   orgId?: string,
  *   environment?: string,
  *   body?: Record<string, unknown>,
@@ -121,6 +149,12 @@ export async function runOpsAgent(options = {}) {
       orgId,
       environment: options.environment || HEALTH_LEAK.environment,
     }
+  } else if (kind === "partial") {
+    body = {
+      ...PARTIAL,
+      orgId,
+      environment: options.environment || PARTIAL.environment,
+    }
   } else {
     body = { ...NOVEL_LEAK, orgId, environment: options.environment || "dev" }
   }
@@ -137,6 +171,11 @@ export async function runOpsAgent(options = {}) {
   })
 
   const intervene = result.decision === "INTERVENE"
+  const invariants = Array.isArray(result.reduction?.invariants)
+    ? result.reduction.invariants
+    : []
+  /** @type {string | null} */
+  const cut = intervene ? causalCut(invariants) : null
   /** @type {Record<string, unknown> | null} */
   let delivery = null
   /** @type {"redact-sensitive" | null} */
@@ -147,17 +186,20 @@ export async function runOpsAgent(options = {}) {
     delivery = deliver(body, orgId, { channel })
     deliveredOriginal = true
   } else if (intervene) {
-    const redacted = redactSensitive(body)
+    const redacted = redactSensitive(body, { cut })
     delivery = deliver(redacted, orgId, { redacted: true, channel })
     intervention = "redact-sensitive"
     deliveredOriginal = false
   }
+
+  const cutPhrase = cut ? `قُطعت: ${cut}. ` : ""
 
   return {
     executed: false,
     delivered: Boolean(delivery),
     deliveredOriginal,
     intervention,
+    cut,
     delivery,
     harness,
     result,
@@ -169,12 +211,14 @@ export async function runOpsAgent(options = {}) {
         : "فريق تشغيل الوكيل داخل المؤسسة",
     change: intervene
       ? kind === "health"
-        ? "الأصل لم يُرسل إلى نظام السجلات الصحية (محاكاة)؛ أُرسلت نسخة محذوفة فقط"
-        : "المهمة اكتملت بنسخة محذوفة؛ الأصل الحساس لم يُرسل"
-      : delivery
-        ? kind === "health"
-          ? "الإرسال للمحاكى (EHR/بريد) بعد السماح"
-          : "الإرسال المحلي تم بعد السماح"
-        : "لم يُنفَّذ إرسال",
+        ? `${cutPhrase}الأصل لم يُرسل إلى نظام السجلات الصحية (محاكاة)؛ أُرسلت نسخة محذوفة فقط`
+        : `${cutPhrase}المهمة اكتملت بنسخة محذوفة؛ الأصل الحساس لم يُرسل`
+      : result.decision === "VERIFY"
+        ? "بداية جزئية — تحقق بشري؛ لم يُنفَّذ إرسال"
+        : delivery
+          ? kind === "health"
+            ? "الإرسال للمحاكى (EHR/بريد) بعد السماح"
+            : "الإرسال المحلي تم بعد السماح"
+          : "لم يُنفَّذ إرسال",
   }
 }

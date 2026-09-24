@@ -110,6 +110,9 @@ test("mutated leak: harness allows, fingerprint intervenes", async () => {
   assert.equal(outcome.deliveredOriginal, false)
   assert.equal(outcome.delivered, true)
   assert.equal(outcome.intervention, "redact-sensitive")
+  assert.equal(outcome.cut, "تعليمة في النص المسترجع")
+  assert.ok(String(outcome.change).includes("قُطعت"))
+  assert.ok(String(outcome.change).includes("تعليمة في النص المسترجع"))
 })
 
 test("lookalike allows — wording alone does not block", async () => {
@@ -121,7 +124,36 @@ test("lookalike allows — wording alone does not block", async () => {
   assert.equal(outcome.delivered, true)
   assert.equal(outcome.deliveredOriginal, true)
   assert.equal(outcome.intervention, null)
+  assert.equal(outcome.cut, null)
   assert.equal(outcome.harness, "ALLOW")
+})
+
+test("partial: harness ALLOW, fingerprint VERIFY, no send, no fingerprint match", async () => {
+  resetTelemetryCache()
+  resetPersistCache()
+  const { PARTIAL } = await import("../engine/fixtures/novel-leak.mjs")
+  const orgId = "test-partial"
+  const invariants = deriveInvariants(PARTIAL)
+  assert.ok(invariants.includes("أداة إرسال"))
+  assert.ok(invariants.includes("بيانات حساسة"))
+  assert.ok(!invariants.includes("وجهة غير معتمدة"))
+  assert.ok(!invariants.includes("تعليمة في النص المسترجع"))
+  const score = jaccard(invariants, [
+    "أداة إرسال",
+    "بيانات حساسة",
+    "وجهة غير معتمدة",
+    "تعليمة في النص المسترجع",
+  ])
+  assert.ok(score < MATCH_THRESHOLD)
+
+  const outcome = await runOpsAgent({ kind: "partial", orgId, environment: "dev" })
+  assert.equal(outcome.harness, "ALLOW")
+  assert.equal(outcome.result.decision, "VERIFY")
+  assert.equal(outcome.delivered, false)
+  assert.equal(outcome.deliveredOriginal, false)
+  assert.equal(outcome.intervention, null)
+  assert.equal(outcome.cut, null)
+  assert.ok(String(outcome.change).includes("تحقق"))
 })
 
 test("health sim: harness ALLOW, fingerprint INTERVENE, simulated EHR path", async () => {
