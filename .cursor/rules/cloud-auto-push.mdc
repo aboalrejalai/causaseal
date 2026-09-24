@@ -1,0 +1,56 @@
+---
+description: Always commit, cut SemVer, and push directly to main — no feature branches or PRs
+alwaysApply: true
+---
+
+# Main-only workflow (owner preference)
+
+This repo deploys from `main` (Hostinger auto-deploy → `causaseal.aboalrejal.com`). The owner **always works on `main`**.
+
+After any task that changes code, docs, or shipping rules:
+
+1. Stay on (or switch to) `main` — do **not** create feature branches.
+2. Commit the finished durable work (granular commits — see below and `.cursor/rules/git-main-granular-commits.mdc`).
+3. Cut a changelog SemVer version and bump `package.json` (see `.cursor/rules/changelog.mdc`) — every finished batch, small or large; do **not** wait for the user to say “release”.
+4. Push immediately: `git push origin main` (and `vX.Y.Z` tags when created).
+5. Do **not** open pull requests for normal work.
+6. Do **not** leave finished work only on another branch or only local.
+
+## Why push every finished batch
+
+Hostinger rebuilds from `main`. If the new build fails, the **previous successful deploy stays live**; the site does not go down. The owner gets a failed-build signal and will ask for a fix. So finished work should be pushed so the owner can test the new version the same day — even when unsure. Prefer a local `tsc` / `npm test` / `npm run build` when cheap, but do not withhold the push waiting for perfect confidence or an explicit “ارفع”.
+
+## Granular commits (required)
+
+**Forbidden:** one mega-commit that mixes unrelated topics (UI + i18n + engine + rules, etc.).
+
+When a batch has multiple clear subjects, split into **separate commits** — one subject (or tightly related file group) per commit. Prefer clarity over minimizing commit count.
+
+Examples of good splits:
+
+- `feat(mcp): expose causaseal-mcp-server on /mcp without authentication`
+- `feat(ui): add HTTP, MCP, and SDK connector detail pages`
+- `fix(ui): keep dashboard shell from scrolling sideways on mobile`
+- `docs(changelog): backfill Keep a Changelog from GitHub history`
+- `chore(release): cut 0.9.1`
+
+Commit messages must say **what changed and why** in **English**, so history and rollbacks stay readable without opening every diff.
+
+**Restore points:** if a session touches ~N independent subjects, expect ~N commits, then one release commit — never one commit that mixes “built feature A + fixed B + i18n + routing + version bump” so you cannot roll back to mid-session safely.
+
+## End-of-batch sequence (required)
+
+1. Product/docs commits (granular).
+2. Cut version in `CHANGELOG.md` + bump `package.json` + compare links (per changelog rule).
+3. `chore(release): cut X.Y.Z` commit; tag `vX.Y.Z` when tags are in use.
+4. `git push origin main` and push the tag.
+5. Once for the series is fine unless the user asked to push earlier mid-batch.
+
+Forbidden unless the user explicitly asks for an exception:
+
+- `git checkout -b …` / creating long-lived feature branches for routine changes
+- `gh pr create` for routine updates
+- Leaving changes unpushed on a non-`main` branch
+- Parking finished work under `[Unreleased]` without a dated SemVer cut
+
+Never force-push `main` unless the user explicitly requests it.

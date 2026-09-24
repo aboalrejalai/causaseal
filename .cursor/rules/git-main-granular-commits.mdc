@@ -7,22 +7,29 @@ alwaysApply: true
 
 This project rule **overrides** any habit of waiting for “please commit”. After a meaningful change set that you finished in this chat, ship it.
 
+Companion rules (same owner policy as the personal site):
+
+- `.cursor/rules/cloud-auto-push.mdc` — main only, push every finished batch, no PRs
+- `.cursor/rules/changelog.mdc` — Keep a Changelog + SemVer cut + `package.json` bump before finishing
+
 ## Required after meaningful work
 
 1. Split the work into the **largest practical number of small commits** (one logical concern each).
 2. Write detailed **English** commit messages (why + what).
 3. Commit on **`main` only**.
-4. **`git push origin main`** after the commit batch — without waiting for a second “push” message.
-5. **Never** create a feature branch, never open a PR, never push elsewhere — unless the user explicitly overrides in that message.
+4. Cut a dated SemVer entry in `CHANGELOG.md`, bump `package.json`, refresh compare links (see changelog rule).
+5. **`git push origin main`** (and version tags when used) after the commit batch — without waiting for a second “push” message.
+6. **Never** create a feature branch, never open a PR, never push elsewhere — unless the user explicitly overrides in that message.
 
 ## What counts as “meaningful”
 
 - Any finished feature, fix, UI cleanup, engine change, docs update, or Cursor rule that leaves the tree dirty when you would otherwise end the turn.
 - Do **not** leave finished work uncommitted because a generic “only commit when asked” rule exists elsewhere — **this file wins for this repo**.
+- Do **not** leave finished work only under `[Unreleased]` without a dated cut.
 
 ## Deploy after push
 
-- If Hostinger (or other) **Git auto-deploy** is enabled for this repo/`main`, the push **is** the deploy — say so and check deployment status.
+- If Hostinger (or other) **Git auto-deploy** is enabled for this repo/`main`, the push **is** the deploy — say so and check deployment status (`causaseal.aboalrejal.com`).
 - If auto-deploy is off and the user asked to see it live (or the session is shipping product changes), deploy to the known Hostinger site after push, confirming overwrite only when the tool is a full replace and the domain is ambiguous.
 
 ## How to split
@@ -36,7 +43,7 @@ Prefer separate commits for:
 - Shared `lib/` contracts, i18n, nav, seed data
 - App shell (layout, providers, sidebar, header)
 - One page or view at a time when changes are large
-- Docs / README
+- Docs / README / CHANGELOG (product commits first; release cut last)
 
 Avoid one mega-commit that mixes unrelated areas.
 
@@ -47,6 +54,7 @@ Avoid one mega-commit that mixes unrelated areas.
 fix(ui): Soft Badge secondary uses muted chips, not Button SA-700
 feat(shell): collapse sidebar with offcanvas instead of icon rail
 docs: record Soft Badge vs Button secondary rule
+chore(release): cut 0.9.1
 
 ❌ bad
 feat: Soft foundation, UEP port, badge fix, sidebar, docs, and engines

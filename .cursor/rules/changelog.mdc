@@ -1,0 +1,128 @@
+---
+description: Keep a Changelog + SemVer; after every durable batch cut a dated version, bump package.json, commit, and push to main
+globs: CHANGELOG.md
+alwaysApply: true
+---
+
+# Changelog writing rules (causaseal)
+
+Standards: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) + [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
+
+When editing `CHANGELOG.md` or finishing any durable product change, follow this file. Do **not** invent marketing essays, fake version jumps, or dump raw git logs.
+
+## Purpose
+
+A changelog is a **curated, human-readable** list of **notable** changes per released version. Readers are users, reviewers, judges, and future you — not machines.
+
+**Commits ≠ changelog versions.** Git history is the fine-grained undo/restore tool (many small commits). The changelog version is the human-facing “what shipped today” record.
+
+**Owner policy (do not misread):** after **every** finished durable batch — small fix or large feature — **cut a SemVer version**, update `CHANGELOG.md`, bump `package.json`, commit, and **`git push origin main`**. The owner tests on Hostinger (`causaseal.aboalrejal.com`). A failed Hostinger build does **not** take down the site (last good deploy stays live); the owner will report the build failure for a follow-up fix. Do **not** wait for the user to say “release” / “قطع إصدار” before bumping the version. Waiting for an explicit release keyword was a **wrong** reading of older wording and is forbidden.
+
+## Required after every durable update
+
+After any finished agent/Cloud task that changes product behaviour, public UI, routing, APIs, engine, user-facing docs, or agent rules that affect shipping:
+
+1. **Granular commits** for the work itself (see `.cursor/rules/cloud-auto-push.mdc` and `.cursor/rules/git-main-granular-commits.mdc`): one subject per commit, clear `type(scope): why` messages in English.
+2. During the batch you may draft bullets under `[Unreleased]` as a scratch pad.
+3. **Before finishing the batch, always cut a version** (unless the user explicitly said `keep Unreleased` / `don't bump` for this batch only):
+   - Move curated bullets into `## [X.Y.Z] - YYYY-MM-DD` (today’s ISO date).
+   - Leave a fresh empty `## [Unreleased]`.
+   - Bump root `package.json` `"version"` to `X.Y.Z`.
+   - Refresh compare links at the bottom of `CHANGELOG.md` (repo: `aboalrejalai/causaseal`).
+   - Commit as `chore(release): cut X.Y.Z` (or `docs(changelog): cut X.Y.Z` if only docs).
+   - Tag `vX.Y.Z` when tagging is already in use for this repo (after the first tag, keep tagging every cut).
+4. **Push immediately** to `origin main` (and tags) so Hostinger can build and the owner can test. See `.cursor/rules/cloud-auto-push.mdc`.
+
+Noise that does **not** get a version cut of its own (and usually not a changelog bullet): lockfile-only churn with no product impact, env-only, asset-only dumps, internal agent memory docs, local plan dumps. If those ride along with product work, fold them into that batch’s version; do not invent empty releases.
+
+## File shape (required)
+
+```markdown
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.9.1] - 2026-09-24
+
+### Fixed
+- …
+
+[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/aboalrejalai/causaseal/compare/v0.9.0...v0.9.1
+```
+
+Rules:
+
+1. One root file: `CHANGELOG.md`.
+2. Latest version **first**; `[Unreleased]` always at the top and **empty** after a cut.
+3. Version heading: `## [X.Y.Z] - YYYY-MM-DD` (ISO-8601 date only — never `June 28, 2026`).
+4. Group under **only** these types (omit empty sections; **one** heading per type — never duplicate `### Fixed`):
+   - `### Added` — new capabilities
+   - `### Changed` — changes in existing behavior
+   - `### Deprecated` — soon-to-be removed
+   - `### Removed` — removed features
+   - `### Fixed` — bug fixes
+   - `### Security` — vulnerability fixes
+5. Do **not** invent sections like `Improvements`, `Patches`, `Features`, or numbered `(6)` counters.
+6. Put bullets under the correct type: “Add …” / “Integrate …” belong in **Added**, not **Fixed**.
+7. At the bottom, keep compare/tag links for every cut version.
+
+## SemVer (how to pick X.Y.Z)
+
+Read current `package.json` version, then bump:
+
+| Bump | When |
+|------|------|
+| **MAJOR** (`1.0.0` → `2.0.0`) | Breaking change for users (API, URL, auth, data, public behavior). Mark with `**Breaking:**` inside `Changed` or `Removed`. |
+| **MINOR** (`0.8.0` → `0.9.0`) | Backward-compatible feature / notable Added (new page, MCP tools, connectors hub, architecture map, …) |
+| **PATCH** (`0.8.0` → `0.8.1`) | Backward-compatible fix, polish, docs-only product note, rule fix that accompanies a ship |
+
+Pre-1.0 (`0.y.z`): still use SemVer; breaking changes may bump **MINOR** if the project has not declared 1.0 yet — be consistent and state breaking clearly.
+
+Same calendar day may have several cuts (`0.8.0`, `0.8.1`, …) if several finished batches land — that is expected. Do **not** park multiple days of work under `[Unreleased]` to “save” version numbers.
+
+Never invent aspirational majors (`2.1.0`) without a real published `1.x` history.
+
+## Writing each bullet
+
+- One notable change per bullet; user-facing impact first.
+- Prefer imperative: “Add …”, “Fix …”, “Remove …”.
+- Concise: usually one sentence; two max for breaking/migration notes.
+- No commit hashes as the whole entry; optional short ref at end only if useful.
+- Merge duplicate commit messages into one curated bullet.
+- Commits are **input**, not the changelog. Curate.
+
+## Workflow
+
+1. Do the product work with granular commits.
+2. Draft bullets under `[Unreleased]` while the batch is open (optional but useful).
+3. End of batch: cut `## [X.Y.Z] - YYYY-MM-DD`, bump `package.json`, refresh links, empty `[Unreleased]`, release commit, tag, **push**.
+4. If `npm run build` / `npm test` / `tsc` was run and failed locally, fix before push when practical; if the owner asked to push for live verify anyway, still push — Hostinger keeps the last good deploy on build failure.
+5. Do not rewrite published history except to fix factual errors.
+
+## Forbidden (this repo)
+
+- Marketing paragraphs as version intros (“Successful progressive migration…”).
+- Fake or aspirational version numbers.
+- One mega-commit for a whole session of unrelated work (breaks restore points — use granular commits).
+- Skipping the changelog **or** leaving finished work only under `[Unreleased]` without a dated cut.
+- Waiting for the user to say “release” before bumping `package.json` / cutting `## [X.Y.Z]`.
+- Treating “don’t push until asked” as the default — the default is **push after the finished durable batch** (see cloud-auto-push). Force-push remains forbidden unless explicitly requested.
+- Claiming Entra / real EHR / external SIEM as shipped when only simulated.
+- Treating essay-style changelogs as the template.
+
+## Quick self-check before finishing a task
+
+- [ ] Product commits are granular and restore-friendly
+- [ ] Notable changes have curated changelog bullets under the correct `###` type
+- [ ] Dated `## [X.Y.Z] - YYYY-MM-DD` cut exists for this batch; `[Unreleased]` is empty
+- [ ] `package.json` `version` matches `X.Y.Z`; compare links updated
+- [ ] Release commit + tag (when tags are used) done
+- [ ] Pushed to `origin main` so Hostinger can build and the owner can test
+- [ ] Breaking changes marked when applicable
+- [ ] Readable by a non-author in under a minute per release
