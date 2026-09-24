@@ -65,4 +65,4 @@ export const VIEW_TITLES: Record<string, string> = {
 
 /** One-line difference from a tool harness, shown on the first screen. */
 export const HARNESS_DIFF =
-  "موافقة الهارنس توقف هذه الأداة الآن. البصمة توقف الصياغة التالية لأن الثوابت هي نفسها."
+  "نركب فوق هارنس الوكيل. الهارنس يحكم على الأداة الحالية. نحن نحفظ سبب الحادث السابق، نعرفه إذا رجع بشكل جديد، ونقطع تلك العلاقة والمهمة تكمل."
