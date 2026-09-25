@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.7] - 2026-09-25
+
+### Changed
+- MCP tool titles are English; descriptions and replies are Arabic then English.
+- MCP connectors page notes that Claude's "No approval received" is fixed with Always allow, not a server auth gate.
+
+### Fixed
+- Cover unauthenticated MCP tools/call for session and compliance so judges can separate Claude approval from the live /mcp server.
+
 ## [0.10.6] - 2026-09-25
 
 ### Changed
@@ -190,7 +199,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Serve static UI and API from a plain Node server to clear Hostinger 503s.
 - Align Hostinger deploy with the Express entry and stop publishing `public` as the site root.
 
-[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.6...HEAD
+[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.7...HEAD
+[0.10.7]: https://github.com/aboalrejalai/causaseal/compare/v0.10.6...v0.10.7
 [0.10.6]: https://github.com/aboalrejalai/causaseal/compare/v0.10.5...v0.10.6
 [0.10.5]: https://github.com/aboalrejalai/causaseal/compare/v0.10.4...v0.10.5
 [0.10.4]: https://github.com/aboalrejalai/causaseal/compare/v0.10.3...v0.10.4
