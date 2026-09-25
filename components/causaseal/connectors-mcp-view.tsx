@@ -112,8 +112,8 @@ export function ConnectorsMcpView() {
           </CardTitle>
           <CardDescription>
             {ar
-              ? "على الدومين يعمل من server.js نفسه بلا مفتاح بعد اكتمال النشر. أثناء التطوير المحلي الواجهة على 3000 والـ API على 4000."
-              : "On the live domain it runs from the same server.js with no key after deploy. During local next dev the UI is on 3000 and the API on 4000."}
+              ? "بلا مفتاح ولا OAuth. على الدومين من server.js بعد النشر؛ محليًا الواجهة 3000 والـ API 4000. إن ظهرت No approval received في كلود: Customize → Connectors → causaseal → Tool permissions → Always allow للقراءة والكتابة — الطلب ما يصل السيرفر قبل السماح."
+              : "No API key and no OAuth. Live domain from server.js after deploy; local UI 3000 and API 4000. If Claude shows No approval received: Customize → Connectors → causaseal → Tool permissions → Always allow for read and write — the call never reaches the server until you allow it."}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
