@@ -24,6 +24,9 @@ yarn-error.log*
 pnpm-debug.log*
 data/causaseal-state.json
 
+# /brag render output (mp4, posters, composition drafts)
+brag-output/
+
 # Capacitor native shells (regenerate with npx cap add … after clone)
 android/
 ios/
