@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.9] - 2026-09-25
+
+### Added
+- Project-local `/brag` skill (`latent-spaces/brag`) for SAIF booth launch-video generation via Hyperframes; ignore `brag-output/` so renders stay off git.
+
 ## [0.10.8] - 2026-09-25
 
 ### Added
@@ -204,7 +209,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Serve static UI and API from a plain Node server to clear Hostinger 503s.
 - Align Hostinger deploy with the Express entry and stop publishing `public` as the site root.
 
-[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.8...HEAD
+[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.9...HEAD
+[0.10.9]: https://github.com/aboalrejalai/causaseal/compare/v0.10.8...v0.10.9
 [0.10.8]: https://github.com/aboalrejalai/causaseal/compare/v0.10.7...v0.10.8
 [0.10.7]: https://github.com/aboalrejalai/causaseal/compare/v0.10.6...v0.10.7
 [0.10.6]: https://github.com/aboalrejalai/causaseal/compare/v0.10.5...v0.10.6
