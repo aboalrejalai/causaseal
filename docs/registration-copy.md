@@ -1,80 +1,80 @@
 # Registration & poster copy — CAUSASEAL (SAIF 2026)
 
-**Platform / poster language:** paste the **English** sections into SAIF and into `_SAIF Poster Template Age Group (18 and Above) - 2026.pptx`.  
-**Arabic at the bottom** mirrors the same tables for the team to read. Do **not** paste Arabic into English-required form fields.
+**English above** = paste into the **18+ poster template** (and any English project fields).  
+**Arabic below** = for the team to read only — do **not** paste Arabic into the poster.
 
-Not the live demo script — that is [`judge-runbook.md`](judge-runbook.md).
+Poster is **mandatory** and **English only**. Video / screenshots / Drive folder are **optional** extras (you will film the video, upload it to the platform and to Drive with images, and generate QR codes yourselves).
 
-**Technical docs (Drive):** [Saif-26 folder](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing)
+**Drive folder:** [Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing)  
+**Demo:** `https://causaseal.aboalrejal.com` · **Repo:** `https://github.com/aboalrejalai/causaseal`  
+**Live script (not poster):** [`judge-runbook.md`](judge-runbook.md)
 
----
+### Your jobs (not text in this file)
 
-## Still missing (only these)
+| Item | Who | Note |
+| --- | --- | --- |
+| Scientific poster PPTX → PDF | team | Paste English sections below; keep template titles/boxes; leave ~15–20% empty space |
+| Country flag | team | Use **Saudi Arabia** flag (participation country) |
+| Booth number + official booth QR | — | **Not available at this submission stage** (after qualification) |
+| References QR | team | Point to Drive Saif-26 (and/or demo URL) |
+| Video ≤5 min | team | Arabic or English; platform + Drive |
+| Prototype screenshots | team | Clear images → platform (optional) + Drive |
 
-| # | What | Who | Status |
-| ---: | --- | --- | --- |
-| 1 | **Email** for SAIF (if the form asks) | Bushra | Missing |
-| 2 | **Email** for SAIF | Mohammed | Missing |
-| 3 | **Poster flag choice** | team | Decide: Saudi · Yemen · both |
-| 4 | **Booth Number** | team | After qualification |
-| 5 | **Prototype screenshot** JPG/PNG for upload | team | If not already in Drive |
-
-Filled: names, IDs, mobiles, Shadia email, Drive link, nationalities.
-
-### Team roster (filled)
-
-| Member (EN) | Member (AR) | Nationality | ID | Mobile | Email |
-| --- | --- | --- | --- | --- | --- |
-| Shadia Ahmed Taher Albsheer | شادية أحمد طاهر البشير | Saudi | 1014444887 | 0543404892 | Shadia.ta10@gmail.com |
-| Bushra Fahad O Alshammari | بشرى فهد عبيد الشمري | Saudi | 1136396387 | 0553533657 | `[FILL email]` |
-| Mohammed Nadher Aboalrejal | محمد نذير أبو الرجال | Yemeni | 10491861 | 0533548021 | `[FILL email]` |
+Nothing else is required from you for this markdown file.
 
 ---
 
-# ENGLISH (paste this)
+# ENGLISH (paste into poster)
 
-## A. Poster header (template fields)
+## A. Header
 
-| Field on template | Paste |
+| Template field | Paste |
 | --- | --- |
-| **Innovation Title** | CAUSASEAL — Causal Decision Layer Before Agent Tool Impact |
-| **Student Name** (line 1) | Shadia Ahmed Taher Albsheer |
-| **ID** (line 1) | 1014444887 |
-| **Nationality** (line 1) | Saudi Arabia |
-| **Student Name** (line 2) | Bushra Fahad O Alshammari |
-| **ID** (line 2) | 1136396387 |
-| **Nationality** (line 2) | Saudi Arabia |
-| **Student Name** (line 3) | Mohammed Nadher Aboalrejal |
-| **ID** (line 3) | 10491861 |
-| **Nationality** (line 3) | Yemen |
-| **Country Flag Here** | `[FILL: Saudi · Yemen · or both]` |
-| **Booth Number** | `[FILL after qualification]` |
-| **QR Code** | `https://causaseal.aboalrejal.com` (and/or `https://github.com/aboalrejalai/causaseal`) |
+| **Innovation Title** | CAUSASEAL: Path-Shape Fingerprints That Catch Rephrased Agent Data Leaks Before Send |
+| **Student Name** (1) | Shadia Ahmed Taher Albsheer |
+| **ID** (1) | 1014444887 |
+| **Student Name** (2) | Bushra Fahad O Alshammari |
+| **ID** (2) | 1136396387 |
+| **Student Name** (3) | Mohammed Nadher Aboalrejal |
+| **ID** (3) | 10491861 |
+| **Country Flag Here** | Saudi Arabia |
+| **Booth Number** | Leave empty until assigned |
+| **QR Code** (header) | Leave empty this stage **or** temporary link to demo/Drive if you want visitors to open it now |
 
-If the platform allows one lead name only, use **Shadia Ahmed Taher Albsheer**; list all three on the poster.
+Lead name if only one slot: **Shadia Ahmed Taher Albsheer**.
 
 ---
 
-## B. Poster body blocks
+## B. Introduction
 
-### Introduction
+Agent security tools and **tool harnesses** already approve or block a single tool call. That works for the *current* call, but it does not remember *why* a past incident was dangerous when the agent rephrases the attack or changes the tool name.
 
-AI agents fail in *actions*, not only in answers. Each tool call can look allowed on its own while the chain still leaks sensitive data. A normal **tool harness** only decides whether *this* known tool call is allowed *now*. It has no memory of the causal shape of a past incident when the wording or tool name changes.
+Organizations then investigate after the leak: logs, forensics, reports. The same causal pattern can return in a new surface form.
 
-**CAUSASEAL** sits above that harness: we store a compact **causal fingerprint** of the incident shape, recognize it when it returns in a new form, and cut the dangerous edge so the task can continue with a safe (redacted) send — without sending the original sensitive payload.
+**Gap:** there is no compact, reusable memory of the **causal shape** of a send-path incident that stops the *next* mutated attempt while still allowing lookalike but benign work.
 
-**Track:** Cybersecurity and Defensive Technologies · **Age group:** Over 18 · **Team size:** 3
+**Goal:** build **CAUSASEAL** — a runtime layer above the harness that fingerprints path-shape invariants, matches them across rephrasing, and on intervene delivers a **redacted** copy only (original sensitive payload never sent).
 
-### Methodology
+Track: Cybersecurity and Defensive Technologies · Age group: Over 18 · Team of 3.
 
-1. **Path-shape invariants (X-CFS):** From the tool-path contract we derive structural invariants (send tool, sensitive data, untrusted destination, directive in retrieved text, elevated privilege) — not a hostile word list.
-2. **Memory match:** Fingerprints are stored per organization (`orgId`) and matched with Jaccard similarity (threshold 0.6), including cross-environment learning.
-3. **Runtime gateway:** Before a send tool, `POST /api/gateway/intercept` / `POST /api/agent/run` returns `ALLOW`, `VERIFY`, or `INTERVENE`.
-4. **Named causal cut:** On `INTERVENE`, we name the severed edge (e.g. directive in retrieved text), deliver a redacted copy only, and never send the original.
-5. **Connectors (extra):** Same engine over HTTP, MCP (`/mcp`, no auth key in the demo), and a partner SDK (`beforeTool` / `applySend`).
-6. **Proof loop:** Live harness compare on `/architecture` — four cases below.
+---
 
-### Results
+## C. Methodology
+
+What we built and how a specialist can replay it:
+
+1. **Path-shape invariants (X-CFS):** Derive structural invariants from the tool-path contract (send tool, sensitive data, untrusted destination, directive in retrieved text, elevated privilege) — no hostile word list.
+2. **Fingerprint memory:** Store invariants per `orgId`; match with Jaccard similarity (threshold 0.6), including cross-environment reuse.
+3. **Runtime gateway:** Before send, `POST /api/gateway/intercept` / `POST /api/agent/run` → `ALLOW` | `VERIFY` | `INTERVENE`.
+4. **Named causal cut:** On `INTERVENE`, name the severed edge, deliver redacted body only.
+5. **Connectors:** Same engine via HTTP, MCP (`/mcp`), and partner SDK.
+6. **Proof:** Live four-case harness compare on `/architecture` + automated tests (`npm test`).
+
+*On the poster:* prefer a small **flowchart** (Agent → Harness → CAUSASEAL → Allow / Verify / Redacted deliver) with a figure caption under it; keep this text short beside the figure.
+
+---
+
+## D. Results
 
 | Case | Harness | Fingerprint | Original sent | Cut |
 | --- | --- | --- | --- | --- |
@@ -83,164 +83,102 @@ AI agents fail in *actions*, not only in answers. Each tool call can look allowe
 | Lookalike (benign) | ALLOW | ALLOW | Yes | — |
 | Partial start | ALLOW | VERIFY | No | — (monitor; no send) |
 
-**One-line product claim:**  
-We sit above the agent harness. The harness judges the current tool call. We store the cause of a past incident, recognize it when it returns in a new form, and cut that edge while the task completes.
+**Claim (honest):** We sit above the agent harness. The harness judges the current tool call. We store the cause of a past incident, recognize it when it returns in a new form, and cut that edge while the task completes.
 
-Prototype: `https://causaseal.aboalrejal.com` · Source: `https://github.com/aboalrejalai/causaseal` · Docs folder: [Google Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing)
+*On the poster:* add **Figure:** screenshot of the four-row compare on `/architecture` (clear resolution) + caption “Fig. 1 — Live harness vs fingerprint compare”.
 
-### Innovation
-
-- **Difference from a tool harness:** harness = allow/block *this* call; CAUSASEAL = remember *why* a path was dangerous and catch the same cause after surface mutation.
-- **Smallest practical intervention:** redacted delivery + named cut — not “stop the whole mission” as the only option.
-- **Honest scope:** rules + invariant memory + local/simulated outbox. No measured 90%/99% on external logs. No live Entra / real EHR / external SIEM in this build.
-
-### Conclusion
-
-CAUSASEAL is a working prototype for SAIF: a causal decision layer before agent tool impact, with a four-case proof a judge can replay. It does not replace enterprise IAM or SIEM; it covers **returning causal shape under new wording**.
-
-### Future Work & References
-
-- One real beneficiary attach and one documented blocked incident.
-- Stronger matching only if evidence requires it.
-- IAM / real EHR / external SIEM after the causal difference is solid.
-- Judges: this repo · [`idea-to-code.md`](idea-to-code.md) · [`saif.md`](saif.md) · `/architecture` compare · [Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing).
-
-### Acknowledgments
-
-Team CAUSASEAL. Built for SAIF 2026 (Security and Innovation Fair). Soft UI / Next.js prototype for demo verification.
-
-### Statement
-
-We affirm that CAUSASEAL is our team’s original work for SAIF 2026. Unmeasured marketing numbers (e.g. 90%, 99%+) are **not** submitted as measured results. Claims match the running prototype and tests in the public repository.
+Demo: `https://causaseal.aboalrejal.com`
 
 ---
 
-## C. SAIF platform form (English fields)
+## E. Innovation (short)
 
-| Likely field | Paste |
-| --- | --- |
-| **Project / innovation title** | CAUSASEAL — Causal Decision Layer Before Agent Tool Impact |
-| **Track** | Cybersecurity and Defensive Technologies |
-| **Age category** | Over 18 |
-| **Short summary / abstract** | CAUSASEAL is a runtime causal layer above an agent tool harness. The harness allows or blocks the current tool call. We store a compact fingerprint of why a path was dangerous, recognize that shape when phrasing or tools change, and on intervene deliver a redacted copy only — so the original sensitive payload is never sent. Demo: four live harness-vs-fingerprint cases. |
-| **Problem** | Agent failures happen in tool actions. Traditional harnesses lack memory of causal shape across rephrased attacks. |
-| **Solution** | Path-shape invariants + fingerprint memory + gateway before send + named cut / redacted deliver. |
-| **How it works (short)** | Analyze path → match fingerprint → ALLOW / VERIFY / INTERVENE → deliver original or redacted or hold for human. |
-| **Impact / beneficiary** | Teams that run agents with send tools against sensitive systems. Demo uses a simulated outbox; not a production contract yet. |
-| **Tech stack** | Node.js gateway, Next.js UI, MCP server, partner SDK stub, session metrics, automated tests. |
-| **Demo / repo / docs links** | `https://causaseal.aboalrejal.com` · `https://github.com/aboalrejalai/causaseal` · [Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing) |
-| **Team member 1** | Shadia Ahmed Taher Albsheer — Saudi — ID 1014444887 — mobile 0543404892 — Shadia.ta10@gmail.com — idea / innovation lead |
-| **Team member 2** | Bushra Fahad O Alshammari — Saudi — ID 1136396387 — mobile 0553533657 — email `[FILL]` — software engineering / prototype |
-| **Team member 3** | Mohammed Nadher Aboalrejal — Yemeni — ID 10491861 — mobile 0533548021 — email `[FILL]` — systems / cybersecurity / AI platform |
-| **Intellectual property** | Original team work; no plagiarized drop-in codebase presented as ours. |
-| **Attachments checklist** | Video ≤5 min MP4 · Scientific poster PDF · Prototype image JPG/PNG · Technical docs: Drive link above (view access). |
+1. **Memory of cause, not only of this tool call** — catches rephrased leaks the harness allows.  
+2. **Smallest practical intervene** — named cut + redacted deliver; benign lookalikes still allowed.  
+3. **Scoped honesty** — prototype with rules + invariant memory + simulated outbox; not claimed measured 90%/99% on external enterprise logs.
+
+---
+
+## F. Conclusion
+
+We closed the stated gap with a **working prototype**: four replayable cases show harness vs fingerprint decisions, including mutated phrasing blocked without sending the original.
+
+**Readiness:** prototype (demo + tests), not a full enterprise IAM/SIEM replacement.
+
+**Impact path:** ops/security teams that run agents with send tools against sensitive systems — starting from a local/simulated outbox proof.
+
+---
+
+## G. Future Work & References
+
+**Near term (≈1–2 months):** (1) attach one real partner send-tool via intercept; (2) document one blocked incident without secrets; (3) keep claims aligned with measured session evidence only.
+
+**References:** place a **References** QR on the poster pointing to [Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing) (video, screenshots, docs). Repo: `https://github.com/aboalrejalai/causaseal`.
+
+---
+
+## H. Acknowledgments
+
+Team CAUSASEAL — SAIF 2026 (Security and Innovation Fair).
+
+## I. Statement
+
+Original team work for SAIF 2026. Unmeasured marketing figures (e.g. 90%, 99%+) are **not** submitted as measured results. Claims match the running prototype and tests.
 
 ### Do not paste as measured claims
 
-- 90% / 99%+
-- “First in the world”
-- “Sovereign immunity” as a proven product claim
-- Live Entra / real EHR / external SIEM as if shipped
+- 90% / 99%+ · “First in the world” · “Sovereign immunity” as proven · Live Entra / real EHR / external SIEM as if shipped
 
 ---
 
-# ARABIC (للفريق فقط — فهم · لا للصق في حقول الإنجليزية)
+# ARABIC (للفريق فقط — للقراءة)
 
-## ما زال ناقصًا فقط
+الملصق **إلزامي** وبالإنجليزي فقط. الفيديو والصور ومجلد الدرايف **اختيارية** كإضافات — أنتم تصوّرون الفيديو وترفعونه للمنصة وللدرايف مع الصور، وتولّدون الـQR بنفسكم.
 
-| # | المطلوب | من |
-| ---: | --- | --- |
-| 1 | البريد الإلكتروني | بشرى |
-| 2 | البريد الإلكتروني | محمد |
-| 3 | علم الملصق: سعودي / يمني / الاثنان | الفريق |
-| 4 | رقم الجناح | بعد التأهل |
-| 5 | صورة النموذج JPG/PNG إن لم تكن في الدرايف | الفريق |
-
-### قائمة الفريق (مُعبَّأة)
-
-| الاسم (EN) | الاسم (AR) | الجنسية | الهوية | الجوال | البريد |
-| --- | --- | --- | --- | --- | --- |
-| Shadia Ahmed Taher Albsheer | شادية أحمد طاهر البشير | سعودية | 1014444887 | 0543404892 | Shadia.ta10@gmail.com |
-| Bushra Fahad O Alshammari | بشرى فهد عبيد الشمري | سعودية | 1136396387 | 0553533657 | `[املأ البريد]` |
-| Mohammed Nadher Aboalrejal | محمد نذير أبو الرجال | يمني | 10491861 | 0533548021 | `[املأ البريد]` |
-
-**رابط التوثيق:** [مجلد Saif-26 على Drive](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing)
-
----
-
-## أ) رأس الملصق
-
-| الحقل في القالب | المقابل |
+| البند | من يقوم به |
 | --- | --- |
-| عنوان الابتكار | CAUSASEAL — طبقة قرار سببي قبل أثر أداة الوكيل |
-| اسم الطالبة (سطر 1) | شادية أحمد طاهر البشير |
-| الهوية (سطر 1) | 1014444887 |
-| الجنسية (سطر 1) | سعودية |
-| اسم الطالبة (سطر 2) | بشرى فهد عبيد الشمري |
-| الهوية (سطر 2) | 1136396387 |
-| الجنسية (سطر 2) | سعودية |
-| اسم الطالب (سطر 3) | محمد نذير أبو الرجال |
-| الهوية (سطر 3) | 10491861 |
-| الجنسية (سطر 3) | يمني |
-| مكان العلم | `[املأ: سعودي · يمني · أو الاثنان]` |
-| رقم الجناح | `[بعد التأهل]` |
-| رمز QR | `https://causaseal.aboalrejal.com` |
+| تعبئة قالب الملصق 18+ بالنص الإنجليزي أعلاه | الفريق |
+| علم الدولة | علم **السعودية** |
+| رقم الجناح وQR الرسمي للجناح | فارغ الآن — بعد التأهل |
+| QR المراجع | على مجلد [Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing) |
+| فيديو + لقطات الشاشة | أنتم → منصة + درايف |
 
----
+لا نطلب منكم إيميلات ولا رقم جناح الآن — مو مطلوب لهذه المرحلة حسب درس الملصق.
 
-## ب) جملة المنتج
+### الفريق (رأس الملصق)
+
+| الاسم (EN) | الاسم (AR) | الهوية | الجنسية |
+| --- | --- | --- | --- |
+| Shadia Ahmed Taher Albsheer | شادية أحمد طاهر البشير | 1014444887 | سعودية |
+| Bushra Fahad O Alshammari | بشرى فهد عبيد الشمري | 1136396387 | سعودية |
+| Mohammed Nadher Aboalrejal | محمد نذير أبو الرجال | 10491861 | يمني |
+
+### معنى الأقسام الإنجليزية
+
+| القسم | المعنى |
+| --- | --- |
+| العنوان | بصمة شكل مسار تمسك تسريبًا مُعاد صياغته قبل الإرسال |
+| المقدمة | هارنس يحكم على النداء الحالي → فجوة: لا ذاكرة لشكل السبب → هدف CAUSASEAL |
+| المنهجية | ثوابت · Jaccard · بوابة · قطع مسمّى · موصّلات · أربع حالات (+ مخطط في الملصق) |
+| النتائج | جدول الحالات + لقطة شاشة للمقارنة |
+| الابتكار | ذاكرة السبب · أصغر تدخل · صدق النطاق |
+| الخاتمة | نموذج أولي جاهز للإعادة؛ مو IAM كامل |
+| المستقبل | خلال شهرين تقريبًا: ربط أداة حقيقية + حادثة موثّقة + التزام بالأدلة |
+| المراجع | QR على الدرايف |
+
+### جملة المنتج
 
 نركب فوق هارنس الوكيل. الهارنس يحكم على الأداة الحالية. نحن نحفظ سبب الحادث السابق، نعرفه إذا رجع بشكل جديد، ونقطع تلك العلاقة والمهمة تكمل.
 
----
-
-## ج) جدول الحالات الأربع
+### جدول الحالات الأربع
 
 | الحالة | هارنس | بصمة | أصل مُرسل | القطع |
 | --- | --- | --- | --- | --- |
 | صياغة متغيرة | ALLOW | INTERVENE | لا | تعليمة في النص المسترجع |
 | تسريب معروف | BLOCK | INTERVENE | لا | ثابت مسمّى |
 | شبيه لفظي مشروع | ALLOW | ALLOW | نعم | — |
-| بداية جزئية | ALLOW | VERIFY | لا | — (راقب؛ لا إرسال) |
+| بداية جزئية | ALLOW | VERIFY | لا | — |
 
----
+### ممنوع رفعه كرقم مقاس
 
-## د) معنى أقسام الملصق الإنجليزية
-
-| القسم | المعنى باختصار |
-| --- | --- |
-| Introduction | الوكيل يخطئ في الفعل؛ الهارنس على النداء الحالي؛ نحن نتذكر شكل السبب بعد تغيّر الصياغة |
-| Methodology | ثوابت شكل المسار · Jaccard · بوابة قبل الإرسال · قطع مسمّى · موصّلات · أربع حالات |
-| Results | الجدول أعلاه + رابط الديمو والمستودع والدرايف |
-| Innovation | الفرق عن الهارنس + أصغر تدخل + صدق النطاق |
-| Conclusion | نموذج أولي لسيف؛ ليس بديل IAM/SIEM |
-| Future Work | مستفيد حقيقي لاحقًا؛ لا نوسّع IAM قبل إثبات الفرق |
-| Acknowledgments | فريق CAUSASEAL · سيف 2026 |
-| Statement | عمل أصلي؛ لا نرفع 90٪/99٪ كأرقام مقاسة |
-
----
-
-## هـ) حقول نموذج المنصة (معنى اللصق الإنجليزي)
-
-| الحقل المحتمل | المعنى |
-| --- | --- |
-| عنوان المشروع | CAUSASEAL — طبقة قرار سببي قبل أثر أداة الوكيل |
-| المسار | الأمن السيبراني والتقنيات الدفاعية |
-| الفئة | أكبر من 18 |
-| الملخص | طبقة فوق الهارنس · بصمة سبب · نسخة محذوفة عند التدخل · أربع حالات حية |
-| العضو 1 | شادية أحمد طاهر البشير — سعودية — 1014444887 — 0543404892 — Shadia.ta10@gmail.com |
-| العضو 2 | بشرى فهد عبيد الشمري — سعودية — 1136396387 — 0553533657 — بريد `[املأ]` |
-| العضو 3 | محمد نذير أبو الرجال — يمني — 10491861 — 0533548021 — بريد `[املأ]` |
-
----
-
-## ممنوع رفعه
-
-| ممنوع |
-| --- |
-| 90٪ / 99٪+ كرقم مقاس |
-| «أول في العالم» |
-| «مناعة سيادية» كادعاء مثبت |
-| Entra / EHR حقيقي / SIEM خارجي كأنها شغّالة |
-
-مرجع: [`idea-to-code.md`](idea-to-code.md) · [`saif.md`](saif.md) · [`idea-causaseal-sermg.md`](idea-causaseal-sermg.md).
+90٪ / 99٪+ · «أول في العالم» · «مناعة سيادية» مثبتة · Entra/EHR/SIEM كأنها شغّالة.
