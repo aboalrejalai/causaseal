@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.6] - 2026-09-25
+
+### Changed
+- Trim `registration-copy.md` to mandatory English poster fields and team Arabic notes; remove non-required email/booth chase.
+
 ## [0.10.5] - 2026-09-25
 
 ### Changed
@@ -185,7 +190,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Serve static UI and API from a plain Node server to clear Hostinger 503s.
 - Align Hostinger deploy with the Express entry and stop publishing `public` as the site root.
 
-[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.5...HEAD
+[Unreleased]: https://github.com/aboalrejalai/causaseal/compare/v0.10.6...HEAD
+[0.10.6]: https://github.com/aboalrejalai/causaseal/compare/v0.10.5...v0.10.6
 [0.10.5]: https://github.com/aboalrejalai/causaseal/compare/v0.10.4...v0.10.5
 [0.10.4]: https://github.com/aboalrejalai/causaseal/compare/v0.10.3...v0.10.4
 [0.10.3]: https://github.com/aboalrejalai/causaseal/compare/v0.10.2...v0.10.3
