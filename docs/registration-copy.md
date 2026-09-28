@@ -70,8 +70,6 @@ What we built and how a specialist can replay it:
 5. **Connectors:** Same engine via HTTP, MCP (`/mcp`), and partner SDK.
 6. **Proof:** Live four-case harness compare on `/architecture` + automated tests (`npm test`).
 
-*On the poster:* prefer a small **flowchart** (Agent → Harness → CAUSASEAL → Allow / Verify / Redacted deliver) with a figure caption under it; keep this text short beside the figure.
-
 ---
 
 ## D. Results
@@ -84,8 +82,6 @@ What we built and how a specialist can replay it:
 | Partial start | ALLOW | VERIFY | No | — (monitor; no send) |
 
 **Claim (honest):** We sit above the agent harness. The harness judges the current tool call. We store the cause of a past incident, recognize it when it returns in a new form, and cut that edge while the task completes.
-
-*On the poster:* add **Figure:** screenshot of the four-row compare on `/architecture` (clear resolution) + caption “Fig. 1 — Live harness vs fingerprint compare”.
 
 Demo: `https://causaseal.aboalrejal.com`
 
@@ -113,7 +109,7 @@ We closed the stated gap with a **working prototype**: four replayable cases sho
 
 **Near term (≈1–2 months):** (1) attach one real partner send-tool via intercept; (2) document one blocked incident without secrets; (3) keep claims aligned with measured session evidence only.
 
-**References:** place a **References** QR on the poster pointing to [Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing) (video, screenshots, docs). Repo: `https://github.com/aboalrejalai/causaseal`.
+**References:** [Drive Saif-26](https://drive.google.com/drive/folders/1Dt9IJjQEXbdSHiBSF6UksP4ef7dKsw6e?usp=sharing) (video, screenshots, docs). Repo: `https://github.com/aboalrejalai/causaseal`.
 
 ---
 
