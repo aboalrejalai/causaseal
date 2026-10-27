@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css">
+<style>
+  .head { right: 150px; top: 64px; }
+  .col { top: 300px; width: 470px; padding: 34px 34px 30px; }
+  .col h4 { font: 700 36px/1.2 "Plex"; }
+  .col .meta { margin-top: 10px; font: 500 26px/1 "Plex"; color: var(--muted); }
+  .col .meta .en { font-family: var(--mono); }
+  .col svg { display: block; margin: 20px auto 6px; width: 330px; }
+  .col ul { list-style: none; margin-top: 14px; }
+  .col li { display: flex; justify-content: space-between; align-items: center; font: 600 28px/1 "Plex"; padding: 13px 0; border-top: 1px solid var(--line); }
+  .col li i { font-style: normal; font-weight: 700; }
+  .ok { color: var(--sa-600); } .no { color: #98a2b3; }
+  .past { right: 150px; }
+  .now { left: 150px; }
+  .mid { left: 650px; top: 250px; width: 620px; text-align: center; }
+  .mid svg { width: 400px; }
+  .mid .score { margin-top: 18px; font: 700 42px/1.2 "Plex"; }
+  .mid .score small { display: block; margin-top: 10px; font: 500 28px/1 "Plex"; color: var(--muted); }
+  .stamp-wrap { left: 0; right: 0; top: 830px; display: flex; justify-content: center; }
+  .stamp-wrap .stamp { font-size: 50px; padding: 14px 30px; }
+  .stamp-wrap .ar { font: 700 40px/1 "Plex"; margin-inline-start: 18px; direction: rtl; }
+</style></head>
+<body><div class="stage day">
+  <div class="abs head"><div class="h2">نفس الشكل = <span class="red">نفس الهجوم.</span></div></div>
+
+  <div class="abs card col past">
+    <h4>بصمة من حادثة سابقة</h4>
+    <div class="meta"><span class="en">X-CFS-001</span> · ذاكرة X-CFS</div>
+    <svg id="svgPast" viewBox="0 0 300 260"></svg>
+    <ul id="listPast"></ul>
+  </div>
+
+  <div class="abs mid">
+    <svg id="svgMid" viewBox="0 0 300 260"></svg>
+    <div class="score">٣ من ٤ ثوابت متطابقة<small>الأداة تغيّرت… والشكل بقي</small></div>
+  </div>
+
+  <div class="abs card col now">
+    <h4>المسار الحالي</h4>
+    <div class="meta"><span class="en">post_update</span> · صياغة جديدة</div>
+    <svg id="svgNow" viewBox="0 0 300 260"></svg>
+    <ul id="listNow"></ul>
+  </div>
+
+  <div class="abs stamp-wrap"><div class="stamp intervene">INTERVENE<span class="ar">· تدخّل</span></div></div>
+</div>
+<script>
+  // Invariant vertices: fixed positions so every path has a comparable "shape".
+  const V = { "أداة إرسال": [150, 26], "بيانات حساسة": [272, 128], "وجهة غير معتمدة": [150, 234], "تعليمة في النص المسترجع": [28, 128] }
+  const seed = ["أداة إرسال", "بيانات حساسة", "وجهة غير معتمدة", "تعليمة في النص المسترجع"] // X-CFS-001
+  const now = ["بيانات حساسة", "وجهة غير معتمدة", "تعليمة في النص المسترجع"] // engine story run
+  const order = seed
+  const poly = (list) => order.filter((k) => list.includes(k)).map((k) => V[k].join(",")).join(" ")
+  const dots = (list, color) => Object.keys(V).map((k) => {
+    const on = list.includes(k), [x, y] = V[k]
+    return `<circle cx="${x}" cy="${y}" r="${on ? 16 : 10}" fill="${on ? color : "#fff"}" stroke="${on ? "#0d121c" : "#d0d5dd"}" stroke-width="4" ${on ? "" : 'stroke-dasharray="4 5"'}/>`
+  }).join("")
+  const shape = (list, fill, stroke) => `<polygon points="${poly(list)}" fill="${fill}" stroke="${stroke}" stroke-width="7" stroke-linejoin="round"/>`
+  document.getElementById("svgPast").innerHTML = shape(seed, "rgba(27,131,84,.14)", "#1b8354") + dots(seed, "#1b8354")
+  document.getElementById("svgNow").innerHTML = shape(now, "rgba(240,68,56,.12)", "#f04438") + dots(now, "#f04438")
+  document.getElementById("svgMid").innerHTML =
+    shape(seed, "rgba(27,131,84,.12)", "#1b8354") + shape(now, "rgba(27,131,84,.45)", "#0d121c") + dots(now, "#1b8354") +
+    `<circle cx="150" cy="26" r="10" fill="#fff" stroke="#98a2b3" stroke-width="4" stroke-dasharray="4 5"/>`
+  const li = (list, mark) => seed.map((k) => list.includes(k)
+    ? `<li>${k}<i class="ok">✓</i></li>` : `<li class="no">${k}<i>${mark}</i></li>`).join("")
+  document.getElementById("listPast").innerHTML = li(seed, "")
+  document.getElementById("listNow").innerHTML = li(now, "—")
+</script>
+</body></html>

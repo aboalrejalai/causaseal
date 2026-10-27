@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>CAUSASEAL — Frames</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "IBM Plex Sans Arabic";
+        src: url("assets/fonts/IBMPlexSansArabic-Regular.otf") format("opentype");
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "IBM Plex Sans Arabic";
+        src: url("assets/fonts/IBMPlexSansArabic-Medium.otf") format("opentype");
+        font-weight: 500;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "IBM Plex Sans Arabic";
+        src: url("assets/fonts/IBMPlexSansArabic-SemiBold.otf") format("opentype");
+        font-weight: 600;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "IBM Plex Sans Arabic";
+        src: url("assets/fonts/IBMPlexSansArabic-Bold.otf") format("opentype");
+        font-weight: 700;
+        font-style: normal;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #fcfcfd;
+        color: #0d121c;
+        font-family: "IBM Plex Sans Arabic", system-ui, sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #fcfcfd;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 36px 48px 20px;
+      }
+      .enter-top,
+      .enter-bottom { opacity: 0; }
+      .eyebrow {
+        font-size: 22px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: #1b8354;
+        margin: 0 0 8px;
+        direction: rtl;
+      }
+      .title {
+        font-size: 52px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 0;
+        color: #0d121c;
+        direction: rtl;
+      }
+      .title-lg {
+        font-size: 64px;
+        font-weight: 700;
+        line-height: 1.1;
+        margin: 0;
+        color: #0d121c;
+        letter-spacing: -0.02em;
+      }
+      .subtitle {
+        font-size: 28px;
+        font-weight: 500;
+        line-height: 1.4;
+        margin: 8px 0 0;
+        color: #384250;
+        direction: rtl;
+      }
+      .card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 12px 40px rgba(17, 25, 39, 0.06);
+        padding: 22px 24px;
+        direction: rtl;
+      }
+      .card-grid { display: grid; gap: 14px; }
+      .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+      .card-grid.cols-3 { grid-template-columns: 1fr; }
+      .mini-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 6px;
+        color: #0d121c;
+      }
+      .mini-body {
+        font-size: 20px;
+        font-weight: 400;
+        line-height: 1.4;
+        margin: 0;
+        color: #4d5761;
+      }
+      .badge-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 18px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        direction: ltr;
+      }
+      .badge-allow { background: #dff6e7; color: #166a45; }
+      .badge-verify { background: #fef3c7; color: #92400e; }
+      .badge-intervene { background: #fee2e2; color: #991b1b; }
+      .badge-block { background: #fecaca; color: #7f1d1d; }
+      .layer {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        direction: rtl;
+      }
+      .layer-tag {
+        flex-shrink: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #ffffff;
+        background: #1b8354;
+        border-radius: 999px;
+        padding: 6px 12px;
+      }
+      .layer.sim .layer-tag { background: #4d5761; }
+      .layer.later .layer-tag { background: #384250; }
+      .layer h3 { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
+      .layer p { margin: 0; font-size: 18px; color: #4d5761; line-height: 1.35; }
+      .stack { display: flex; flex-direction: column; gap: 10px; }
+      .compare-head,
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1.25fr 0.85fr 0.95fr 0.7fr 1.7fr;
+        align-items: center;
+        gap: 8px;
+        direction: rtl;
+      }
+      .compare-head {
+        font-size: 16px;
+        font-weight: 600;
+        color: #4d5761;
+        padding: 0 12px;
+      }
+      .compare-row {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 8px;
+        font-size: 20px;
+        font-weight: 500;
+      }
+      .compare-row strong { font-weight: 700; }
+      .token {
+        direction: ltr;
+        display: inline-block;
+        font-weight: 700;
+        font-size: 18px;
+        padding: 4px 10px;
+        border-radius: 8px;
+      }
+      .token.allow { background: #dff6e7; color: #166a45; }
+      .token.verify { background: #fef3c7; color: #92400e; }
+      .token.intervene { background: #fee2e2; color: #991b1b; }
+      .token.block { background: #fecaca; color: #7f1d1d; }
+      .token.yes { background: #dff6e7; color: #166a45; }
+      .token.no { background: #f3f4f6; color: #384250; }
+      .row-note {
+        margin: 12px 0 0;
+        font-size: 22px;
+        font-weight: 500;
+        color: #166a45;
+        direction: rtl;
+      }
+      .metric {
+        font-size: 56px;
+        font-weight: 700;
+        color: #1b8354;
+        margin: 8px 0 0;
+        direction: ltr;
+        display: inline-block;
+      }
+      .domain {
+        font-size: 42px;
+        font-weight: 600;
+        direction: ltr;
+        color: #1b8354;
+        margin: 0;
+      }
+      .stage-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 28px;
+        direction: ltr;
+      }
+      .char {
+        width: 150px;
+        height: 236px;
+        flex-shrink: 0;
+      }
+      .char svg { display: block; width: 150px; height: 236px; }
+      .phone-tilt {
+        width: 420px;
+        height: 760px;
+        transform: rotate(-8deg);
+        transform-origin: 50% 85%;
+      }
+      .phone-shell {
+        width: 420px;
+        height: 760px;
+        background: #0d121c;
+        border-radius: 48px;
+        padding: 14px;
+      }
+      .phone-screen {
+        position: relative;
+        height: 732px;
+        background: #fcfcfd;
+        border-radius: 36px;
+        overflow: hidden;
+        padding: 42px 16px 16px;
+        direction: rtl;
+      }
+      .notch {
+        position: absolute;
+        top: 0;
+        left: 150px;
+        width: 120px;
+        height: 22px;
+        background: #0d121c;
+        border-radius: 0 0 14px 14px;
+      }
+      .laptop-tilt {
+        width: 1320px;
+        transform: rotate(3deg);
+        transform-origin: 50% 100%;
+      }
+      .laptop-lid {
+        background: #111827;
+        border-radius: 18px 18px 6px 6px;
+        padding: 12px 12px 16px;
+      }
+      .laptop-screen {
+        background: #fcfcfd;
+        border-radius: 8px;
+        height: 520px;
+        overflow: hidden;
+        padding: 18px 22px;
+        direction: rtl;
+      }
+      .laptop-base {
+        height: 16px;
+        margin: 0 100px;
+        background: #1f2937;
+        border-radius: 0 0 16px 16px;
+      }
+      .ai-tilt {
+        width: 1080px;
+        transform: rotate(-3deg);
+        transform-origin: 50% 80%;
+      }
+      .ai-window {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 18px;
+        box-shadow: 0 18px 50px rgba(17, 25, 39, 0.08);
+        overflow: hidden;
+      }
+      .ai-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background: #f3f4f6;
+        border-bottom: 1px solid #e5e7eb;
+        direction: rtl;
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #1b8354;
+        flex-shrink: 0;
+      }
+      .ai-body {
+        padding: 20px 22px 24px;
+        background: #fcfcfd;
+        direction: rtl;
+      }
+      .mini-rig { display: flex; align-items: flex-end; gap: 24px; direction: ltr; }
+      .mini-phone-tilt { width: 180px; height: 320px; transform: rotate(-8deg); transform-origin: 50% 100%; }
+      .mini-phone-shell {
+        width: 180px;
+        height: 320px;
+        background: #0d121c;
+        border-radius: 28px;
+        padding: 8px;
+      }
+      .mini-phone-screen {
+        height: 304px;
+        background: #fcfcfd;
+        border-radius: 22px;
+      }
+      .mini-laptop-tilt { width: 460px; transform: rotate(6deg); transform-origin: 50% 100%; }
+      .mini-laptop-lid {
+        background: #111827;
+        border-radius: 12px 12px 4px 4px;
+        padding: 8px;
+      }
+      .mini-laptop-screen { height: 240px; background: #fcfcfd; border-radius: 6px; }
+      .mini-laptop-base {
+        height: 12px;
+        margin: 0 40px;
+        background: #1f2937;
+        border-radius: 0 0 10px 10px;
+      }
+      .hook-badges {
+        position: relative;
+        height: 88px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        direction: ltr;
+      }
+      .hook-badges .badge { position: absolute; }
+      .screen-stack { display: flex; flex-direction: column; gap: 12px; }
+      .soft {
+        background: #f9fafb;
+        box-shadow: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="causaseal-frames"
+      data-start="0"
+      data-width="1920"
+      data-height="1080"
+      data-duration="64"
+    >
+      <svg width="0" height="0" aria-hidden="true">
+        <defs>
+          <symbol id="char-agent" viewBox="0 0 140 220">
+            <ellipse cx="70" cy="208" rx="36" ry="8" fill="#0d121c" opacity="0.12" />
+            <rect x="48" y="150" width="16" height="52" rx="8" fill="#0d121c" />
+            <rect x="76" y="150" width="16" height="52" rx="8" fill="#0d121c" />
+            <rect x="40" y="88" width="60" height="70" rx="20" fill="#1b8354" />
+            <rect x="96" y="98" width="14" height="44" rx="7" fill="#166a45" />
+            <circle cx="70" cy="52" r="28" fill="#f9fafb" stroke="#0d121c" stroke-width="3" />
+            <path d="M44 52 Q70 16 96 52 Q88 34 70 32 Q52 34 44 52" fill="#0d121c" />
+            <circle cx="60" cy="56" r="3.2" fill="#0d121c" />
+            <circle cx="80" cy="56" r="3.2" fill="#0d121c" />
+            <path d="M46 50 Q46 26 70 26 Q94 26 94 50" fill="none" stroke="#1b8354" stroke-width="4" />
+            <rect x="90" y="46" width="12" height="16" rx="4" fill="#1b8354" />
+          </symbol>
+          <symbol id="char-seal" viewBox="0 0 160 220">
+            <ellipse cx="78" cy="208" rx="36" ry="8" fill="#0d121c" opacity="0.12" />
+            <rect x="56" y="150" width="16" height="52" rx="8" fill="#0d121c" />
+            <rect x="84" y="150" width="16" height="52" rx="8" fill="#0d121c" />
+            <rect x="46" y="92" width="64" height="66" rx="18" fill="#0d121c" />
+            <circle cx="78" cy="50" r="26" fill="#f9fafb" stroke="#0d121c" stroke-width="3" />
+            <path d="M54 48 Q78 18 102 48 Q94 32 78 30 Q62 32 54 48" fill="#0d121c" />
+            <circle cx="70" cy="52" r="3" fill="#0d121c" />
+            <circle cx="88" cy="52" r="3" fill="#0d121c" />
+            <path d="M112 86 L146 98 V128 Q146 156 112 168 Q78 156 78 128 V98 Z" fill="#1b8354" stroke="#0d121c" stroke-width="3" />
+            <path d="M96 128 H128" stroke="#fcfcfd" stroke-width="5" stroke-linecap="round" />
+          </symbol>
+        </defs>
+      </svg>
+
+      <!-- Scene 1: Hook 0-4 phone app -->
+      <section id="scene-hook" class="clip" data-start="0" data-duration="4" data-track-index="1">
+        <div class="scene">
+          <p id="s1-line" class="subtitle enter-top" style="font-size: 36px; font-weight: 700; color: #0d121c">
+            الهارنس يسمح. البصمة تقطع.
+          </p>
+          <div class="stage-row">
+            <div class="char enter-bottom" id="s1-agent">
+              <svg viewBox="0 0 140 220" width="150" height="236"><use href="#char-agent" /></svg>
+            </div>
+            <div class="enter-bottom" id="s1-phone">
+              <div class="phone-tilt">
+                <div class="phone-shell">
+                  <div class="phone-screen">
+                    <div class="notch"></div>
+                    <div class="hook-badges">
+                      <div id="s1-allow" class="badge badge-allow enter-bottom">ALLOW</div>
+                      <div id="s1-intervene" class="badge badge-intervene enter-bottom">INTERVENE</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="char enter-bottom" id="s1-seal">
+              <svg viewBox="0 0 160 220" width="150" height="236"><use href="#char-seal" /></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 2: Name 4-8 phone app -->
+      <section id="scene-name" class="clip" data-start="4" data-duration="4" data-track-index="1">
+        <div class="scene">
+          <div id="s2-head" class="enter-top">
+            <p class="eyebrow">SAIF 2026</p>
+            <h1 class="title-lg">CAUSASEAL</h1>
+          </div>
+          <div class="stage-row">
+            <div class="enter-bottom" id="s2-phone">
+              <div class="phone-tilt">
+                <div class="phone-shell">
+                  <div class="phone-screen" style="text-align: center">
+                    <div class="notch"></div>
+                    <p class="subtitle enter-bottom" id="s2-sub">قرار قبل الإرسال</p>
+                    <div class="badge-row">
+                      <span class="badge badge-allow enter-bottom" id="s2-b1">ALLOW</span>
+                      <span class="badge badge-verify enter-bottom" id="s2-b2">VERIFY</span>
+                      <span class="badge badge-intervene enter-bottom" id="s2-b3">INTERVENE</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 3: Ops 8-13 computer -->
+      <section id="scene-ops" class="clip" data-start="8" data-duration="5" data-track-index="1">
+        <div class="scene">
+          <div id="s3-head" class="enter-top">
+            <p class="eyebrow">مركز العمليات</p>
+            <h2 class="title">مركز العمليات السببية</h2>
+          </div>
+          <div class="enter-bottom" id="s3-laptop">
+            <div class="laptop-tilt">
+              <div class="laptop-lid">
+                <div class="laptop-screen">
+                  <div class="card-grid cols-2">
+                    <div class="card soft">
+                      <h3 class="mini-title">تدفق الجلسة</h3>
+                      <p class="mini-body">أحداث هذه الجلسة — قرار قبل أثر الأداة.</p>
+                    </div>
+                    <div class="card soft">
+                      <h3 class="mini-title">توزيع القرارات</h3>
+                      <p class="mini-body">ALLOW · VERIFY · INTERVENE من المحرك الحي.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="laptop-base"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 4: Architecture 13-18 computer -->
+      <section id="scene-arch" class="clip" data-start="13" data-duration="5" data-track-index="1">
+        <div class="scene">
+          <div id="s4-head" class="enter-top">
+            <p class="eyebrow">المعمارية</p>
+            <h2 class="title">معمارية الربط الصادقة</h2>
+          </div>
+          <div class="enter-bottom" id="s4-laptop">
+            <div class="laptop-tilt">
+              <div class="laptop-lid">
+                <div class="laptop-screen">
+                  <div class="stack">
+                    <div class="layer enter-bottom" id="s4-l1">
+                      <span class="layer-tag">الموجود</span>
+                      <div>
+                        <h3>القرار والموصّلات</h3>
+                        <p>بوابة حية عبر HTTP وMCP وSDK قبل الإرسال.</p>
+                      </div>
+                    </div>
+                    <div class="layer sim enter-bottom" id="s4-l2">
+                      <span class="layer-tag">محاكاة</span>
+                      <div>
+                        <h3>EHR / بريد — محاكاة</h3>
+                        <p>صندوق صادر محلي معلّم صراحة — ليس نظام سجلات حقيقي.</p>
+                      </div>
+                    </div>
+                    <div class="layer later enter-bottom" id="s4-l3">
+                      <span class="layer-tag">لاحقًا</span>
+                      <div>
+                        <h3>IAM وSIEM</h3>
+                        <p>هدف لاحق — غير مشحون في هذا النموذج الأولي.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="laptop-base"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 5: Heart 18-32 computer -->
+      <section id="scene-heart" class="clip" data-start="18" data-duration="14" data-track-index="1">
+        <div class="scene">
+          <div id="s5-head" class="enter-top">
+            <p class="eyebrow">إثبات المقارنة</p>
+            <h2 class="title" style="font-size: 44px">هارنس مقابل البصمة</h2>
+          </div>
+          <div class="stage-row">
+            <div class="char enter-bottom" id="s5-agent">
+              <svg viewBox="0 0 140 220" width="150" height="236"><use href="#char-agent" /></svg>
+            </div>
+            <div class="enter-bottom" id="s5-laptop">
+              <div class="laptop-tilt" style="width: 1240px">
+                <div class="laptop-lid">
+                  <div class="laptop-screen" style="height: 500px">
+                    <div class="compare-head">
+                      <span>الحالة</span>
+                      <span>هارنس</span>
+                      <span>بصمة</span>
+                      <span>الأصل</span>
+                      <span>القطع</span>
+                    </div>
+                    <div class="compare-row enter-bottom" id="s5-r1">
+                      <strong>صياغة متغيرة</strong>
+                      <span><span class="token allow">ALLOW</span></span>
+                      <span><span class="token intervene">INTERVENE</span></span>
+                      <span><span class="token no">لا</span></span>
+                      <span>تعليمة في النص المسترجع</span>
+                    </div>
+                    <div class="compare-row enter-bottom" id="s5-r2">
+                      <strong>تسريب معروف</strong>
+                      <span><span class="token block">BLOCK</span></span>
+                      <span><span class="token intervene">INTERVENE</span></span>
+                      <span><span class="token no">لا</span></span>
+                      <span>تعليمة في النص المسترجع</span>
+                    </div>
+                    <div class="compare-row enter-bottom" id="s5-r3">
+                      <strong>شبيه لفظي</strong>
+                      <span><span class="token allow">ALLOW</span></span>
+                      <span><span class="token allow">ALLOW</span></span>
+                      <span><span class="token yes">نعم</span></span>
+                      <span>—</span>
+                    </div>
+                    <div class="compare-row enter-bottom" id="s5-r4">
+                      <strong>بداية جزئية</strong>
+                      <span><span class="token allow">ALLOW</span></span>
+                      <span><span class="token verify">VERIFY</span></span>
+                      <span><span class="token no">لا إرسال</span></span>
+                      <span>—</span>
+                    </div>
+                    <p class="row-note enter-top" id="s5-note">ما نمنع المشروع على اللفظ وحده.</p>
+                  </div>
+                </div>
+                <div class="laptop-base"></div>
+              </div>
+            </div>
+            <div class="char enter-bottom" id="s5-seal">
+              <svg viewBox="0 0 160 220" width="150" height="236"><use href="#char-seal" /></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 6: Investigate 32-36 AI -->
+      <section id="scene-investigate" class="clip" data-start="32" data-duration="4" data-track-index="1">
+        <div class="scene">
+          <div id="s6-head" class="enter-top">
+            <p class="eyebrow">التحليل السببي</p>
+          </div>
+          <div class="stage-row">
+            <div class="char enter-bottom" id="s6-agent">
+              <svg viewBox="0 0 140 220" width="150" height="236"><use href="#char-agent" /></svg>
+            </div>
+            <div class="enter-bottom" id="s6-ai">
+              <div class="ai-tilt">
+                <div class="ai-window">
+                  <div class="ai-bar"><span class="dot"></span>وكيل</div>
+                  <div class="ai-body">
+                    <div class="card-grid cols-2">
+                      <div class="card enter-bottom" id="s6-c1">
+                        <h3 class="mini-title">شكل الثوابت</h3>
+                        <p class="mini-body">ثوابت شكل المسار — لا قائمة كلمات عدائية.</p>
+                      </div>
+                      <div class="card enter-bottom" id="s6-c2">
+                        <h3 class="mini-title">قوة المطابقة</h3>
+                        <p class="mini-body">تطابق عبر إعادة الصياغة قبل تنفيذ الأداة.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 7: Memory 36-40 AI -->
+      <section id="scene-memory" class="clip" data-start="36" data-duration="4" data-track-index="1">
+        <div class="scene">
+          <div id="s7-head" class="enter-top">
+            <p class="eyebrow">الذاكرة</p>
+            <h2 class="title">ذاكرة X-CFS</h2>
+          </div>
+          <div class="stage-row">
+            <div class="char enter-bottom" id="s7-agent">
+              <svg viewBox="0 0 140 220" width="150" height="236"><use href="#char-agent" /></svg>
+            </div>
+            <div class="enter-bottom" id="s7-ai">
+              <div class="ai-tilt">
+                <div class="ai-window">
+                  <div class="ai-bar"><span class="dot"></span>وكيل</div>
+                  <div class="ai-body">
+                    <div class="card">
+                      <p class="subtitle">تكرار الثوابت لكل orgId</p>
+                      <p class="metric enter-bottom" id="s7-metric">0.6</p>
+                      <p class="mini-body" style="margin-top: 8px">
+                        عتبة Jaccard كنقطة تشغيل للديمو — ليست نسبة نجاح مقاسة.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 8: Lab 40-44 AI -->
+      <section id="scene-lab" class="clip" data-start="40" data-duration="4" data-track-index="1">
+        <div class="scene">
+          <div id="s8-head" class="enter-top">
+            <p class="eyebrow">المختبر</p>
+            <h2 class="title">مختبر SERMG</h2>
+          </div>
+          <div class="stage-row">
+            <div class="char enter-bottom" id="s8-agent">
+              <svg viewBox="0 0 140 220" width="150" height="236"><use href="#char-agent" /></svg>
+            </div>
+            <div class="enter-bottom" id="s8-ai">
+              <div class="ai-tilt">
+                <div class="ai-window">
+                  <div class="ai-bar"><span class="dot"></span>وكيل</div>
+                  <div class="ai-body">
+                    <div class="card-grid cols-2">
+                      <div class="card enter-bottom" id="s8-c1">
+                        <h3 class="mini-title">التشابه السببي لكل طفرة</h3>
+                        <p class="mini-body">الصياغة تتغير والشكل يبقى قريبًا.</p>
+                      </div>
+                      <div class="card enter-bottom" id="s8-c2">
+                        <h3 class="mini-title">درجة الاكتشاف</h3>
+                        <p class="mini-body">إثبات جلسة قابلة للإعادة — بلا نسبة دعائية.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 9: Impact 44-48 phone features -->
+      <section id="scene-impact" class="clip" data-start="44" data-duration="4" data-track-index="1">
+        <div class="scene">
+          <div id="s9-head" class="enter-top">
+            <p class="eyebrow">الأثر</p>
+            <h2 class="title">أثر المنع على سير العمل</h2>
+          </div>
+          <div class="stage-row">
+            <div class="enter-bottom" id="s9-phone">
+              <div class="phone-tilt">
+                <div class="phone-shell">
+                  <div class="phone-screen">
+                    <div class="notch"></div>
+                    <div class="screen-stack">
+                      <div class="card enter-bottom" id="s9-c1">
+                        <h3 class="mini-title">ماذا أُرسل</h3>
+                        <p class="mini-body">جسم محذوف فقط. الأصل لا يُسلَّم.</p>
+                      </div>
+                      <div class="card enter-bottom" id="s9-c2">
+                        <h3 class="mini-title">القطع المسمّى</h3>
+                        <p class="mini-body">تُقطع العلاقة الخطرة والمهمة تكمل.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 10: Connectors 48-54 phone features -->
+      <section id="scene-connectors" class="clip" data-start="48" data-duration="6" data-track-index="1">
+        <div class="scene">
+          <div id="s10-head" class="enter-top">
+            <p class="eyebrow">الموصّلات</p>
+            <h2 class="title" style="font-size: 44px">نفس المحرك — ثلاث واجهات</h2>
+          </div>
+          <div class="stage-row">
+            <div class="enter-bottom" id="s10-phone">
+              <div class="phone-tilt">
+                <div class="phone-shell">
+                  <div class="phone-screen">
+                    <div class="notch"></div>
+                    <div class="screen-stack">
+                      <div class="card enter-bottom" id="s10-c1">
+                        <h3 class="mini-title">واجهة HTTP</h3>
+                        <p class="mini-body">اعتراض قبل الإرسال عبر API.</p>
+                      </div>
+                      <div class="card enter-bottom" id="s10-c2">
+                        <h3 class="mini-title">خادم MCP</h3>
+                        <p class="mini-body">بلا مفتاح في النموذج — أدوات causaseal_*.</p>
+                      </div>
+                      <div class="card enter-bottom" id="s10-c3">
+                        <h3 class="mini-title">SDK للشريك</h3>
+                        <p class="mini-body">نفس القرار داخل تكامل الشريك.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 11: Monitor 54-58 computer -->
+      <section id="scene-monitor" class="clip" data-start="54" data-duration="4" data-track-index="1">
+        <div class="scene">
+          <div id="s11-head" class="enter-top">
+            <p class="eyebrow">المراقبة الحية</p>
+            <h2 class="title">المراقبة الحية</h2>
+          </div>
+          <div class="enter-bottom" id="s11-laptop">
+            <div class="laptop-tilt">
+              <div class="laptop-lid">
+                <div class="laptop-screen">
+                  <div class="card">
+                    <p class="subtitle">أحداث هذه الجلسة — SOC العرض.</p>
+                    <p class="row-note enter-top" id="s11-note">الأصل ما وصل للنظام المحاكى.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="laptop-base"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 12: Reports 58-61 computer -->
+      <section id="scene-reports" class="clip" data-start="58" data-duration="3" data-track-index="1">
+        <div class="scene">
+          <div id="s12-head" class="enter-top">
+            <p class="eyebrow">التقارير</p>
+            <h2 class="title">تقارير إثبات الـMVP</h2>
+          </div>
+          <div class="enter-bottom" id="s12-laptop">
+            <div class="laptop-tilt">
+              <div class="laptop-lid">
+                <div class="laptop-screen">
+                  <div class="card">
+                    <p class="subtitle">ملف الجلسة — إثبات قابل للإعادة.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="laptop-base"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scene 13: Outro 61-64 -->
+      <section id="scene-outro" class="clip" data-start="61" data-duration="3" data-track-index="1">
+        <div class="scene">
+          <div>
+            <p class="domain enter-top" id="s13-domain">causaseal.aboalrejal.com</p>
+            <p class="subtitle enter-top" id="s13-line" style="font-size: 40px; font-weight: 700; color: #0d121c">
+              الأصل لا يُرسل.
+            </p>
+          </div>
+          <div class="stage-row" id="s13-cast">
+            <div class="char" id="s13-agent">
+              <svg viewBox="0 0 140 220" width="150" height="236"><use href="#char-agent" /></svg>
+            </div>
+            <div id="s13-devices">
+              <div class="mini-rig">
+                <div class="mini-phone-tilt">
+                  <div class="mini-phone-shell"><div class="mini-phone-screen"></div></div>
+                </div>
+                <div class="mini-laptop-tilt">
+                  <div class="mini-laptop-lid"><div class="mini-laptop-screen"></div></div>
+                  <div class="mini-laptop-base"></div>
+                </div>
+              </div>
+            </div>
+            <div class="char" id="s13-seal">
+              <svg viewBox="0 0 160 220" width="150" height="236"><use href="#char-seal" /></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <audio
+        id="bgm"
+        data-start="0"
+        data-duration="58"
+        data-track-index="0"
+        data-volume="0.2"
+        src="assets/music/happy-beats-business-moves-vol-10-by-ende-dot-app.mp3"
+      ></audio>
+      <audio id="sfx-hook" data-start="1.35" data-duration="0.3" data-track-index="2" data-volume="0.45" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+      <audio id="sfx-b1" data-start="5.4" data-duration="0.1" data-track-index="2" data-volume="0.3" src="assets/sfx/click_003.ogg"></audio>
+      <audio id="sfx-b2" data-start="5.95" data-duration="0.1" data-track-index="2" data-volume="0.3" src="assets/sfx/click_003.ogg"></audio>
+      <audio id="sfx-b3" data-start="6.5" data-duration="0.1" data-track-index="2" data-volume="0.3" src="assets/sfx/click2.ogg"></audio>
+      <audio id="sfx-r1" data-start="19.2" data-duration="0.2" data-track-index="2" data-volume="0.4" src="assets/sfx/impactSoft_medium_004.ogg"></audio>
+      <audio id="sfx-r2" data-start="22.4" data-duration="0.1" data-track-index="2" data-volume="0.28" src="assets/sfx/click2.ogg"></audio>
+      <audio id="sfx-r3" data-start="24.8" data-duration="0.1" data-track-index="2" data-volume="0.28" src="assets/sfx/click2.ogg"></audio>
+      <audio id="sfx-r4" data-start="27.2" data-duration="0.1" data-track-index="2" data-volume="0.28" src="assets/sfx/click2.ogg"></audio>
+      <audio id="sfx-conn1" data-start="49.2" data-duration="0.1" data-track-index="2" data-volume="0.28" src="assets/sfx/click_003.ogg"></audio>
+      <audio id="sfx-conn2" data-start="50.4" data-duration="0.1" data-track-index="2" data-volume="0.28" src="assets/sfx/click_003.ogg"></audio>
+      <audio id="sfx-conn3" data-start="51.6" data-duration="0.1" data-track-index="2" data-volume="0.28" src="assets/sfx/click_003.ogg"></audio>
+      <audio id="sfx-outro" data-start="62.2" data-duration="0.2" data-track-index="2" data-volume="0.35" src="assets/sfx/bong_001.ogg"></audio>
+    </div>
+
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      const OUT = "power3.out";
+      const IN = "power2.in";
+
+      function rise(id, t) {
+        tl.fromTo(id, { opacity: 0, y: 72 }, { opacity: 1, y: 0, duration: 0.55, ease: OUT }, t);
+      }
+      function dropIn(id, t) {
+        tl.fromTo(id, { opacity: 0, y: -48 }, { opacity: 1, y: 0, duration: 0.4, ease: OUT }, t);
+      }
+      function leaveDown(id, t) {
+        tl.to(id, { opacity: 0, y: 72, duration: 0.2, ease: IN }, t);
+      }
+      function leaveUp(id, t) {
+        tl.to(id, { opacity: 0, y: -48, duration: 0.2, ease: IN }, t);
+      }
+
+      rise("#s1-phone", 0.12);
+      rise("#s1-agent", 0.22);
+      rise("#s1-allow", 0.45);
+      leaveUp("#s1-allow", 1.15);
+      rise("#s1-intervene", 1.35);
+      rise("#s1-seal", 1.35);
+      dropIn("#s1-line", 1.85);
+      leaveUp("#s1-line", 3.75);
+      leaveDown("#s1-phone", 3.75);
+      leaveDown("#s1-agent", 3.75);
+      leaveDown("#s1-seal", 3.75);
+      leaveDown("#s1-intervene", 3.75);
+
+      dropIn("#s2-head", 4.15);
+      rise("#s2-phone", 4.25);
+      rise("#s2-sub", 4.7);
+      rise("#s2-b1", 5.35);
+      rise("#s2-b2", 5.9);
+      rise("#s2-b3", 6.45);
+      leaveUp("#s2-head", 7.75);
+      leaveDown("#s2-phone", 7.75);
+
+      dropIn("#s3-head", 8.15);
+      rise("#s3-laptop", 8.35);
+      leaveUp("#s3-head", 12.75);
+      leaveDown("#s3-laptop", 12.75);
+
+      dropIn("#s4-head", 13.15);
+      rise("#s4-laptop", 13.3);
+      rise("#s4-l1", 13.55);
+      rise("#s4-l2", 14.15);
+      rise("#s4-l3", 14.75);
+      leaveUp("#s4-head", 17.75);
+      leaveDown("#s4-laptop", 17.75);
+
+      dropIn("#s5-head", 18.15);
+      rise("#s5-laptop", 18.3);
+      rise("#s5-agent", 18.4);
+      rise("#s5-r1", 19.1);
+      rise("#s5-seal", 19.2);
+      rise("#s5-r2", 22.3);
+      rise("#s5-r3", 24.7);
+      rise("#s5-r4", 27.1);
+      dropIn("#s5-note", 27.85);
+      leaveUp("#s5-head", 31.75);
+      leaveUp("#s5-note", 31.75);
+      leaveDown("#s5-laptop", 31.75);
+      leaveDown("#s5-agent", 31.75);
+      leaveDown("#s5-seal", 31.75);
+
+      dropIn("#s6-head", 32.15);
+      rise("#s6-ai", 32.25);
+      rise("#s6-agent", 32.35);
+      rise("#s6-c1", 32.55);
+      rise("#s6-c2", 32.85);
+      leaveUp("#s6-head", 35.75);
+      leaveDown("#s6-ai", 35.75);
+      leaveDown("#s6-agent", 35.75);
+
+      dropIn("#s7-head", 36.15);
+      rise("#s7-ai", 36.25);
+      rise("#s7-agent", 36.35);
+      rise("#s7-metric", 36.7);
+      leaveUp("#s7-head", 39.75);
+      leaveDown("#s7-ai", 39.75);
+      leaveDown("#s7-agent", 39.75);
+
+      dropIn("#s8-head", 40.15);
+      rise("#s8-ai", 40.25);
+      rise("#s8-agent", 40.35);
+      rise("#s8-c1", 40.5);
+      rise("#s8-c2", 40.85);
+      leaveUp("#s8-head", 43.75);
+      leaveDown("#s8-ai", 43.75);
+      leaveDown("#s8-agent", 43.75);
+
+      dropIn("#s9-head", 44.15);
+      rise("#s9-phone", 44.25);
+      rise("#s9-c1", 44.5);
+      rise("#s9-c2", 44.9);
+      leaveUp("#s9-head", 47.75);
+      leaveDown("#s9-phone", 47.75);
+
+      dropIn("#s10-head", 48.15);
+      rise("#s10-phone", 48.3);
+      rise("#s10-c1", 49.1);
+      rise("#s10-c2", 50.3);
+      rise("#s10-c3", 51.5);
+      leaveUp("#s10-head", 53.75);
+      leaveDown("#s10-phone", 53.75);
+
+      dropIn("#s11-head", 54.15);
+      rise("#s11-laptop", 54.3);
+      dropIn("#s11-note", 55.0);
+      leaveUp("#s11-head", 57.75);
+      leaveUp("#s11-note", 57.75);
+      leaveDown("#s11-laptop", 57.75);
+
+      dropIn("#s12-head", 58.15);
+      rise("#s12-laptop", 58.3);
+      leaveUp("#s12-head", 60.75);
+      leaveDown("#s12-laptop", 60.75);
+
+      dropIn("#s13-domain", 61.15);
+      dropIn("#s13-line", 61.55);
+      leaveDown("#s13-agent", 61.2);
+      leaveDown("#s13-devices", 61.2);
+      leaveDown("#s13-seal", 61.35);
+
+      window.__timelines["causaseal-frames"] = tl;
+    </script>
+  </body>
+</html>

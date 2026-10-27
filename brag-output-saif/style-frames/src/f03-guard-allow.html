@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css">
+<style>
+  .floor { left: 0; right: 0; top: 900px; height: 3px; background: linear-gradient(90deg, transparent, #2a3654 12%, #2a3654 88%, transparent); }
+  /* Flow: agent (right) → guard → gate → public channel (left) */
+  .agent { left: 1640px; top: 580px; width: 220px; }
+  .trail { left: 1180px; top: 800px; width: 440px; height: 4px; background: repeating-linear-gradient(90deg, #ff6b5e 0 18px, transparent 18px 34px); opacity: .6; }
+  .guard { left: 1240px; top: 470px; width: 330px; }
+  .gate { left: 640px; top: 330px; width: 560px; height: 572px; }
+  .pillar { position: absolute; bottom: 0; width: 66px; height: 500px; background: #1c2740; border: 5px solid #05080f; border-radius: 16px 16px 6px 6px; }
+  .beam { position: absolute; top: 0; left: -30px; right: -30px; height: 80px; background: #1c2740; border: 5px solid #05080f; border-radius: 18px;
+          display: flex; align-items: center; justify-content: center; gap: 16px; font: 700 32px/1 "Plex"; color: #b7c1d6; }
+  .beam span { direction: ltr; font: 600 24px/1 var(--mono); color: #7c89a6; }
+  .scan { position: absolute; left: 66px; right: 66px; top: 80px; bottom: 0; background: linear-gradient(180deg, rgba(61,214,140,.22), rgba(61,214,140,0) 80%); }
+  .intruder { left: 790px; top: 500px; width: 270px; }
+  .stamp-wrap { left: 700px; top: 170px; }
+  /* Destination */
+  .dest { left: 120px; top: 470px; width: 400px; height: 330px; border: 4px dashed #ff6b5e; border-radius: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: #ffb4ab; background: rgba(255,107,94,.06); }
+  .dest svg { width: 130px; }
+  .dest b { font: 700 38px/1 "Plex"; }
+  .dest small { font: 500 26px/1 "Plex"; opacity: .8; }
+  /* Clipboard callout, anchored to the guard */
+  .list { left: 1260px; top: 70px; width: 560px; padding: 28px 34px; background: #f8fafc; color: var(--ink); border-radius: 24px; box-shadow: 0 30px 80px -20px rgba(0,0,0,.7); }
+  .list::after { content: ""; position: absolute; left: 260px; bottom: -22px; border: 22px solid transparent; border-bottom: 0; border-top-color: #f8fafc; }
+  .list h4 { font: 700 32px/1 "Plex"; margin-bottom: 16px; }
+  .list .row { display: flex; justify-content: space-between; font: 600 30px/1 var(--mono); direction: ltr; padding: 13px 0; border-top: 2px dashed #d0d5dd; color: #344054; }
+  .list .row i { font-style: normal; color: #98a2b3; }
+  .list .q { margin-top: 14px; padding: 16px 18px; border-radius: 14px; background: #fef0c7; display: flex; justify-content: space-between; align-items: center; direction: ltr; font: 700 30px/1 var(--mono); }
+  .list .q b { font: 700 30px/1 "Plex"; color: #b54708; direction: rtl; }
+  .tag-guard { left: 1300px; top: 930px; }
+  .tag-intr { left: 760px; top: 930px; }
+  .tag-agent { left: 1650px; top: 930px; }
+</style></head>
+<body><div class="stage night">
+  <div class="abs floor"></div>
+  <div class="abs dest">
+    <svg viewBox="0 0 64 64" fill="none" stroke="#ff6b5e" stroke-width="4"><circle cx="32" cy="32" r="26"/><path d="M6 32h52M32 6c9 8 9 44 0 52M32 6c-9 8-9 44 0 52"/></svg>
+    <b>قناة عامة</b><small>خارج مساحة الفريق</small>
+  </div>
+  <div class="abs gate">
+    <div class="pillar" style="left:0"></div><div class="pillar" style="right:0"></div>
+    <div class="beam">بوابة الأدوات <span>tool gate</span></div>
+    <div class="scan"></div>
+  </div>
+  <div class="abs intruder" id="intruder"></div>
+  <div class="abs trail"></div>
+  <div class="abs guard" id="guard"></div>
+  <div class="abs agent" id="agent"></div>
+
+  <div class="abs list">
+    <h4>قائمة أدوات الإرسال</h4>
+    <div class="row">send_to_workspace <i>✕</i></div>
+    <div class="row">export_document <i>✕</i></div>
+    <div class="row">share_document <i>✕</i></div>
+    <div class="q">post_update <b>مو في القائمة</b></div>
+  </div>
+
+  <div class="abs stamp-wrap"><div class="stamp allow">ALLOW</div></div>
+  <div class="abs tag-guard"><span class="tag">الهارنس <small>Harness</small></span></div>
+  <div class="abs tag-intr"><span class="tag">تعليمة مدسوسة متنكّرة</span></div>
+  <div class="abs tag-agent"><span class="tag">الوكيل <small>AI Agent</small></span></div>
+</div>
+<script src="characters.js"></script>
+<script>
+  document.getElementById("guard").innerHTML = CAST.guard({ mood: "calm", night: true })
+  document.getElementById("intruder").innerHTML = CAST.intruder({ night: true })
+  document.getElementById("agent").innerHTML = CAST.agent({ eyes: "spiral", night: true })
+</script>
+</body></html>

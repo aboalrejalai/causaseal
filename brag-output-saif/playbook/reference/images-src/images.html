@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>CAUSASEAL — SAIF images</title>
+<link rel="stylesheet" href="../composition/kit.css">
+<style>
+  .stage { direction: ltr; }
+  .col { position: absolute; left: 110px; top: 120px; width: 600px; }
+  .eyebrow2 { display: flex; align-items: center; gap: 14px; font: 600 22px/1 "Plex"; color: var(--sa-600); letter-spacing: .06em; text-transform: uppercase; }
+  .num { font: 700 20px/1 "Plex"; color: #fff; background: var(--sa-600); border-radius: 8px; padding: 8px 10px; letter-spacing: 0; }
+  h1 { margin-top: 26px; font: 700 58px/1.12 "Plex"; letter-spacing: -.015em; color: var(--ink); }
+  h1 em { font-style: normal; color: var(--danger); }
+  h1 b { color: var(--sa-600); }
+  .cap { margin-top: 24px; font: 400 25px/1.5 "Plex"; color: var(--ink-2); }
+  ul.pts { list-style: none; margin-top: 30px; display: grid; gap: 16px; }
+  ul.pts li { display: flex; gap: 14px; font: 500 22px/1.4 "Plex"; color: var(--ink); }
+  ul.pts li::before { content: ""; flex: none; width: 24px; height: 24px; margin-top: 3px; border-radius: 50%;
+    background: var(--sa-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b8354' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12l4 4 8-8'/%3E%3C/svg%3E") center/16px no-repeat; box-shadow: inset 0 0 0 1.5px var(--sa-200); }
+  .wtop { position: absolute; left: 110px; right: 110px; top: 96px; display: grid; grid-template-columns: 1fr 640px; gap: 70px; align-items: start; }
+  .wtop h1 { font-size: 52px; margin-top: 20px; }
+  .wtop .cap { font-size: 23px; margin-top: 16px; }
+  .wtop ul.pts { margin-top: 58px; gap: 14px; }
+  .wcard { position: absolute; left: 50%; top: 440px; transform: translateX(-50%); }
+  .wcard img { width: 100%; display: block; border-radius: 22px; background: #fff; box-shadow: 0 0 0 1px var(--line), 0 50px 100px -40px rgba(16,24,40,.35); }
+  .foot { position: absolute; left: 110px; bottom: 64px; display: flex; align-items: center; gap: 14px; font: 600 20px/1 "Plex"; color: var(--muted); }
+  .foot .logo-cs { width: 36px; height: 36px; line-height: 36px; font-size: 15px; border-radius: 9px; }
+  .foot b { color: var(--ink); }
+  .laptop.pos { left: 770px; top: 150px; width: 1050px; height: 700px; }
+  .laptop .screen img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; }
+  .cardbox { position: absolute; left: 770px; top: 110px; width: 1040px; height: 860px; display: flex; align-items: center; justify-content: center; }
+  .cardbox img { max-width: 100%; max-height: 100%; border-radius: 22px; box-shadow: 0 0 0 1px var(--line), 0 50px 100px -40px rgba(16,24,40,.35), 0 20px 40px -24px rgba(16,24,40,.2); background: #fff; }
+  .phone.pos { width: 300px; height: 620px; padding: 12px; border-radius: 46px; }
+  .phone.pos .screen { border-radius: 36px; }
+  .phone.pos .screen img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  .phone.pos .notch { width: 100px; height: 24px; top: 12px; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .55; }
+
+  /* hero */
+  .hero-h { position: absolute; left: 110px; top: 190px; width: 820px; }
+  .hero-h h1 { font-size: 76px; line-height: 1.08; margin-top: 30px; }
+  .brand { display: flex; align-items: center; gap: 18px; font: 700 34px/1 "Plex"; }
+  .brand .logo-cs { width: 60px; height: 60px; line-height: 60px; font-size: 24px; border-radius: 15px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 40px; }
+  .chip2 { font: 600 21px/1 "Plex"; padding: 14px 18px; border-radius: 12px; background: #fff; border: 1px solid var(--line); box-shadow: 0 8px 24px -16px rgba(16,24,40,.35); color: var(--ink); }
+  .chip2 i { font-style: normal; color: var(--sa-600); margin-right: 8px; }
+  /* how it works */
+  .hw-title { position: absolute; left: 110px; top: 90px; }
+  .hw-title h1 { font-size: 60px; margin-top: 18px; }
+  .steps { position: absolute; left: 110px; right: 110px; top: 330px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+  .step img { width: 100%; border-radius: 18px; box-shadow: 0 0 0 1px var(--line), 0 30px 60px -30px rgba(16,24,40,.4); display: block; }
+  .step .n { margin-top: 26px; display: flex; align-items: center; gap: 12px; font: 700 28px/1.2 "Plex"; color: var(--ink); }
+  .step .n span { font: 700 18px/1 "Plex"; color: #fff; background: var(--sa-600); border-radius: 8px; padding: 7px 9px; }
+  .step p { margin-top: 12px; font: 400 21px/1.5 "Plex"; color: var(--ink-2); }
+</style></head>
+<body><div class="stage day" id="stage"></div>
+<script src="../composition/characters.js"></script>
+<script>
+const FOOT = `<div class="foot"><span class="logo-cs">CS</span><b>CAUSASEAL</b> · causaseal.aboalrejal.com · SAIF 2026</div>`
+const text = (c) => `<div class="col">
+  <div class="eyebrow2"><span class="num">${c.n}</span>${c.eyebrow}</div>
+  <h1>${c.title}</h1><p class="cap">${c.cap}</p>
+  <ul class="pts">${c.pts.map((p) => `<li><span>${p}</span></li>`).join("")}</ul></div>`
+const laptop = (src) => `<div class="glow" style="left:900px;top:220px;width:800px;height:500px;background:var(--sa-100)"></div>
+  <div class="laptop pos"><div class="lid"><div class="screen"><img src="${src}"></div></div><div class="base"></div></div>`
+const wide = (c, src, w) => `<div class="wtop">
+    <div><div class="eyebrow2"><span class="num">${c.n}</span>${c.eyebrow}</div><h1>${c.title}</h1><p class="cap">${c.cap}</p></div>
+    <ul class="pts">${c.pts.map((p) => `<li><span>${p}</span></li>`).join("")}</ul></div>
+  <div class="glow" style="left:560px;top:520px;width:800px;height:380px;background:var(--sa-100)"></div>
+  <div class="wcard" style="width:${w}px"><img src="${src}"></div>`
+const card = (src) => `<div class="glow" style="left:900px;top:260px;width:760px;height:520px;background:var(--sa-100)"></div><div class="cardbox"><img src="${src}"></div>`
+const S = "../work/shots/"
+
+const IMAGES = {
+  hero: () => `
+    <div class="glow" style="left:1000px;top:150px;width:900px;height:700px;background:var(--sa-100)"></div>
+    <div class="hero-h">
+      <div class="brand"><span class="logo-cs">CS</span>CAUSASEAL</div>
+      <div class="eyebrow2" style="margin-top:34px">SAIF 2026 · Cybersecurity &amp; Defensive Technologies</div>
+      <h1>The harness allows.<br>The fingerprint <em>intervenes.</em></h1>
+      <p class="cap" style="font-size:27px">A causal decision layer above the AI-agent tool harness. It remembers <b style="color:var(--ink)">why</b> a past path was dangerous — and stops it when the attacker rephrases.</p>
+      <div class="chips">
+        <span class="chip2"><i>●</i>4 live cases · real engine</span>
+        <span class="chip2"><i>●</i>Named cut · redacted delivery</span>
+        <span class="chip2"><i>●</i>HTTP · MCP · SDK</span>
+      </div>
+    </div>
+    <div class="laptop" style="left:1000px;top:170px;width:860px;height:574px"><div class="lid"><div class="screen"><img src="${S}arch-map.png" style="width:100%;height:100%;object-fit:cover;object-position:top left;display:block"></div></div><div class="base"></div></div>
+    <div style="position:absolute;left:930px;top:640px;width:690px"><img src="${S}compare-card.png" style="width:100%;border-radius:18px;box-shadow:0 0 0 1px var(--line),0 40px 80px -30px rgba(16,24,40,.45)"></div>
+    <div class="phone pos" style="position:absolute;left:1640px;top:360px;width:230px;height:476px;padding:10px;border-radius:38px"><div class="notch" style="width:80px;height:20px;top:10px"></div><div class="screen" style="border-radius:30px"><img src="${S}phone-connectors.png"></div></div>
+    <div style="position:absolute;left:790px;top:850px;width:130px" id="heroSeal"></div>
+    ${FOOT}`,
+
+  how: () => `
+    <div class="hw-title"><div class="eyebrow2"><span class="num">01</span>How it works</div>
+      <h1>A rephrased leak passes the harness. <b>CAUSASEAL remembers its shape.</b></h1></div>
+    <div class="steps">
+      <div class="step"><img src="../work/stills-en/allow.jpg"><div class="n"><span>1</span>The harness allows</div>
+        <p>A line hidden in a customer email tells the agent to leak customer data. The attacker swaps the tool name (<code>post_update</code>) and the wording, so the tool-list harness finds no match — <b>ALLOW</b>.</p></div>
+      <div class="step"><img src="../work/stills-en/match.jpg"><div class="n"><span>2</span>The fingerprint remembers</div>
+        <p>CAUSASEAL reduces the path to its causal invariants and matches the shape of a past incident (<b>X-CFS-001</b>, 3 of 4 invariants) — <b>INTERVENE</b>, before the tool runs.</p></div>
+      <div class="step"><img src="../work/stills-en/cut.jpg"><div class="n"><span>3</span>One named cut — work continues</div>
+        <p>Only the causal edge <i>instruction in retrieved text</i> is cut. The sensitive original is never sent; a redacted copy is delivered and the task completes.</p></div>
+    </div>
+    ${FOOT}`,
+
+  compare: () => wide({ n: "02", eyebrow: "Proof · four live cases",
+    title: "Harness allows. <em>Fingerprint intervenes.</em>",
+    cap: "“Run harness compare” sends four real cases through the running engine (POST /api/agent/run). No seeded numbers.",
+    pts: ["<b>Mutated phrasing</b> — harness ALLOW, fingerprint INTERVENE, original not sent, named cut",
+          "<b>Known leak</b> — both stop it; the shape is recorded for later forms",
+          "<b>Lookalike</b> — benign work is allowed: no keyword blocking",
+          "<b>Partial start</b> — VERIFY: monitor, don't send until reviewed"] }, S + "compare-card.png", 1560) + FOOT,
+
+  architecture: () => text({ n: "03", eyebrow: "Honest integration map",
+    title: "Every component is labeled <b>Live, Simulated or Later.</b>",
+    cap: "The prototype proves one thing end to end: a causal decision before the tool touches the world.",
+    pts: ["<b>Live</b> — operator → AI agent → CAUSASEAL decision plane → HTTP · MCP · SDK",
+          "<b>Simulated</b> — effect gateway and outbox, clearly marked in the UI",
+          "<b>Later</b> — IAM / Entra identity and external SIEM export"] }) + laptop(S + "arch-map.png") + FOOT,
+
+  lab: () => text({ n: "04", eyebrow: "SERMG mutation lab",
+    title: "Rephrase it. Swap the tool. <b>Same shape, same decision.</b>",
+    cap: "SERMG generates mutated variants of a known attack and replays each one through the gateway.",
+    pts: ["<b>5 of 5</b> mutated attacks detected in this run",
+          "The approved-destination variant is <b>allowed</b> — the check is causal, not lexical",
+          "Structural match on path invariants, not a keyword list"] }) + card(S + "lab-results.png") + FOOT,
+
+  impact: () => wide({ n: "05", eyebrow: "Minimal intervention",
+    title: "One named cut. <b>The task still completes.</b>",
+    cap: "On INTERVENE, CAUSASEAL severs the causal edge and delivers a redacted copy. The sensitive original is never sent.",
+    pts: ["Named cut: <b>instruction in retrieved text</b>",
+          "Redacted copy delivered to the team workspace",
+          "Cross-context: a shape learned in one environment is applied in another"] }, S + "impact-runs.png", 1180) + FOOT,
+
+  monitor: () => text({ n: "06", eyebrow: "Live monitoring",
+    title: "Every decision, <b>logged live.</b>",
+    cap: "Each tool call is recorded with its causal path, decision and fingerprint match — a session-level SOC view.",
+    pts: ["ALLOW · VERIFY · INTERVENE · DELIVERED-REDACTED",
+          "Path invariants shown for every event",
+          "Session events of this demo — not an external SIEM"] }) + laptop(S + "monitor.png") + FOOT,
+
+  memory: () => text({ n: "07", eyebrow: "X-CFS fingerprint memory",
+    title: "It stores <b>why</b> a path was dangerous — not its words.",
+    cap: "Causal invariants of past incidents, stored per organisation and matched by Jaccard similarity (0.6 operating point).",
+    pts: ["New intervened shapes are learned automatically",
+          "Per-organisation isolation by orgId",
+          "Reproducible demo threshold — not a tuned accuracy claim"] }) + laptop(S + "memory.png") + FOOT,
+
+  connectors: () => text({ n: "08", eyebrow: "Integration",
+    title: "Plugs in <b>above any agent.</b>",
+    cap: "The same engine is exposed over HTTP, a remote MCP server and a partner SDK — the agent asks CAUSASEAL before the tool runs.",
+    pts: ["Remote MCP: <b>causaseal.aboalrejal.com/mcp</b>",
+          "No API key or OAuth in the prototype",
+          "Decision returned before execution (<code>executed: false</code>)"] }) + laptop(S + "connector-mcp.png") +
+    `<div class="phone pos" style="position:absolute;left:1600px;top:330px"><div class="notch"></div><div class="screen"><img src="${S}phone-connectors.png"></div></div>` + FOOT,
+}
+
+const id = new URLSearchParams(location.search).get("i") || "hero"
+document.getElementById("stage").innerHTML = IMAGES[id]()
+const hs = document.getElementById("heroSeal"); if (hs) hs.innerHTML = CAST.seal({ mood: "happy" })
+</script>
+</body></html>

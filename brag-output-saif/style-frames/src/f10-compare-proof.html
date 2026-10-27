@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css">
+<style>
+  .head { right: 150px; top: 60px; }
+  .laptop { left: 120px; top: 220px; width: 1680px; height: 840px; }
+  .panel { margin: 34px 40px; padding: 34px 40px 20px; }
+  .bar { display: flex; justify-content: space-between; align-items: center; }
+  .bar h3 { font: 700 40px/1 "Plex"; }
+  .btn { position: relative; font: 700 28px/1 "Plex"; background: var(--sa-600); color: #fff; padding: 18px 28px; border-radius: 14px; box-shadow: 0 0 0 8px rgba(27,131,84,.18); }
+  .cursor { position: absolute; left: -22px; top: 44px; width: 46px; }
+  table { width: 100%; margin-top: 26px; border-collapse: separate; border-spacing: 0 12px; }
+  th { text-align: right; font: 600 26px/1 "Plex"; color: var(--muted); padding: 0 22px 4px; }
+  td { font: 700 34px/1 "Plex"; padding: 24px 22px; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  td:first-child { border-right: 1px solid var(--line); border-radius: 0 16px 16px 0; }
+  td:last-child { border-left: 1px solid var(--line); border-radius: 16px 0 0 16px; font-size: 28px; color: var(--ink-2); }
+  tr.dim td { opacity: .32; }
+  tr.focus td { background: #fffbfa; border-color: #f04438; border-width: 3px; }
+  tr.focus td:first-child { border-right-width: 3px; } tr.focus td:last-child { border-left-width: 3px; }
+  .no { color: #b42318; } .yes { color: var(--ok); }
+</style></head>
+<body><div class="stage day">
+  <div class="abs head"><div class="h2">الهارنس سمح. <span class="red">البصمة قطعت.</span></div></div>
+
+  <div class="laptop"><div class="lid"><div class="screen">
+    <div class="app-top"><div class="logo-cs">CS</div><div class="app-name">CAUSASEAL</div><div class="app-page">· المعمارية</div></div>
+    <div class="card panel">
+      <div class="bar"><h3>مقارنة الهارنس (أربع حالات)</h3>
+        <div class="btn">شغّل مقارنة الهارنس
+          <svg class="cursor" viewBox="0 0 24 24"><path d="M4 2l16 10-7 1.5 4 7.5-3 1.5-4-7.5L5 20z" fill="#fff" stroke="#0d121c" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+      <table><thead><tr><th>الحالة</th><th>هارنس</th><th>بصمة</th><th>أصل مُرسل</th><th>القطع</th></tr></thead><tbody id="rows"></tbody></table>
+    </div>
+  </div></div><div class="base"></div></div>
+</div>
+<script>
+  // Values copied from work/engine-data.json → compare (real runOpsAgent runs).
+  const rows = [
+    ["صياغة متغيرة", "ALLOW", "INTERVENE", false, "تعليمة في النص المسترجع", "focus"],
+    ["تسريب معروف", "BLOCK", "INTERVENE", false, "تعليمة في النص المسترجع", "dim"],
+    ["شبيه لفظي", "ALLOW", "ALLOW", true, "—", "dim"],
+    ["بداية جزئية", "ALLOW", "VERIFY", false, "—", "dim"],
+  ]
+  const b = (d) => `<span class="badge b-sm b-${d.toLowerCase()}">${d}</span>`
+  document.getElementById("rows").innerHTML = rows.map(([c, h, f, sent, cut, cls]) =>
+    `<tr class="${cls}"><td>${c}</td><td>${b(h)}</td><td>${b(f)}</td><td class="${sent ? "yes" : "no"}">${sent ? "نعم" : "لا"}</td><td>${cut}</td></tr>`).join("")
+</script>
+</body></html>

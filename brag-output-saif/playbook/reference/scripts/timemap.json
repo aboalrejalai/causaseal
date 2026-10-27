@@ -1,0 +1,4 @@
+{
+  "note": "Piecewise-linear map from composition time t to output time u. Stretches the threat act and the fingerprint match so narration fits.",
+  "knots": [[0, 0], [4.3, 4.3], [9.15, 10.3], [9.8, 10.95], [13.5, 15.9], [20.6, 22.3], [22.48, 24.0], [38.6, 40.12], [43.3, 46.3], [88.0, 91.0], [90.0, 94.0]]
+}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css">
+<style>
+  /* Radial wipe mid-expansion: light world spreading from the impact point */
+  .stage { background: var(--night); }
+  .wipe { left: 0; top: 0; width: 1920px; height: 1080px;
+          background: radial-gradient(circle 1320px at 560px 700px, #fcfcfd 0 99.4%, transparent 100%); }
+  .ring { border-radius: 50%; border: 4px solid var(--sa-300); opacity: .5; }
+  .intruder { left: 380px; top: 560px; width: 300px; }
+  .seal { left: 340px; top: 290px; width: 390px; }
+  .impact { left: 300px; top: 680px; width: 470px; height: 60px; }
+  .impact i { position: absolute; top: 0; width: 10px; height: 46px; border-radius: 5px; background: var(--sa-500); }
+  .lock { right: 150px; top: 290px; width: 980px; }
+  .mark { display: flex; align-items: center; gap: 30px; }
+  .mark .logo-cs { width: 128px; height: 128px; border-radius: 30px; font-size: 54px; line-height: 128px; }
+  .word { font: 700 132px/1 "Plex"; direction: ltr; letter-spacing: .01em; }
+  .line { margin-top: 56px; font: 700 76px/1.25 "Plex"; }
+  .line span { color: var(--sa-600); }
+  .en-sub { margin-top: 22px; font: 500 38px/1.3 "Plex"; color: var(--muted); direction: ltr; text-align: right; }
+</style></head>
+<body><div class="stage">
+  <div class="abs wipe"></div>
+  <div class="abs ring" style="left:290px;top:430px;width:540px;height:540px"></div>
+  <div class="abs ring" style="left:180px;top:320px;width:760px;height:760px;opacity:.25"></div>
+  <div class="abs intruder" id="intruder"></div>
+  <div class="abs seal" id="seal"></div>
+
+  <div class="abs lock">
+    <div class="mark"><div class="logo-cs">CS</div><div class="word">CAUSASEAL</div></div>
+    <div class="line">نحفظ <span>سبب</span> الحادثة…<br>مو كلماتها.</div>
+    <div class="en-sub">Remember the cause, not the words.</div>
+  </div>
+</div>
+<script src="characters.js"></script>
+<script>
+  document.getElementById("intruder").innerHTML = CAST.intruder({ grey: true })
+  document.getElementById("seal").innerHTML = CAST.seal({ mood: "focus" })
+</script>
+</body></html>

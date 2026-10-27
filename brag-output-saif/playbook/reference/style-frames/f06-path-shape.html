@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css">
+<style>
+  .head { right: 150px; top: 64px; }
+  .laptop { left: 190px; top: 256px; width: 1540px; height: 800px; }
+  .panel { margin: 40px 44px; padding: 40px 44px; }
+  .panel h3 { font: 700 44px/1 "Plex"; }
+  .panel .sub { margin-top: 14px; font: 500 28px/1 "Plex"; color: var(--muted); }
+  .graph { margin-top: 56px; display: flex; align-items: center; justify-content: space-between; }
+  .node { width: 290px; padding: 26px 26px 30px; border-radius: 22px; background: #fff; border: 4px solid #f04438; box-shadow: 0 0 0 8px rgba(240,68,56,.08); }
+  .node small { display: block; font: 600 26px/1 "Plex"; color: var(--muted); }
+  .node b { display: block; margin-top: 16px; font: 700 36px/1.25 "Plex"; color: #b42318; }
+  .arrow { flex: 1; height: 6px; margin: 0 14px; background: #f04438; position: relative; border-radius: 3px; }
+  .arrow::after { content: ""; position: absolute; left: -6px; top: -11px; border: 14px solid transparent; border-left: 0; border-right-color: #f04438; }
+  .chips { margin-top: 56px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  .chips > span:first-child { font: 600 28px/1 "Plex"; color: var(--muted); margin-inline-end: 8px; }
+  .chip { font: 600 30px/1 "Plex"; padding: 14px 22px; border-radius: 12px; background: var(--danger-bg); color: #b42318; }
+  .seal { left: 40px; top: 760px; width: 250px; }
+</style></head>
+<body><div class="stage day">
+  <div class="abs head">
+    <div class="h2"><span class="en">CAUSASEAL</span> يقرأ شكل المسار…</div>
+    <div class="h2 green">مو الكلمات.</div>
+  </div>
+
+  <div class="laptop"><div class="lid"><div class="screen">
+    <div class="app-top"><div class="logo-cs">CS</div><div class="app-name">CAUSASEAL</div><div class="app-page">· التحليل السببي</div></div>
+    <div class="card panel">
+      <h3>إعادة بناء المسار السببي</h3>
+      <div class="sub">إيميل العميل ← الوكيل ← post_update</div>
+      <div class="graph" id="graph"></div>
+      <div class="chips" id="chips"><span>الثوابت المستخرجة:</span></div>
+    </div>
+  </div></div><div class="base"></div></div>
+
+  <div class="abs seal" id="seal"></div>
+</div>
+<script src="characters.js"></script>
+<script>
+  // Nodes and invariants copied from work/engine-data.json (story run of the real engine).
+  const nodes = [["مصدر الإدخال","نص مسترجع موجّه"],["تأثير القرار","تعليمة في المسترجع"],["بيانات","حساسة"],["سياق الوجهة","غير معتمد"]]
+  const inv = ["تعليمة في النص المسترجع","بيانات حساسة","وجهة غير معتمدة"]
+  document.getElementById("graph").innerHTML = nodes.map(([l,v]) => `<div class="node"><small>${l}</small><b>${v}</b></div>`).join('<div class="arrow"></div>')
+  document.getElementById("chips").innerHTML += inv.map((t) => `<span class="chip">${t}</span>`).join("")
+  document.getElementById("seal").innerHTML = CAST.seal({ mood: "focus" })
+</script>
+</body></html>

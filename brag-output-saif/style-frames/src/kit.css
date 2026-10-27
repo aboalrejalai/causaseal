@@ -1,0 +1,77 @@
+/* CAUSASEAL SAIF video — shared design kit (style frames → composition). */
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSansArabic-Regular.otf"); font-weight: 400; }
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSansArabic-Medium.otf"); font-weight: 500; }
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSansArabic-SemiBold.otf"); font-weight: 600; }
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSansArabic-Bold.otf"); font-weight: 700; }
+
+:root {
+  --sa-50: #f3fcf6; --sa-100: #dff6e7; --sa-200: #b8eacb; --sa-300: #88d8ad;
+  --sa-400: #54c08a; --sa-500: #25935f; --sa-600: #1b8354; --sa-700: #166a45; --sa-900: #104631;
+  --ink: #0d121c; --ink-2: #344054; --muted: #667085; --line: #e4e7ec; --paper: #ffffff; --bg: #fcfcfd;
+  --danger: #d92d20; --danger-bg: #fee4e2; --warn: #dc6803; --warn-bg: #fef0c7; --ok-bg: #dcfae6; --ok: #067647;
+  --night: #0b1220; --night-2: #111a2e; --night-3: #1c2740; --night-line: #2a3654; --night-text: #e6ebf5;
+  --mono: "SF Mono", "Menlo", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; }
+body { font-family: "Plex", system-ui, sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+.stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; direction: rtl; }
+.stage.night { background: radial-gradient(1200px 800px at 50% 45%, #16223b 0%, var(--night) 70%); color: var(--night-text); }
+.stage.day { background: radial-gradient(1400px 900px at 50% 40%, #ffffff 0%, var(--bg) 60%, #f2f5f3 100%); }
+.abs { position: absolute; }
+
+/* Typography scale (1080p) */
+.eyebrow { font-size: 30px; font-weight: 600; color: var(--sa-600); letter-spacing: .01em; }
+.night .eyebrow { color: var(--sa-400); }
+.h1 { font-size: 108px; font-weight: 700; line-height: 1.12; letter-spacing: -.01em; }
+.h2 { font-size: 72px; font-weight: 700; line-height: 1.2; }
+.lead { font-size: 44px; font-weight: 500; line-height: 1.35; color: var(--ink-2); }
+.night .lead { color: #b7c1d6; }
+.en { font-family: "Plex", system-ui; direction: ltr; unicode-bidi: isolate; }
+.red { color: var(--danger); }
+.night .red { color: #ff6b5e; }
+.green { color: var(--sa-600); }
+
+/* Decision badges — same palette as the app */
+.badge { display: inline-flex; align-items: center; gap: 12px; font: 700 34px/1 "Plex"; padding: 14px 24px; border-radius: 14px; direction: ltr; letter-spacing: .04em; }
+.b-allow { background: var(--ok-bg); color: var(--ok); }
+.b-intervene { background: var(--danger-bg); color: #b42318; }
+.b-block { background: #fda29b; color: #7a271a; }
+.b-verify { background: var(--warn-bg); color: #b54708; }
+.b-sm { font-size: 26px; padding: 10px 18px; border-radius: 10px; }
+
+/* Stamp (big decision stamp) */
+.stamp { font: 800 64px/1 "Plex"; letter-spacing: .08em; padding: 18px 36px; border: 8px solid currentColor; border-radius: 20px; direction: ltr; text-transform: uppercase; }
+.stamp.allow { color: #3dd68c; transform: rotate(-9deg); box-shadow: 0 0 60px rgba(61,214,140,.25) inset; }
+.stamp.intervene { color: var(--danger); transform: rotate(-7deg); background: rgba(255,255,255,.85); }
+
+/* Laptop */
+.laptop { position: absolute; }
+.laptop .lid { position: absolute; inset: 0 0 34px 0; background: #0d121c; border-radius: 30px; padding: 22px; box-shadow: 0 40px 80px -30px rgba(16,24,40,.45); }
+.laptop .screen { position: relative; width: 100%; height: 100%; border-radius: 12px; overflow: hidden; background: var(--bg); }
+.laptop .base { position: absolute; left: -70px; right: -70px; bottom: 0; height: 34px; background: linear-gradient(#cfd5dd, #aab3bf); border-radius: 0 0 26px 26px; }
+.laptop .base::after { content: ""; position: absolute; left: 50%; top: 0; width: 220px; height: 12px; transform: translateX(-50%); background: #9aa4b1; border-radius: 0 0 12px 12px; }
+.night .laptop .lid { background: #05080f; box-shadow: 0 0 0 2px #1f2a44, 0 40px 90px -20px rgba(0,0,0,.7); }
+
+/* Phone */
+.phone { position: absolute; background: #0d121c; border-radius: 64px; padding: 18px; box-shadow: 0 40px 80px -30px rgba(16,24,40,.45); }
+.phone .screen { width: 100%; height: 100%; border-radius: 48px; overflow: hidden; background: var(--bg); position: relative; }
+.phone .notch { position: absolute; top: 18px; left: 50%; width: 150px; height: 34px; transform: translateX(-50%); background: #0d121c; border-radius: 0 0 20px 20px; z-index: 5; }
+
+/* App chrome inside devices */
+.app-top { height: 64px; display: flex; align-items: center; gap: 14px; padding: 0 28px; border-bottom: 1px solid var(--line); background: #fff; }
+.logo-cs { width: 40px; height: 40px; border-radius: 10px; background: var(--sa-600); color: #fff; font: 700 17px/40px "Plex"; text-align: center; direction: ltr; }
+.app-name { font: 700 22px/1 "Plex"; direction: ltr; }
+.app-page { font: 500 20px/1 "Plex"; color: var(--muted); }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+
+/* Caption pill used for character name tags */
+.tag { display: inline-flex; gap: 10px; align-items: baseline; padding: 10px 20px; border-radius: 999px; font: 600 28px/1 "Plex"; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); color: var(--night-text); white-space: nowrap; }
+.day .tag { background: #fff; border-color: var(--line); color: var(--ink); box-shadow: 0 6px 20px -10px rgba(16,24,40,.25); }
+.tag small { font-size: 22px; opacity: .6; direction: ltr; }
+
+/* Blurred sensitive field */
+.blurfield { display: inline-block; height: 22px; border-radius: 6px; background: #c9d1dc; filter: blur(3px); }
+.redacted { display: inline-block; height: 24px; border-radius: 4px; background: #0d121c; }
